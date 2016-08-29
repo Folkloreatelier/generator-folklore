@@ -1,0 +1,30 @@
+{
+  "name": "generator-folklore",
+  "version": "2.0.0",
+  "description": "Yeoman generator for projects at Folklore",
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "generators/app",
+    "generators/js",
+    "generators/laravel"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Folkloreatelier/generator-folklore.git"
+  },
+  "author": "Folklore <info@atelierfolklore.ca>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Folkloreatelier/generator-folklore/issues"
+  },
+  "homepage": "https://github.com/Folkloreatelier/generator-folklore#readme",
+  "dependencies": {
+    "lodash": "^4.15.0"
+  }
+}

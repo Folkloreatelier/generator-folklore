@@ -1,7 +1,6 @@
 module.exports = {
     
-    <% if(hasBrowserSync) { %>
-    /**
+    <% if(hasBrowserSync) { %>/**
      * Browsersync
      */
     browsersync: {
@@ -35,8 +34,7 @@ module.exports = {
         stats: {
             colors: true
         }
-    },
-    <% } %>
+    },<% } %>
     
     /**
      * PostCSS
@@ -45,6 +43,45 @@ module.exports = {
         autoprefixer: {
             browsers: '> 5%'
         }
+    },
+    
+    /**
+     * Modernizr
+     */
+    modernizr: {
+        'cache' : true,
+
+        'devFile' : false,
+
+        'dest' : '<%= modernizrDestPath %>',
+
+        'options' : [
+            'setClasses',
+            'addTest',
+            'html5printshiv',
+            'testProp',
+            'fnBind'
+        ],
+
+        'uglify' : false,
+
+        'tests' : [],
+
+        'excludeTests': [],
+
+        'crawl' : true,
+
+        'useBuffers' : false,
+
+        'files' : {
+            'src': [
+                '*[^(g|G)runt(file)?].{js,css,scss}',
+                '**[^node_modules]/**/*.{js,css,scss}',
+                '!lib/**/*'
+            ]
+        },
+
+        'customTests' : []
     }
     
 };

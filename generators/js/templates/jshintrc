@@ -1,8 +1,7 @@
 {
     "node": true,
     "browser": true,
-    "es5": false,
-    "esnext": true,
+    "esversion": 6,
     "bitwise": false,
     "camelcase": false,
     "curly": true,
@@ -20,6 +19,7 @@
     "trailing": true,
     "smarttabs": true,
     "globals": {
-        
+        "Modernizr": true,
+        "app_config": true
     }
 }

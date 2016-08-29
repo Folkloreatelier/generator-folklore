@@ -49,6 +49,11 @@ module.exports = Generator.extend({
             defaults: true
         });
         
+        this.option('modernizr', {
+            type: Boolean,
+            defaults: true
+        });
+        
         this.option('copy', {
             type: Boolean,
             defaults: false
@@ -64,9 +69,39 @@ module.exports = Generator.extend({
             defaults: true
         });
         
+        this.option('js-path', {
+            type: String,
+            defaults: 'js'
+        });
+        
+        this.option('js-src-path', {
+            type: String,
+            defaults: null
+        });
+        
+        this.option('js-tmp-path', {
+            type: String,
+            defaults: null
+        });
+        
+        this.option('js-dest-path', {
+            type: String,
+            defaults: null
+        });
+        
+        this.option('webpack-public-path', {
+            type: String,
+            defaults: null
+        });
+        
         this.option('css', {
             type: Boolean,
             defaults: true
+        });
+        
+        this.option('css-path', {
+            type: String,
+            defaults: 'css'
         });
         
         this.option('css-src-path', {
@@ -132,16 +167,20 @@ module.exports = Generator.extend({
         config: function()
         {  
             var buildPath = _.get(this.options, 'path', false);
+            var tmpPath = _.get(this.options, 'tmp-path');
             var hasBrowserSync = _.get(this.options, 'browsersync', false);
             var browserSyncProxy = _.get(this.options, 'browsersync-proxy', null);
             var browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir', []);
             var browserSyncFiles = _.get(this.options, 'browsersync-files', []);
+            var jsPath = _.get(this.options, 'js-path', 'js');
+            var jsTmpPath = _.get(this.options, 'js-tmp-path', null) || path.join(tmpPath, jsPath);
             
             var templateData = {
                 hasBrowserSync: hasBrowserSync,
                 browserSyncProxy: browserSyncProxy && browserSyncProxy.length ? browserSyncProxy:null,
                 browserSyncBaseDir: _.isArray(browserSyncBaseDir) ? browserSyncBaseDir:[browserSyncBaseDir],
-                browserSyncFiles: _.isArray(browserSyncFiles) ? browserSyncFiles:[browserSyncFiles]
+                browserSyncFiles: _.isArray(browserSyncFiles) ? browserSyncFiles:[browserSyncFiles],
+                modernizrDestPath: path.join(jsTmpPath, 'modernizr.js')
             };
             
             var srcPath = this.templatePath('config.js');
@@ -151,6 +190,11 @@ module.exports = Generator.extend({
         
         browsersync: function()
         {
+            if(!_.get(this.options, 'browsersync', false))
+            {
+                return;
+            }
+            
             if(!this.options.browsersync)
             {
                 return;
@@ -166,8 +210,34 @@ module.exports = Generator.extend({
             this.fs.copyTpl(srcPath, destPath, templateData);
         },
         
+        modernizr: function()
+        {
+            if(!_.get(this.options, 'modernizr', false))
+            {
+                return;
+            }
+            
+            var destPath = _.get(this.options, 'dest-path');
+            var jsPath = _.get(this.options, 'js-path', 'js');
+            var jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
+            
+            var templateData = {
+                destPath: path.join(jsDestPath, 'modernizr.js')
+            };
+            
+            var buildPath = _.get(this.options, 'path');
+            var modernizrSrcPath = this.templatePath('modernizr.js');
+            var modernizrDestPath = this.destinationPath(path.join(buildPath, 'modernizr.js'));
+            this.fs.copyTpl(modernizrSrcPath, modernizrDestPath, templateData);
+        },
+        
         postcss: function()
         {
+            if(!_.get(this.options, 'css', false))
+            {
+                return;
+            }
+            
             var templateData = {
                 
             };
@@ -180,24 +250,42 @@ module.exports = Generator.extend({
         
         webpack: function()
         {
-            var templateData = {
-                
-            };
+            if(!_.get(this.options, 'js', false))
+            {
+                return;
+            }
             
             var buildPath = _.get(this.options, 'path');
-            var srcPath = this.templatePath('webpack.config.js');
-            var destPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
-            this.fs.copyTpl(srcPath, destPath, templateData);
+            var projectPath = _.get(this.options, 'project-path');
+            var tmpPath = _.get(this.options, 'tmp-path');
+            var srcPath = _.get(this.options, 'src-path');
+            var destPath = _.get(this.options, 'dest-path');
+            var jsPath = _.get(this.options, 'js-path', 'js');
+            var publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
+            var jsTmpPath = _.get(this.options, 'js-tmp-path', null) || path.join(tmpPath, jsPath);
+            var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
+            var jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
             
-            srcPath = this.templatePath('webpack.config.build.js');
-            destPath = this.destinationPath(path.join(buildPath, 'webpack.config.build.js'));
-            this.fs.copyTpl(srcPath, destPath, templateData);
+            var templateData = {
+                srcPath: jsSrcPath,
+                tmpPath: jsTmpPath,
+                destPath: jsDestPath,
+                publicPath: publicPath
+            };
+            
+            var configSrcPath = this.templatePath('webpack.config.js');
+            var configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
+            this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+            
+            configSrcPath = this.templatePath('webpack.config.build.js');
+            configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.build.js'));
+            this.fs.copyTpl(configSrcPath, configDestPath, templateData);
             
             if(this.options.browsersync)
             {
-                srcPath = this.templatePath('webpack.config.browsersync.js');
-                destPath = this.destinationPath(path.join(buildPath, 'webpack.config.browsersync.js'));
-                this.fs.copyTpl(srcPath, destPath, templateData);
+                configSrcPath = this.templatePath('webpack.config.browsersync.js');
+                configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.browsersync.js'));
+                this.fs.copyTpl(configSrcPath, configDestPath, templateData);
             }
         },
         
@@ -258,10 +346,25 @@ module.exports = Generator.extend({
                 });
             }
             
+            if(_.get(this.options, 'modernizr'))
+            {
+                var modernizrPath = path.join(buildPath, 'modernizr.js');
+                scripts = _.extend(scripts, {
+                    'modernizr:dist': 'node '+modernizrPath+' --prod',
+                    'modernizr:server': 'node '+modernizrPath,
+                    'modernizr': 'npm run modernizr:dist',
+                    'build:modernizr': 'npm run modernizr:dist',
+                });
+                
+                scripts.watch += ' && npm run modernizr:server';
+                scripts.build += ' && npm run build:modernizr';
+            }
+            
             if(_.get(this.options, 'images'))
             {
-                var imagesSrcPath = _.get(this.options, 'images-src-path', null) || path.join(srcPath, 'img/*');
-                var imagesDestPath = _.get(this.options, 'images-dest-path', null) || path.join(destPath, 'img');
+                var imagesPath = _.get(this.options, 'images-path', 'img');
+                var imagesSrcPath = _.get(this.options, 'images-src-path', null) || path.join(srcPath, imagesPath, '*');
+                var imagesDestPath = _.get(this.options, 'images-dest-path', null) || path.join(destPath, imagesPath);
                 scripts = _.extend(scripts, {
                     'imagemin:dist': 'imagemin '+imagesSrcPath+' --out-dir='+imagesDestPath,
                     'imagemin': 'npm run imagemin:dist',
@@ -273,9 +376,10 @@ module.exports = Generator.extend({
             if(_.get(this.options, 'css'))
             {
                 var postcssConfigFile = path.join(buildPath, 'postcss.js');
-                var cssSrcPath = _.get(this.options, 'css-src-path', null) || path.join(srcPath, 'css');
-                var cssTmpPath = _.get(this.options, 'css-tmp-path', null) || path.join(tmpPath, 'css');
-                var cssDestPath = _.get(this.options, 'css-dest-path', null) || path.join(destPath, 'css');
+                var cssPath = _.get(this.options, 'css-path', 'css');
+                var cssSrcPath = _.get(this.options, 'css-src-path', null) || path.join(srcPath, cssPath);
+                var cssTmpPath = _.get(this.options, 'css-tmp-path', null) || path.join(tmpPath, cssPath);
+                var cssDestPath = _.get(this.options, 'css-dest-path', null) || path.join(destPath, cssPath);
                 scripts = _.extend(scripts, {
                     'postcss:dist': 'postcss -c '+postcssConfigFile+' -u autoprefixer -u cssnano -d '+cssDestPath+' '+path.join(cssTmpPath, '/**/*.css'),
                     'postcss': 'npm run postcss:dist',
@@ -288,7 +392,7 @@ module.exports = Generator.extend({
                     'build:css': 'npm run styles'
                 });
                 scripts.build += ' && npm run build:css';
-                if(this.options.build_watch)
+                if(_.get(this.options, 'watch'))
                 {
                     scripts.watch += ' && npm run watch:styles';
                 }
@@ -297,12 +401,13 @@ module.exports = Generator.extend({
             if(_.get(this.options, 'js'))
             {
                 var webpackConfigFile = path.join(buildPath, 'webpack.config.build.js');
-                var jsSrcpath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, 'js');
+                var jsPath = _.get(this.options, 'js-path', 'js');
+                var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 scripts = _.extend(scripts, {
                     'test': 'mocha',
-                    'jshint:dist': 'jshint '+path.join(jsSrcpath, '/**/*.js'),
+                    'jshint:dist': 'jshint '+path.join(jsSrcPath, '/**/*.js'),
                     'jshint': 'npm run jshint:dist',
-                    'jscs': 'jscs '+path.join(jsSrcpath, '/**/*.js'),
+                    'jscs': 'jscs '+path.join(jsSrcPath, '/**/*.js'),
                     'webpack:dist': 'webpack --config '+webpackConfigFile,
                     'webpack': 'npm run webpack:dist',
                     'scripts:dist': 'npm run webpack:dist',
@@ -324,6 +429,11 @@ module.exports = Generator.extend({
     install: {
         npm: function()
         {
+            if(_.get(this.options, 'without-dependencies', false))
+            {
+                return;
+            }
+            
             this.npmInstall([
                 'webpack@latest',
                 'jshint@latest',
@@ -341,12 +451,33 @@ module.exports = Generator.extend({
                 'babel-loader@latest',
                 'html-loader@latest',
                 'json-loader@latest',
+                'raw-loader@latest',
+                'sass-loader@latest',
+                'style-loader@latest',
+                'svg-react-loader@latest',
+                'transform-loader@latest',
+                'imports-loader@latest',
+                'expose-loader@latest',
+                'css-loader@latest',
+                'brfs@latest',
                 'babel-preset-es2015@latest',
                 'babel-preset-react@latest',
-                'babel-preset-stage-0@latest'
+                'babel-preset-stage-0@latest',
+                'commander@latest',
+                'customizr@latest'
             ], {
                 'saveDev': true
             });
+        },
+        
+        sass: function()
+        {
+            if(_.get(this.options, 'without-dependencies', false))
+            {
+                return;
+            }
+            
+            this.spawnCommand('gem', ['install', 'sass']);
         }
     }
     

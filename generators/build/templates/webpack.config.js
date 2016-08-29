@@ -1,21 +1,40 @@
+var webpack = require('webpack');
 var path = require('path');
 
 module.exports = {
     
-    context: path.join(process.env.PWD, './src/js'),
+    context: path.join(process.env.PWD, '<%= srcPath %>'),
     
     entry: {
-        'main': [
+        main: [
             './index'
+        ],
+        config: './config',
+        vendor: [
+            'jquery'
         ]
     },
     
     output: {
-        path: path.join(process.env.PWD, '.tmp/js'),
+        path: path.join(process.env.PWD, '<%= tmpPath %>'),
         filename: '[name].js',
-        publicPath: '/js',
+        publicPath: '<%= publicPath %>',
         chunkFilename: '[name]-[id].bundle.js'
     },
+    
+    plugins: [
+        new webpack.ProvidePlugin({
+            '$': 'jquery',
+            'jQuery': 'jquery',
+            'window.jQuery': 'jquery',
+            'root.jQuery': 'jquery'
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            chunks: ['main','vendor']
+        })
+    ],
     
     module: {
         loaders: [
@@ -36,12 +55,38 @@ module.exports = {
                 test: /.html$/,
                 loader: 'html',
                 exclude: /node_modules/,
+            },
+            {
+                test: /\.svg$/,
+                exclude: /(node_modules|bower_components|\.tmp)/,
+                loader: 'babel?presets[]=es2015&presets[]=react!svg-react'
+            },
+            {
+                test: /\.scss$/,
+                loader: 'style!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]!sass'
             }
-        ]
+        ],
+                postLoaders: [
+                    {
+                        test: require.resolve('react'),
+                        loader: 'expose?React'
+                    },
+                    {
+                        test: require.resolve('jquery'),
+                        loader: 'expose?jQuery'
+                    },
+                    {
+                        test: require.resolve('./config'),
+                        loader: 'expose?app_config'
+                    }
+                ]
      },
     
     resolve: {
         extensions: ['', '.js', '.jsx', '.es6'],
+        alias: {
+            underscore: 'lodash'
+        },
         modulesDirectories: [
             path.join(process.env.PWD, './node_modules'),
             path.join(process.env.PWD, './web_modules'),

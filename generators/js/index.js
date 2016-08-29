@@ -53,12 +53,20 @@ module.exports = Generator.extend({
         
         if(!this.type)
         {
-            prompts.push({
-                type    : 'list',
-                name    : 'type',
-                message : 'What type of javascript project?',
-                choices: _.map(this.types, 'label')
-            });
+            if(this.types.length > 1)
+            {
+                prompts.push({
+                    type    : 'list',
+                    name    : 'type',
+                    message : 'What type of javascript project?',
+                    choices: _.map(this.types, 'label')
+                });
+            }
+            else
+            {
+                this.type = _.get(this.types, '0.name');
+            }
+            
         }
         
         if(!prompts.length)
@@ -93,6 +101,22 @@ module.exports = Generator.extend({
             this.directory(srcPath, destPath);
         },
         
+        config: function()
+        {
+            var jsPath = _.get(this.options, 'path');
+            var srcPath = this.templatePath('config.js');
+            var destPath = this.destinationPath(path.join(jsPath, 'config.js'));
+            this.fs.copy(srcPath, destPath);
+        },
+        
+        jshintrc: function()
+        {
+            var projectPath = _.get(this.options, 'project-path');
+            var srcPath = this.templatePath('jshintrc');
+            var destPath = this.destinationPath(path.join(projectPath, '.jshintrc'));
+            this.fs.copy(srcPath, destPath);
+        },
+        
         packageJSON: function()
         {
             var projectPath = _.get(this.options, 'project-path');
@@ -100,6 +124,38 @@ module.exports = Generator.extend({
             var destPath = this.destinationPath(path.join(projectPath, 'package.json'));
             this.fs.copyTpl(srcPath, destPath, {
                 name: this.project_name
+            });
+        }
+    },
+    
+    install: {
+        npm: function()
+        {
+            if(_.get(this.options, 'without-dependencies', false))
+            {
+                return;
+            }
+            
+            this.npmInstall([
+                'jquery@latest',
+                'lodash@latest',
+                'react@latest',
+                'react-dom@latest',
+                'redux@latest',
+                'redux-thunk@latest',
+                'redux-logger@latest',
+                'redux-promise@latest',
+                'react-redux@latest',
+                'react-router@latest',
+                'react-router-redux@latest',
+                'immutable@latest',
+                'keymirror@latest',
+                'fastclick@latest',
+                'redux-devtools@latest',
+                'redux-devtools-log-monitor@latest',
+                'redux-devtools-dock-monitor@latest'
+            ], {
+                'save': true
             });
         }
     }

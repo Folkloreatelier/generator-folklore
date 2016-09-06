@@ -17,34 +17,6 @@ module.exports = Generator.extend({
             type: String,
             required: false
         });
-        
-        this.types = [
-            {
-                'label': 'HTML',
-                'name': 'html'
-            },
-            {
-                'label': 'Laravel',
-                'name': 'laravel'
-            },
-            {
-                'label': 'Javascript',
-                'name': 'js'
-            }
-        ];
-        
-        this.option('html-path', {
-            type: String
-        });
-        this.option('js-path', {
-            type: String
-        });
-        this.option('laravel-path', {
-            type: String
-        });
-        this.option('build-path', {
-            type: String
-        });
     },
     
     prompting: function ()
@@ -62,7 +34,20 @@ module.exports = Generator.extend({
                 type    : 'list',
                 name    : 'type',
                 message : 'What type of project?',
-                choices: _.map(this.types, 'label')
+                choices : [
+                    {
+                        'name': 'HTML',
+                        'value': 'html'
+                    },
+                    {
+                        'name': 'Laravel',
+                        'value': 'laravel'
+                    },
+                    {
+                        'label': 'Javascript',
+                        'name': 'js'
+                    }
+                ]
             });
         }
         
@@ -76,10 +61,7 @@ module.exports = Generator.extend({
             {
                 if(answers.type)
                 {
-                    this.type = _.get(_.find(this.types, function(type)
-                    {
-                        return type.label === answers.type;
-                    }), 'name');
+                    this.type = answers.type;
                 }
                 
                 if(answers.project_name)

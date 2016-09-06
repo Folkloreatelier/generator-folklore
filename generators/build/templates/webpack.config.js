@@ -1,24 +1,24 @@
 var webpack = require('webpack');
 var path = require('path');
 
+var contextPath = path.join(process.env.PWD, '<%= srcPath %>');
+var outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
+var publicPath = '<%= publicPath %>';
+
 module.exports = {
     
-    context: path.join(process.env.PWD, '<%= srcPath %>'),
+    context: contextPath,
     
     entry: {
-        main: [
-            './index'
-        ],
+        main: './index',
         config: './config',
-        vendor: [
-            'jquery'
-        ]
+        vendor: <%- JSON.stringify(vendors).replace(/\"/gi, '\'') %>
     },
     
     output: {
-        path: path.join(process.env.PWD, '<%= tmpPath %>'),
+        path: outputPath,
         filename: '[name].js',
-        publicPath: '<%= publicPath %>',
+        publicPath: publicPath,
         chunkFilename: '[name]-[id].bundle.js'
     },
     
@@ -66,20 +66,20 @@ module.exports = {
                 loader: 'style!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]!sass'
             }
         ],
-                postLoaders: [
-                    {
-                        test: require.resolve('react'),
-                        loader: 'expose?React'
-                    },
-                    {
-                        test: require.resolve('jquery'),
-                        loader: 'expose?jQuery'
-                    },
-                    {
-                        test: require.resolve('./config'),
-                        loader: 'expose?app_config'
-                    }
-                ]
+        postLoaders: [
+            {
+                test: require.resolve('react'),
+                loader: 'expose?React'
+            },
+            {
+                test: require.resolve('jquery'),
+                loader: 'expose?jQuery'
+            },
+            {
+                test: require.resolve(path.join(contextPath, 'config')),
+                loader: 'expose?app_config'
+            }
+        ]
      },
     
     resolve: {

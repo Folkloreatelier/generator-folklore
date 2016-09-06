@@ -1,6 +1,7 @@
 var Generator = require('../../lib/generator');
 var _ = require('lodash');
 var path = require('path');
+var colors = require('colors');
 
 module.exports = Generator.extend({
     
@@ -50,6 +51,18 @@ module.exports = Generator.extend({
             defaults: 'css'
         });
         
+        this.option('scss-path', {
+            type: String,
+            desc: 'Path for the scss',
+            defaults: 'scss'
+        });
+        
+        this.option('images-path', {
+            type: String,
+            desc: 'Path for the images',
+            defaults: 'img'
+        });
+        
         this.option('build-path', {
             type: String,
             desc: 'Path for the build tools',
@@ -68,58 +81,78 @@ module.exports = Generator.extend({
         });
     },
     
-    prompting: function ()
-    {
-        var prompts = [];
+    prompting: {
         
-        if(!this.project_name)
+        welcome: function()
         {
-            prompts.push(this.prompts.project_name);
-        }
-        
-        if(!prompts.length)
-        {
-            return;
-        }
-        
-        return this.prompt(prompts)
-            .then(function (answers)
+            if(this.options.quiet)
             {
-                if(answers.project_name)
+                return;
+            }
+            
+            console.log('\n----------------------'.yellow);
+            console.log('HTML Generator');
+            console.log('----------------------\n'.yellow);
+        },
+        
+        prompts: function ()
+        {
+            var prompts = [];
+            
+            if(!this.project_name)
+            {
+                prompts.push(this.prompts.project_name);
+            }
+            
+            if(!prompts.length)
+            {
+                return;
+            }
+            
+            return this.prompt(prompts)
+                .then(function (answers)
                 {
-                    this.project_name = answers.project_name;
-                }
-            }.bind(this));
+                    if(answers.project_name)
+                    {
+                        this.project_name = answers.project_name;
+                    }
+                }.bind(this));
+        }
+        
     },
     
     configuring: function()
     {
-        var projectPath = _.get(this.options, 'path', '').replace(/\/$/, '');
+        var projectPath = this.destinationPath();
         var srcPath = _.get(this.options, 'src-path');
         var destPath = _.get(this.options, 'dest-path');
         var tmpPath = _.get(this.options, 'tmp-path');
         var buildPath = _.get(this.options, 'build-path') || (projectPath + '/build');
-        var jsPath = _.get(this.options, 'js-path', 'js');
+        var jsPath = _.get(this.options, 'js-path');
         var jsSrcPath = path.join(projectPath, srcPath, jsPath);
-        var cssPath = _.get(this.options, 'css-path', 'css');
-        var cssSrcPath = path.join(projectPath, srcPath, cssPath);
-        var withoutDependencies = _.get(this.options, 'without-dependencies', false);
+        var scssPath = _.get(this.options, 'scss-path');
+        var scssSrcPath = path.join(projectPath, srcPath, scssPath);
+        var cssPath = _.get(this.options, 'css-path');
+        var imagesPath = _.get(this.options, 'images-path');
+        var skipInstall = _.get(this.options, 'skip-install', false);
         
         this.composeWith('folklore:js', {
             arguments: [this.project_name],
             options: {
                 'project-path': projectPath,
                 'path': jsSrcPath,
-                'without-dependencies': withoutDependencies
+                'skip-install': skipInstall,
+                'quiet': true
             }
         });
         
-        this.composeWith('folklore:css', {
+        this.composeWith('folklore:scss', {
             arguments: [this.project_name],
             options: {
                 'project-path': projectPath,
-                'path': cssSrcPath,
-                'without-dependencies': withoutDependencies
+                'path': scssSrcPath,
+                'skip-install': skipInstall,
+                'quiet': true
             }
         });
         
@@ -130,7 +163,8 @@ module.exports = Generator.extend({
                 options: {
                     'project-path': projectPath,
                     'path': _.get(this.options, 'server-path') || (projectPath + '/server'),
-                    'without-dependencies': withoutDependencies
+                    'skip-install': skipInstall,
+                    'quiet': true
                 }
             });
         }
@@ -140,23 +174,27 @@ module.exports = Generator.extend({
             options: {
                 'project-path': projectPath,
                 'path': buildPath,
-                'tmp-path': path.join(projectPath, tmpPath),
-                'src-path': path.join(projectPath, srcPath),
-                'dest-path': path.join(projectPath, destPath),
+                'tmp-path': tmpPath,
+                'src-path': srcPath,
+                'dest-path': destPath,
                 'js-path': jsPath,
+                'scss-path': scssPath,
                 'css-path': cssPath,
+                'images-path': imagesPath,
                 'copy': true,
-                'copy-path': path.join(projectPath, srcPath, '*.{html,ico,txt,png}'),
+                'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
                 'clean-dest': true,
+                'webpack-entry-vendor': ['jquery', 'lodash'],
                 'browsersync-base-dir': [
-                    path.join(projectPath, tmpPath),
-                    path.join(projectPath, srcPath)
+                    tmpPath,
+                    srcPath
                 ],
                 'browsersync-files': [
-                    path.join(projectPath, tmpPath, 'css/*.css'),
-                    path.join(projectPath, srcPath, '*.html')
+                    path.join(tmpPath, 'scss/*.scss'),
+                    path.join(srcPath, '*.html')
                 ],
-                'without-dependencies': withoutDependencies
+                'skip-install': skipInstall,
+                'quiet': true
             }
         });
     },
@@ -165,13 +203,12 @@ module.exports = Generator.extend({
     {
         html: function()
         {
-            var projectPath = _.get(this.options, 'path', '').replace(/\/$/, '');
             var srcPath = _.get(this.options, 'src-path');
             var jsPath = _.get(this.options, 'js-path', 'js').replace(/^\/?/, '/');
             var cssPath = _.get(this.options, 'css-path', 'css').replace(/^\/?/, '/');
             
-            var indexSrcPath = this.templatePath(path.join(projectPath, 'index.html'));
-            var indexDestPath = this.destinationPath(path.join(projectPath, 'src/index.html'));
+            var indexSrcPath = this.templatePath('index.html');
+            var indexDestPath = this.destinationPath(path.join(srcPath, 'index.html'));
             this.fs.copyTpl(indexSrcPath, indexDestPath, {
                 title: this.project_name,
                 jsPath: jsPath,

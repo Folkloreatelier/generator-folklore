@@ -1,6 +1,7 @@
 var Generator = require('../../lib/generator');
 var _ = require('lodash');
 var path = require('path');
+var colors = require('colors');
 
 module.exports = Generator.extend({
     
@@ -30,28 +31,43 @@ module.exports = Generator.extend({
         
     },
     
-    prompting: function ()
-    {
-        var prompts = [];
+    prompting: {
         
-        if(!this.project_name)
+        welcome: function()
         {
-            prompts.push(Generator.prompts.project_name);
-        }
-        
-        if(!prompts.length)
-        {
-            return;
-        }
-        
-        return this.prompt(prompts)
-            .then(function (answers)
+            if(this.options.quiet)
             {
-                if(answers.project_name)
+                return;
+            }
+            
+            console.log('\n----------------------'.yellow);
+            console.log('SCSS Generator');
+            console.log('----------------------\n'.yellow);
+        },
+        
+        prompts: function ()
+        {
+            var prompts = [];
+            
+            if(!this.project_name)
+            {
+                prompts.push(Generator.prompts.project_name);
+            }
+            
+            if(!prompts.length)
+            {
+                return;
+            }
+            
+            return this.prompt(prompts)
+                .then(function (answers)
                 {
-                    this.project_name = answers.project_name;
-                }
-            }.bind(this));
+                    if(answers.project_name)
+                    {
+                        this.project_name = answers.project_name;
+                    }
+                }.bind(this));
+        }
     },
     
     writing: {

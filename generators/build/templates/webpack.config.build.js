@@ -3,10 +3,12 @@ var webpackConfig = require('./webpack.config');
 var _ = require('lodash');
 var path = require('path');
 
+var outputPath = path.join(process.env.PWD, '<%= destPath %>');
+
 module.exports = _.merge({}, webpackConfig, {
     
     output: {
-        path: path.join(process.env.PWD, '<%= destPath %>')
+        path: outputPath
     },
     
     plugins: [

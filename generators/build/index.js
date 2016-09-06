@@ -1,6 +1,7 @@
 var Generator = require('../../lib/generator');
 var _ = require('lodash');
 var path = require('path');
+var colors = require('colors');
 
 module.exports = Generator.extend({
     
@@ -94,9 +95,38 @@ module.exports = Generator.extend({
             defaults: null
         });
         
-        this.option('css', {
+        this.option('webpack-entry-vendor', {
+            type: String
+        });
+        
+        this.option('images', {
             type: Boolean,
             defaults: true
+        });
+        
+        this.option('images-path', {
+            type: String,
+            defaults: 'img'
+        });
+        
+        this.option('images-src-path', {
+            type: String,
+            defaults: null
+        });
+        
+        this.option('images-dest-path', {
+            type: String,
+            defaults: null
+        });
+        
+        this.option('scss', {
+            type: Boolean,
+            defaults: true
+        });
+        
+        this.option('scss-path', {
+            type: String,
+            defaults: 'scss'
         });
         
         this.option('css-path', {
@@ -104,17 +134,17 @@ module.exports = Generator.extend({
             defaults: 'css'
         });
         
-        this.option('css-src-path', {
+        this.option('scss-src-path', {
             type: String,
             defaults: null
         });
         
-        this.option('css-tmp-path', {
+        this.option('scss-tmp-path', {
             type: String,
             defaults: null
         });
         
-        this.option('css-dest-path', {
+        this.option('scss-dest-path', {
             type: String,
             defaults: null
         });
@@ -139,28 +169,43 @@ module.exports = Generator.extend({
         });
     },
     
-    prompting: function ()
-    {
-        var prompts = [];
+    prompting: {
         
-        if(!this.project_name)
+        welcome: function()
         {
-            prompts.push(this.prompts.project_name);
-        }
-        
-        if(!prompts.length)
-        {
-            return;
-        }
-        
-        return this.prompt(prompts)
-            .then(function (answers)
+            if(this.options.quiet)
             {
-                if(answers.project_name)
+                return;
+            }
+            
+            console.log('\n----------------------'.yellow);
+            console.log('Build tools Generator');
+            console.log('----------------------\n'.yellow);
+        },
+        
+        prompts: function ()
+        {
+            var prompts = [];
+            
+            if(!this.project_name)
+            {
+                prompts.push(this.prompts.project_name);
+            }
+            
+            if(!prompts.length)
+            {
+                return;
+            }
+            
+            return this.prompt(prompts)
+                .then(function (answers)
                 {
-                    this.project_name = answers.project_name;
-                }
-            }.bind(this));
+                    if(answers.project_name)
+                    {
+                        this.project_name = answers.project_name;
+                    }
+                }.bind(this));
+        }
     },
     
     writing: {
@@ -233,7 +278,7 @@ module.exports = Generator.extend({
         
         postcss: function()
         {
-            if(!_.get(this.options, 'css', false))
+            if(!_.get(this.options, 'scss', false))
             {
                 return;
             }
@@ -261,16 +306,18 @@ module.exports = Generator.extend({
             var srcPath = _.get(this.options, 'src-path');
             var destPath = _.get(this.options, 'dest-path');
             var jsPath = _.get(this.options, 'js-path', 'js');
-            var publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
             var jsTmpPath = _.get(this.options, 'js-tmp-path', null) || path.join(tmpPath, jsPath);
             var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
             var jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
+            var publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
+            var vendors = _.get(this.options, 'webpack-entry-vendor', []);
             
             var templateData = {
                 srcPath: jsSrcPath,
                 tmpPath: jsTmpPath,
                 destPath: jsDestPath,
-                publicPath: publicPath
+                publicPath: publicPath,
+                vendors: _.isArray(vendors) ? vendors:(vendors && vendors.length ? [vendors]:[])
             };
             
             var configSrcPath = this.templatePath('webpack.config.js');
@@ -289,7 +336,7 @@ module.exports = Generator.extend({
             }
         },
         
-        packageJSON: function()
+        packageJSONScripts: function()
         {
             var projectPath = _.get(this.options, 'project-path');
             var buildPath = _.get(this.options, 'path');
@@ -363,7 +410,7 @@ module.exports = Generator.extend({
             if(_.get(this.options, 'images'))
             {
                 var imagesPath = _.get(this.options, 'images-path', 'img');
-                var imagesSrcPath = _.get(this.options, 'images-src-path', null) || path.join(srcPath, imagesPath, '*');
+                var imagesSrcPath = _.get(this.options, 'images-src-path', null) || path.join(srcPath, imagesPath, '**/*.{jpg,png,jpeg,gif,svg}');
                 var imagesDestPath = _.get(this.options, 'images-dest-path', null) || path.join(destPath, imagesPath);
                 scripts = _.extend(scripts, {
                     'imagemin:dist': 'imagemin '+imagesSrcPath+' --out-dir='+imagesDestPath,
@@ -373,25 +420,26 @@ module.exports = Generator.extend({
                 scripts.build += ' && npm run build:images';
             }
             
-            if(_.get(this.options, 'css'))
+            if(_.get(this.options, 'scss'))
             {
                 var postcssConfigFile = path.join(buildPath, 'postcss.js');
+                var scssPath = _.get(this.options, 'scss-path', 'scss');
                 var cssPath = _.get(this.options, 'css-path', 'css');
-                var cssSrcPath = _.get(this.options, 'css-src-path', null) || path.join(srcPath, cssPath);
-                var cssTmpPath = _.get(this.options, 'css-tmp-path', null) || path.join(tmpPath, cssPath);
-                var cssDestPath = _.get(this.options, 'css-dest-path', null) || path.join(destPath, cssPath);
+                var scssSrcPath = _.get(this.options, 'scss-src-path', null) || path.join(srcPath, scssPath);
+                var scssTmpPath = _.get(this.options, 'scss-tmp-path', null) || path.join(tmpPath, cssPath);
+                var scssDestPath = _.get(this.options, 'scss-dest-path', null) || path.join(destPath, cssPath);
                 scripts = _.extend(scripts, {
-                    'postcss:dist': 'postcss -c '+postcssConfigFile+' -u autoprefixer -u cssnano -d '+cssDestPath+' '+path.join(cssTmpPath, '/**/*.css'),
+                    'postcss:dist': 'postcss -c '+postcssConfigFile+' -u autoprefixer -u cssnano -d '+scssDestPath+' '+path.join(scssTmpPath, '/**/*.css'),
                     'postcss': 'npm run postcss:dist',
-                    'sass:dist': 'sass --update '+cssSrcPath+':'+cssTmpPath+' --force',
-                    'sass:watch': 'sass --watch '+cssSrcPath+':'+cssTmpPath+'',
+                    'sass:dist': 'sass --update '+scssSrcPath+':'+scssTmpPath+' --force',
+                    'sass:watch': 'sass --watch '+scssSrcPath+':'+scssTmpPath+'',
                     'styles:dist': 'npm run sass:dist && npm run postcss:dist',
                     'styles:watch': 'npm run sass:watch',
                     'styles': 'npm run styles:dist',
                     'watch:styles': 'npm run styles:watch',
-                    'build:css': 'npm run styles'
+                    'build:styles': 'npm run styles'
                 });
-                scripts.build += ' && npm run build:css';
+                scripts.build += ' && npm run build:styles';
                 if(_.get(this.options, 'watch'))
                 {
                     scripts.watch += ' && npm run watch:styles';
@@ -429,7 +477,7 @@ module.exports = Generator.extend({
     install: {
         npm: function()
         {
-            if(_.get(this.options, 'without-dependencies', false))
+            if(this.options['skip-install'])
             {
                 return;
             }
@@ -472,7 +520,7 @@ module.exports = Generator.extend({
         
         sass: function()
         {
-            if(_.get(this.options, 'without-dependencies', false))
+            if(this.options['skip-install'])
             {
                 return;
             }

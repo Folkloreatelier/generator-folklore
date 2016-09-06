@@ -1,6 +1,7 @@
 var Generator = require('../../lib/generator');
 var _ = require('lodash');
 var path = require('path');
+var colors = require('colors');
 
 module.exports = Generator.extend({
     
@@ -28,13 +29,6 @@ module.exports = Generator.extend({
             type: String,
             defaults: 'src/js'
         });
-        
-        this.types = [
-            {
-                'label': 'React',
-                'name': 'react'
-            }
-        ];
     },
     
     initializing: function()
@@ -42,54 +36,92 @@ module.exports = Generator.extend({
         
     },
     
-    prompting: function ()
-    {
-        var prompts = [];
+    prompting: {
         
-        if(!this.project_name)
+        welcome: function()
         {
-            prompts.push(this.prompts.project_name);
-        }
+            if(this.options.quiet)
+            {
+                return;
+            }
+            
+            console.log('\n----------------------'.yellow);
+            console.log('Javascript Generator');
+            console.log('----------------------\n'.yellow);
+        },
         
-        if(!this.type)
+        prompts: function ()
         {
-            if(this.types.length > 1)
+            var prompts = [];
+            
+            if(!this.project_name)
+            {
+                prompts.push(this.prompts.project_name);
+            }
+            
+            if(!this.type)
             {
                 prompts.push({
                     type    : 'list',
                     name    : 'type',
                     message : 'What type of javascript project?',
-                    choices: _.map(this.types, 'label')
+                    choices : [
+                        {
+                            'name': 'React',
+                            'value': 'react'
+                        }
+                    ]
                 });
             }
-            else
+            
+            prompts.push({
+                type: 'checkbox',
+                name: 'react_features',
+                message: 'Which React features?',
+                choices: [
+                    {
+                        'name': 'Router',
+                        'value': 'router',
+                        'checked': true
+                    },
+                    {
+                        'name': 'Redux',
+                        'value': 'redux',
+                        'checked': true,
+                        'short': 'Router'
+                    }
+                ],
+                when: function(answers)
+                {
+                    var type = this.type || answers.type;
+                    return type === 'react' ? true:false;
+                }.bind(this)
+            });
+            
+            if(!prompts.length)
             {
-                this.type = _.get(this.types, '0.name');
+                return;
             }
             
-        }
-        
-        if(!prompts.length)
-        {
-            return;
-        }
-        
-        return this.prompt(prompts)
-            .then(function (answers)
-            {
-                if(answers.type)
+            return this.prompt(prompts)
+                .then(function (answers)
                 {
-                    this.type = _.get(_.find(this.types, function(type)
+                    if(answers.type)
                     {
-                        return type.label === answers.type;
-                    }), 'name');
-                }
-                
-                if(answers.project_name)
-                {
-                    this.project_name = answers.project_name;
-                }
-            }.bind(this));
+                        this.type = answers.type;
+                    }
+                    
+                    if(answers.react_features)
+                    {
+                        this.react_features = answers.react_features;
+                    }
+                    
+                    if(answers.project_name)
+                    {
+                        this.project_name = answers.project_name;
+                    }
+                }.bind(this));
+        }
     },
     
     writing: {
@@ -131,7 +163,7 @@ module.exports = Generator.extend({
     install: {
         npm: function()
         {
-            if(_.get(this.options, 'without-dependencies', false))
+            if(this.options['skip-install'])
             {
                 return;
             }

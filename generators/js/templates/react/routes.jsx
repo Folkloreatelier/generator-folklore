@@ -7,7 +7,7 @@ import Home from './containers/pages/Home';
 
 /*jshint ignore:start */
 module.exports = (
-    <Route path="/" component={App}>
+    <Route path="*" component={App}>
         <IndexRoute component={Home} />
     </Route>
 );

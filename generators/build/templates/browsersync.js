@@ -26,10 +26,6 @@ var bundler = webpack(webpackConfig);
  * Reload all devices when bundle is complete
  * or send a fullscreen error message to the browser instead
  */
-var browserSyncReload = _.debounce(function()
-{
-    browserSync.reload();
-}, 500);
 bundler.plugin('done', function (stats)
 {
     if (stats.hasErrors() || stats.hasWarnings())
@@ -41,14 +37,14 @@ bundler.plugin('done', function (stats)
         });
     }
     
-    browserSyncReload();
+    browserSync.reload();
 });
 
 /**
  * Browser sync options
  */
 var browserSyncOptions = {
-    logFileChanges: true,
+    logFileChanges: false,
     
     middleware: [],
     
@@ -59,7 +55,7 @@ var browserSyncOptions = {
 browserSyncOptions = _.merge(browserSyncOptions, browserSyncConfig);
 
 /**
- * Webpack options
+ * Webpack middleware options
  */
 var webpackMiddlewareOptions = {
    publicPath: webpackConfig.output.publicPath

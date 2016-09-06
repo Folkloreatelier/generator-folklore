@@ -13,7 +13,6 @@ const store = configureStore();
 
 $(function()
 {
-    
     if(!$('#app').length)
     {
         return;

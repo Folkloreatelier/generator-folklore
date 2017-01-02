@@ -95,7 +95,34 @@ module.exports = Generator.extend({
             defaults: null
         });
         
-        this.option('webpack-entry-vendor', {
+        this.option('webpack-entry', {
+            type: String
+        });
+        
+        this.option('webpack-config', {
+            type: Boolean,
+            defaults: true
+        });
+        
+        this.option('webpack-config-build', {
+            type: Boolean,
+            defaults: true
+        });
+        
+        this.option('webpack-config-browsersync', {
+            type: Boolean,
+            defaults: true
+        });
+        
+        this.option('webpack-config-path', {
+            type: String
+        });
+        
+        this.option('webpack-config-build-path', {
+            type: String
+        });
+        
+        this.option('webpack-config-browsersync-path', {
             type: String
         });
         
@@ -310,27 +337,52 @@ module.exports = Generator.extend({
             var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
             var jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
             var publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
-            var vendors = _.get(this.options, 'webpack-entry-vendor', []);
+            var entries = _.get(this.options, 'webpack-entry');
+            if(entries && !_.isObject(entries))
+            {
+                var newEntries = {};
+                entries = _.isArray(entries) ? entries:(entries && entries.length ? [entries]:[]);
+                _.each(entries, function(entry)
+                {
+                    entry = entry.split(',');
+                    newEntries[entry[0]] = entry.slice(1);
+                });
+                entries = newEntries;
+            }
+            else
+            {
+                entries = {
+                    main: './index'
+                };
+            }
             
             var templateData = {
                 srcPath: jsSrcPath,
                 tmpPath: jsTmpPath,
                 destPath: jsDestPath,
                 publicPath: publicPath,
-                vendors: _.isArray(vendors) ? vendors:(vendors && vendors.length ? [vendors]:[])
+                entries: entries
             };
             
-            var configSrcPath = this.templatePath('webpack.config.js');
-            var configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
-            this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+            var configSrcPath, configDestPath;
             
-            configSrcPath = this.templatePath('webpack.config.build.js');
-            configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.build.js'));
-            this.fs.copyTpl(configSrcPath, configDestPath, templateData);
-            
-            if(this.options.browsersync)
+            if(_.get(this.options, 'webpack-config'))
             {
-                configSrcPath = this.templatePath('webpack.config.browsersync.js');
+                configSrcPath = _.get(this.options, 'webpack-config-path') || this.templatePath('webpack.config.js');
+                configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
+                this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+            }
+            
+            if(_.get(this.options, 'webpack-config-build'))
+            {
+                configSrcPath = _.get(this.options, 'webpack-config-build-path') || this.templatePath('webpack.config.build.js');
+                configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.build.js'));
+                this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+            }
+            
+            if(this.options.browsersync && _.get(this.options, 'webpack-config-browsersync'))
+            {
+                configSrcPath = _.get(this.options, 'webpack-config-browsersync-path') || this.templatePath('webpack.config.browsersync.js');
                 configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.browsersync.js'));
                 this.fs.copyTpl(configSrcPath, configDestPath, templateData);
             }
@@ -453,9 +505,9 @@ module.exports = Generator.extend({
                 var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 scripts = _.extend(scripts, {
                     'test': 'mocha',
-                    'jshint:dist': 'jshint '+path.join(jsSrcPath, '/**/*.js'),
+                    'jshint:dist': 'jshint '+path.join(jsSrcPath, '/**.js'),
                     'jshint': 'npm run jshint:dist',
-                    'jscs': 'jscs '+path.join(jsSrcPath, '/**/*.js'),
+                    'jscs': 'jscs '+path.join(jsSrcPath, '/**.js'),
                     'webpack:dist': 'webpack --config '+webpackConfigFile,
                     'webpack': 'npm run webpack:dist',
                     'scripts:dist': 'npm run webpack:dist',
@@ -496,6 +548,7 @@ module.exports = Generator.extend({
                 'proxy-middleware@latest',
                 'bs-fullscreen-message@latest',
                 'concurrently@latest',
+                'babel-core@latest',
                 'babel-loader@latest',
                 'html-loader@latest',
                 'json-loader@latest',

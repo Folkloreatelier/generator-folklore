@@ -3,33 +3,25 @@ var path = require('path');
 
 var contextPath = path.join(process.env.PWD, '<%= srcPath %>');
 var outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
-var publicPath = '<%= publicPath %>';
 
 module.exports = {
     
     context: contextPath,
     
-    entry: <%- JSON.stringify(entries, null, 4).replace(/\"/gi, "'") %>,
+    entry: {
+        main: './index'
+    },
     
     output: {
         path: outputPath,
         filename: '[name].js',
-        publicPath: publicPath,
-        chunkFilename: '[name]-[id].bundle.js'
+        jsonpFunction: 'flklrJsonp',
+        libraryTarget: 'umd',
+        library: 'ReactComponent'
     },
     
     plugins: [
-        new webpack.ProvidePlugin({
-            '$': 'jquery',
-            'jQuery': 'jquery',
-            'window.jQuery': 'jquery',
-            'root.jQuery': 'jquery'
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
-            filename: 'vendor.js',
-            chunks: ['main','vendor']
-        })
+        
     ],
     
     module: {
@@ -61,14 +53,29 @@ module.exports = {
                 test: /\.scss$/,
                 loader: 'style!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]!sass'
             }
-        ],
-        postLoaders: [
-            {
-                test: require.resolve(path.join(contextPath, 'config')),
-                loader: 'expose?app_config'
-            }
         ]
      },
+    
+    externals: {
+        'react': {
+            'commonjs': 'react',
+            'commonjs2': 'react',
+            'amd': 'react',
+            'root': 'React'
+        },
+        'react-dom': {
+            'commonjs': 'react-dom',
+            'commonjs2': 'react-dom',
+            'amd': 'react-dom',
+            'root': 'ReactDOM'
+        },
+        'lodash': {
+            'commonjs': 'lodash',
+            'commonjs2': 'lodash',
+            'amd': 'lodash',
+            'root': '_'
+        }
+    },
     
     resolve: {
         extensions: ['', '.js', '.jsx', '.es6'],

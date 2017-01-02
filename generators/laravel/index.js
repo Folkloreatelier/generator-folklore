@@ -265,7 +265,11 @@ module.exports = Generator.extend({
                 'scss-path': scssPath,
                 'css-path': cssPath,
                 'images-path': imagesPath,
-                'webpack-entry-vendor': ['jquery', 'lodash'],
+                'webpack-entry-vendor': {
+                    'main': './index',
+                    'config': './config',
+                    'vendor': ['jquery', 'lodash']
+                },
                 'browsersync-base-dir': [
                     tmpPath,
                     publicPath

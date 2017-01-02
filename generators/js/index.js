@@ -152,7 +152,7 @@ module.exports = Generator.extend({
         packageJSON: function()
         {
             var projectPath = _.get(this.options, 'project-path');
-            var srcPath = this.templatePath('package.json');
+            var srcPath = this.templatePath('_package.json');
             var destPath = this.destinationPath(path.join(projectPath, 'package.json'));
             this.fs.copyTpl(srcPath, destPath, {
                 name: this.project_name

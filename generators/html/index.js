@@ -184,7 +184,11 @@ module.exports = Generator.extend({
                 'copy': true,
                 'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
                 'clean-dest': true,
-                'webpack-entry-vendor': ['jquery', 'lodash'],
+                'webpack-entry': {
+                    'main': './index',
+                    'config': './config',
+                    'vendor': ['jquery', 'lodash']
+                },
                 'browsersync-base-dir': [
                     tmpPath,
                     srcPath

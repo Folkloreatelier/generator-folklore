@@ -218,6 +218,13 @@ module.exports = Generator.extend({
                 jsPath: jsPath,
                 cssPath: cssPath
             });
+        },
+        
+        gitignore: function()
+        {
+            var srcPath = this.templatePath('gitignore');
+            var destPath = this.destinationPath('.gitignore');
+            this.fs.copy(srcPath, destPath);
         }
     }
     

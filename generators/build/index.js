@@ -441,7 +441,8 @@ module.exports = Generator.extend({
                 var browserSyncPath = path.join(buildPath, 'browsersync.js');
                 scripts = _.extend(scripts, {
                     'browsersync': 'node '+browserSyncPath,
-                    'server': 'concurrently "npm run watch" "npm run browsersync"'
+                    'server': 'concurrently "npm run watch" "npm run browsersync"',
+                    'start': 'npm run server'
                 });
             }
             

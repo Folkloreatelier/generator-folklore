@@ -44,8 +44,16 @@ module.exports = Generator.extend({
                         'value': 'laravel'
                     },
                     {
-                        'label': 'Javascript',
-                        'name': 'js'
+                        'name': 'Javascript',
+                        'value': 'js'
+                    },
+                    {
+                        'name': 'NPM Package',
+                        'value': 'npm-package'
+                    },
+                    {
+                        'name': 'React Package',
+                        'value': 'react-package'
                     }
                 ]
             });

@@ -484,8 +484,8 @@ module.exports = Generator.extend({
                 scripts = _.extend(scripts, {
                     'postcss:dist': 'postcss -c '+postcssConfigFile+' -u autoprefixer -u cssnano -d '+scssDestPath+' '+path.join(scssTmpPath, '/**/*.css'),
                     'postcss': 'npm run postcss:dist',
-                    'sass:dist': 'sass --update '+scssSrcPath+':'+scssTmpPath+' --force',
-                    'sass:watch': 'sass --watch '+scssSrcPath+':'+scssTmpPath+'',
+                    'sass:dist': 'node-sass -r '+scssSrcPath+' --output '+scssTmpPath,
+                    'sass:watch': 'node-sass -r --watch '+scssSrcPath+' --output '+scssTmpPath,
                     'styles:dist': 'npm run sass:dist && npm run postcss:dist',
                     'styles:watch': 'npm run sass:watch',
                     'styles': 'npm run styles:dist',
@@ -566,7 +566,8 @@ module.exports = Generator.extend({
                 'babel-preset-react@latest',
                 'babel-preset-stage-0@latest',
                 'commander@latest',
-                'customizr@latest'
+                'customizr@latest',
+                'node-sass@latest'
             ], {
                 'saveDev': true
             });

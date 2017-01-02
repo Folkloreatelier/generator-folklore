@@ -149,6 +149,14 @@ module.exports = Generator.extend({
             this.fs.copy(srcPath, destPath);
         },
         
+        babelrc: function()
+        {
+            var projectPath = _.get(this.options, 'project-path');
+            var srcPath = this.templatePath('babelrc');
+            var destPath = this.destinationPath(path.join(projectPath, '.babelrc'));
+            this.fs.copy(srcPath, destPath);
+        },
+        
         editorconfig: function()
         {
             var projectPath = _.get(this.options, 'project-path');

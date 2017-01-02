@@ -36,7 +36,7 @@ module.exports = {
         loaders: [
             {
                 test: /.jsx?$/,
-                loader: 'babel-loader',
+                loader: 'babel',
                 exclude: /node_modules/,
                 query: {
                     presets: ['es2015', 'react', 'stage-0']
@@ -63,12 +63,14 @@ module.exports = {
             }
         ],
         postLoaders: [
+            <% if(entries.config) { %>
             {
                 test: require.resolve(path.join(contextPath, 'config')),
                 loader: 'expose?app_config'
             }
+            <% } %>
         ]
-     },
+    },
     
     resolve: {
         extensions: ['', '.js', '.jsx', '.es6'],
@@ -80,6 +82,10 @@ module.exports = {
             path.join(process.env.PWD, './web_modules'),
             path.join(process.env.PWD, './bower_components')
         ]
+    },
+    
+    resolveLoader: {
+        root: path.join(process.env.PWD, './node_modules')
     },
 
     stats: {

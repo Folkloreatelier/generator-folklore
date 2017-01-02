@@ -172,6 +172,13 @@ module.exports = Generator.extend({
             this.fs.copy(srcPath, destPath);
         },
         
+        babelrc: function()
+        {
+            var srcPath = this.templatePath('babelrc');
+            var destPath = this.destinationPath('.babelrc');
+            this.fs.copy(srcPath, destPath);
+        },
+        
         readme: function()
         {
             var srcPath = this.templatePath('Readme.md');

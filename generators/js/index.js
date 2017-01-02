@@ -149,6 +149,14 @@ module.exports = Generator.extend({
             this.fs.copy(srcPath, destPath);
         },
         
+        editorconfig: function()
+        {
+            var projectPath = _.get(this.options, 'project-path');
+            var srcPath = this.templatePath('editorconfig');
+            var destPath = this.destinationPath(path.join(projectPath, '.editorconfig'));
+            this.fs.copy(srcPath, destPath);
+        },
+        
         packageJSON: function()
         {
             var projectPath = _.get(this.options, 'project-path');

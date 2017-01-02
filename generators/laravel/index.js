@@ -83,9 +83,9 @@ module.exports = Generator.extend({
             defaults: 'img'
         });
         
-        this.option('skip-db', {
+        this.option('db', {
             type: Boolean,
-            desc: 'Skip the creation of the database',
+            desc: 'Create a database',
             defaults: false
         });
         
@@ -144,7 +144,7 @@ module.exports = Generator.extend({
                 });
             }
             
-            if(!this.options['skip-db'])
+            if(this.options.db)
             {
                 if(!this.options['db-name'] || !this.options['db-name'].length)
                 {
@@ -200,7 +200,7 @@ module.exports = Generator.extend({
                         this.project_host = answers.project_host;
                     }
                     
-                    if(!this.options['skip-db'])
+                    if(this.options.db)
                     {
                         this.db_name = _.get(answers, 'db_name', this.options['db-name']);
                         this.db_user = _.get(answers, 'db_user', this.options['db-user']);
@@ -288,7 +288,7 @@ module.exports = Generator.extend({
             }
         });
         
-        if(!this.options['skip-db'])
+        if(this.options.db)
         {
             this.composeWith('folklore:db', {
                 arguments: [this.db_name],
@@ -390,6 +390,13 @@ module.exports = Generator.extend({
             var destProd = this.destinationPath('.env.prod');
             templateData.url = url;
             this.fs.copyTpl(srcProd, destProd, templateData);
+        },
+        
+        phpcs: function()
+        {
+            var srcPath = this.templatePath('phpcs.xml');
+            var destPath = this.destinationPath('phpcs.xml');
+            this.fs.copy(srcPath, destPath);
         },
         
         files: function()

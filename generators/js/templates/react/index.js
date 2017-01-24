@@ -1,35 +1,67 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var $ = require('jquery');
-var attachFastClick = require('fastclick');
-import { syncHistoryWithStore } from 'react-router-redux';
-import { Router, browserHistory } from 'react-router';
-import { Provider } from 'react-redux';
+import React from 'react';
+import ReactDOM from 'react-dom';<%
+if(react_features.indexOf('relay') !== -1) { %>
+import Relay from 'react-relay';
+<% } %>
+import domready from 'domready';
+import attachFastClick from 'fastclick';
+import { match } from 'react-router';
+import { load as loadHypernova } from 'hypernova';
+import HypernovaComponents from './hypernova';
 
-import configureStore from './store/configureStore';
-import routes from './routes';
-
-const store = configureStore();
-
-$(function()
-{
-    if(!$('#app').length)
-    {
-        return;
+import createRoutes from './routes';
+<% if(react_features.indexOf('relay') !== -1) {
+%>/* global __DEV__ */
+/* eslint global-require:0 */
+if (__DEV__) {
+    const SuperagentNetworkLayer = require('./lib/SuperagentNetworkLayer').default;
+    Relay.injectNetworkLayer(new SuperagentNetworkLayer('/graphql'));
+}<%
+} %>
+domready(() => {
+    function findComponent(name) {
+        return HypernovaComponents[name] || null;
     }
-    
-    var history = syncHistoryWithStore(browserHistory, store);
-    var router = React.createElement(Router, {
-        history: history,
-        routes: routes
-    });
-    var provider = React.createElement(Provider, {
-        store: store
-    }, router);
-    ReactDOM.render(provider, $('#app')[0]);
-    
-    if(Modernizr.touchevents)
-    {
-        attachFastClick(document.body);
+
+    function renderReact(el, componentName, props) {
+        const Component = findComponent(componentName);
+        if (!Component) {
+            console.warn(`Component ${componentName} not found.`);
+            return;
+        }
+        ReactDOM.render(React.createElement(Component, props), el);
+    }
+
+    function createRenderReact(node, componentName, props) {
+        return () => {
+            renderReact(node, componentName, props);
+        };
+    }
+
+    // Render the hypernova elements
+    const elements = document.querySelectorAll('div[data-hypernova-key]');
+    let el;
+    let componentName;
+    let nodes;
+    let node;
+    let props;
+    let routes;
+    for (let i = 0, elementsCount = elements.length; i < elementsCount; i += 1) {
+        el = elements[i];
+        componentName = el.dataset.hypernovaKey;
+        nodes = loadHypernova(componentName);
+        for (let ii = 0, nodesCount = nodes.length; ii < nodesCount; ii += 1) {
+            node = nodes[ii].node;
+            props = nodes[ii].data;
+            if (props.routes && props.url) {
+                routes = createRoutes(props.routes);
+                match({
+                    routes,
+                    location: props.url,
+                }, createRenderReact(node, componentName, { routerRoutes: routes, ...props }));
+            } else {
+                renderReact(node, componentName, props);
+            }
+        }
     }
 });

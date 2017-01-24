@@ -1,8 +1,26 @@
-if (process.env.NODE_ENV === 'production')
-{
-    module.exports = require('./App.prod');
-}
-else
-{
-    module.exports = require('./App.dev');
-}
+import React from 'react';
+import { connect } from 'react-redux';
+import App from '../components/App';
+import DevTools from './DevTools';
+
+const AppContainer = (props) => {
+
+    if (__DEV__) {
+        return (
+            <div>
+                <App {...props} />
+                <DevTools />
+            </div>
+        );
+    }
+
+    return (
+        <App {...props} />
+    );
+};
+
+export default connect(state => (
+    {
+        test: state.test,
+    }
+))(AppContainer);

@@ -7,129 +7,129 @@ var colors = require('colors');
 var generatePassword = require('password-generator');
 
 module.exports = Generator.extend({
-    
+
     // The name `constructor` is important here
     constructor: function ()
     {
         Generator.apply(this, arguments);
-        
+
         this.argument('project_name', {
             type: String,
             required: false
         });
-        
+
         this.argument('project_host', {
             type: String,
             required: false
         });
-        
+
         this.option('url', {
             type: String,
             desc: 'Project url',
             defaults: 'http://<%= project_host %>'
         });
-        
+
         this.option('local-url', {
             type: String,
             desc: 'Project local url',
             defaults: 'http://<%= project_host %>.local.flklr.ca'
         });
-        
+
         this.option('tmp-path', {
             type: String,
             desc: 'Path for temp files',
             defaults: '.tmp'
         });
-        
+
         this.option('assets-path', {
             type: String,
             desc: 'Path for assets',
             defaults: 'resources/assets'
         });
-        
+
         this.option('public-path', {
             type: String,
             desc: 'Path for build',
             defaults: 'public'
         });
-        
+
         this.option('build-path', {
             type: String,
             desc: 'Path for the build tools',
             defaults: 'build'
         });
-        
+
         this.option('js-path', {
             type: String,
             desc: 'Path for the javascript',
             defaults: 'js'
         });
-        
+
         this.option('scss-path', {
             type: String,
             desc: 'Path for the scss',
             defaults: 'scss'
         });
-        
+
         this.option('css-path', {
             type: String,
             desc: 'Path for the css',
             defaults: 'css'
         });
-        
+
         this.option('images-path', {
             type: String,
             desc: 'Path for the images',
             defaults: 'img'
         });
-        
+
         this.option('db', {
             type: Boolean,
             desc: 'Create a database',
             defaults: false
         });
-        
+
         this.option('db-name', {
             type: String,
             desc: 'Database name'
         });
-        
+
         this.option('db-user', {
             type: String,
             desc: 'Database user'
         });
-        
+
         this.option('db-password', {
             type: String,
             desc: 'Database password'
         });
     },
-    
+
     prompting: {
-        
+
         welcome: function()
         {
             if(this.options.quiet)
             {
                 return;
             }
-            
+
             console.log('\n----------------------'.yellow);
             console.log('Laravel Generator');
             console.log('----------------------\n'.yellow);
         },
-        
+
         prompts: function ()
         {
-            
-            
+
+
             var prompts = [];
-            
+
             if(!this.project_name)
             {
                 prompts.push(this.prompts.project_name);
             }
-            
+
             if(!this.project_host)
             {
                 prompts.push({
@@ -143,7 +143,7 @@ module.exports = Generator.extend({
                     }.bind(this)
                 });
             }
-            
+
             if(this.options.db)
             {
                 if(!this.options['db-name'] || !this.options['db-name'].length)
@@ -158,7 +158,7 @@ module.exports = Generator.extend({
                         }.bind(this)
                     });
                 }
-                
+
                 if(!this.options['db-user'] || !this.options['db-user'].length)
                 {
                     prompts.push({
@@ -171,7 +171,7 @@ module.exports = Generator.extend({
                         }.bind(this)
                     });
                 }
-                
+
                 if(!this.options['db-password'] || !this.options['db-password'].length)
                 {
                     prompts.push({
@@ -182,12 +182,12 @@ module.exports = Generator.extend({
                     });
                 }
             }
-            
+
             if(!prompts.length)
             {
                 return;
             }
-            
+
             return this.prompt(prompts)
                 .then(function (answers)
                 {
@@ -199,7 +199,7 @@ module.exports = Generator.extend({
                     {
                         this.project_host = answers.project_host;
                     }
-                    
+
                     if(this.options.db)
                     {
                         this.db_name = _.get(answers, 'db_name', this.options['db-name']);
@@ -210,11 +210,11 @@ module.exports = Generator.extend({
                             this.db_password = this._getPassword();
                         }
                     }
-                    
+
                 }.bind(this));
         }
     },
-    
+
     configuring: function()
     {
         var projectPath = this.destinationPath();
@@ -233,7 +233,7 @@ module.exports = Generator.extend({
             project_host: this.project_host,
             project_name: this.project_name
         }).replace(/^(http)?(s)?(\:\/\/)?/, 'http$2://');
-        
+
         this.composeWith('folklore:js', {
             arguments: [this.project_name],
             options: {
@@ -243,7 +243,7 @@ module.exports = Generator.extend({
                 'quiet': true
             }
         });
-        
+
         this.composeWith('folklore:scss', {
             arguments: [this.project_name],
             options: {
@@ -252,7 +252,7 @@ module.exports = Generator.extend({
                 'quiet': true
             }
         });
-        
+
         this.composeWith('folklore:build', {
             arguments: [this.project_name],
             options: {
@@ -287,7 +287,7 @@ module.exports = Generator.extend({
                 'quiet': true
             }
         });
-        
+
         if(this.options.db)
         {
             this.composeWith('folklore:db', {
@@ -300,13 +300,13 @@ module.exports = Generator.extend({
             });
         }
     },
-    
+
     writing: {
-        
+
         laravel: function()
         {
             var done = this.async();
-            
+
             remote('laravel', 'laravel', function (err, cachePath)
             {
                 var destinationPath = this.destinationPath();
@@ -315,7 +315,7 @@ module.exports = Generator.extend({
                     nodir: true,
                     cwd: cachePath
                 });
-                
+
                 var source, destination;
                 for (var i in files)
                 {
@@ -323,11 +323,11 @@ module.exports = Generator.extend({
                     destination = path.join(destinationPath, files[i]);
                     this.bulkCopy(source, destination);
                 }
-                
+
                 done();
             }.bind(this));
         },
-        
+
         removeFiles: function()
         {
             var files = [
@@ -341,7 +341,7 @@ module.exports = Generator.extend({
                 'resources/assets/js',
                 'resources/views/welcome.blade.php'
             ];
-            
+
             var file;
             for(var i = 0, fl = files.length; i < fl; i++)
             {
@@ -349,7 +349,7 @@ module.exports = Generator.extend({
                 this.fs.delete(file);
             }
         },
-        
+
         composerJSON: function()
         {
             var src = this.destinationPath('composer.json');
@@ -361,19 +361,19 @@ module.exports = Generator.extend({
                 }
             });
         },
-        
+
         env: function()
         {
             var url = _.template(_.get(this.options, 'local-url'))({
                 project_host: this.project_host,
                 project_name: this.project_name
             }).replace(/^(http)?(s)?(\:\/\/)?/, 'http$2://');
-            
+
             var urlLocal = _.template(_.get(this.options, 'local-url'))({
                 project_host: this.project_host,
                 project_name: this.project_name
             }).replace(/^(http)?(s)?(\:\/\/)?/, 'http$2://');
-            
+
             var templateData = {
                 project_name: this.project_name,
                 db_name: this.db_name,
@@ -381,26 +381,33 @@ module.exports = Generator.extend({
                 db_password: this.db_password,
                 url: urlLocal
             };
-            
+
             var src = this.templatePath('env');
             var dest = this.destinationPath('.env');
             this.fs.copyTpl(src, dest, templateData);
-            
+
             var srcProd = this.templatePath('env.prod');
             var destProd = this.destinationPath('.env.prod');
             templateData.url = url;
             this.fs.copyTpl(srcProd, destProd, templateData);
         },
-        
+
         phpcs: function()
         {
             var srcPath = this.templatePath('phpcs.xml');
             var destPath = this.destinationPath('phpcs.xml');
             this.fs.copy(srcPath, destPath);
         },
-        
+
+        editorconfig: function()
+        {
+            var srcPath = this.templatePath('editorconfig');
+            var destPath = this.destinationPath('.editorconfig');
+            this.fs.copy(srcPath, destPath);
+        },
+
         files: function()
-        {    
+        {
             var templatePath = this.templatePath('laravel');
             var destinationPath = this.destinationPath();
             var files = glob.sync('**', {
@@ -408,7 +415,7 @@ module.exports = Generator.extend({
                 nodir: true,
                 cwd: templatePath
             });
-            
+
             var file, source, destination;
             for (var i in files)
             {
@@ -427,48 +434,48 @@ module.exports = Generator.extend({
                 }
             }
         }
-        
+
     },
-    
+
     install: {
-        
+
         composer: function()
         {
             if(this.options['skip-install'])
             {
                 return;
             }
-            
+
             this.spawnCommand('composer', ['install']);
         },
-        
+
         permissions: function()
         {
             this.spawnCommand('chmod', ['-R', '777', 'storage']);
             this.spawnCommand('chmod', ['-R', '777', 'public/files']);
         },
-        
+
         keyGenerate: function()
         {
             this.spawnCommand('php', ['artisan', 'key:generate']);
         },
-        
+
         vendorPublish: function()
         {
             this.spawnCommand('php', ['artisan', 'vendor:publish']);
         }
-        
+
     },
-    
+
     _safeDbString: function(str)
     {
         return str.replace(/[\-\s\.]+/gi, '_')
             .replace(/[^a-z0-9]+/gi, '');
     },
-    
+
     _getPassword: function()
     {
         return generatePassword(20, false);
     }
-    
+
 });

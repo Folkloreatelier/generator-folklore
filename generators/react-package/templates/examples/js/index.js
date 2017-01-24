@@ -1,28 +1,24 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var $ = require('jquery');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import domready from 'domready';
+import $ from 'jquery';
 
-var Examples = require('./examples');
+import Examples from './examples';
 
-$(function()
-{
-    var exampleIndex = 0;
-    
-    var exampleEl = $('#app')[0];
-    function renderExample()
-    {
-        var Example = Examples[exampleIndex];
-        var example = React.createElement(Example);
+domready(() => {
+    let exampleIndex = 0;
+
+    const exampleEl = $('#app')[0];
+    function renderExample() {
+        const Example = Examples[exampleIndex];
+        const example = React.createElement(Example);
         ReactDOM.render(example, exampleEl);
     }
-    
+
     renderExample();
-    $(document).on('click', function(e)
-    {
+    $(document).on('click', (e) => {
         e.preventDefault();
-        
-        exampleIndex = exampleIndex === Examples.length-1 ? 0:(exampleIndex+1);
+        exampleIndex = exampleIndex === (Examples.length - 1) ? 0 : (exampleIndex + 1);
         renderExample();
     });
-    
 });

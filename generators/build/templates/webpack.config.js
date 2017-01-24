@@ -6,18 +6,18 @@ var outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
 var publicPath = '<%= publicPath %>';
 
 module.exports = {
-    
+
     context: contextPath,
-    
+
     entry: <%- JSON.stringify(entries, null, 4).replace(/\"/gi, "'") %>,
-    
+
     output: {
         path: outputPath,
         filename: '[name].js',
         publicPath: publicPath,
         chunkFilename: '[name]-[id].bundle.js'
     },
-    
+
     plugins: [
         new webpack.ProvidePlugin({
             '$': 'jquery',
@@ -31,16 +31,13 @@ module.exports = {
             chunks: ['main','vendor']
         })
     ],
-    
+
     module: {
         loaders: [
             {
                 test: /.jsx?$/,
                 loader: 'babel',
-                exclude: /node_modules/,
-                query: {
-                    presets: ['es2015', 'react', 'stage-0']
-                }
+                exclude: /node_modules/
             },
             {
                 test: /.json$/,
@@ -71,7 +68,7 @@ module.exports = {
             <% } %>
         ]
     },
-    
+
     resolve: {
         extensions: ['', '.js', '.jsx', '.es6'],
         alias: {
@@ -83,7 +80,7 @@ module.exports = {
             path.join(process.env.PWD, './bower_components')
         ]
     },
-    
+
     resolveLoader: {
         root: path.join(process.env.PWD, './node_modules')
     },
@@ -101,5 +98,5 @@ module.exports = {
     devtool: 'source-map',
     cache: false,
     watch: false
-    
+
 };

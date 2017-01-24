@@ -5,34 +5,31 @@ var contextPath = path.join(process.env.PWD, '<%= srcPath %>');
 var outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
 
 module.exports = {
-    
+
     context: contextPath,
-    
+
     entry: {
         main: './index'
     },
-    
+
     output: {
         path: outputPath,
         filename: '[name].js',
         jsonpFunction: 'flklrJsonp',
         libraryTarget: 'umd',
-        library: 'ReactComponent'
+        library: '<%= componentName %>'
     },
-    
+
     plugins: [
-        
+
     ],
-    
+
     module: {
         loaders: [
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
-                exclude: /node_modules/,
-                query: {
-                    presets: ['es2015', 'react', 'stage-0']
-                }
+                exclude: /node_modules/
             },
             {
                 test: /.json$/,
@@ -55,7 +52,7 @@ module.exports = {
             }
         ]
      },
-    
+
     externals: {
         'react': {
             'commonjs': 'react',
@@ -76,7 +73,7 @@ module.exports = {
             'root': '_'
         }
     },
-    
+
     resolve: {
         extensions: ['', '.js', '.jsx', '.es6'],
         alias: {
@@ -102,5 +99,5 @@ module.exports = {
     devtool: 'source-map',
     cache: false,
     watch: false
-    
+
 };

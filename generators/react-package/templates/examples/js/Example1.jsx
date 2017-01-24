@@ -1,16 +1,8 @@
-var React = require('react');
+import React from 'react';
+import Component from '../../src/index';
 
-var Component = require('../../src/index');
+const Example = () => (
+    <Component />
+);
 
-var Example = React.createClass({
-    
-    render: function()
-    {
-        
-        return (
-            <Component />
-        );
-    }
-});
-
-module.exports = Example;
+export default Example;

@@ -1,25 +1,21 @@
-var Immutable = require('immutable');
+import Immutable from 'immutable';
+import {
+    TEST_ACTION,
+} from '../actions/TestActions';
 
-var ActionTypes = require('../actions/ActionTypes');
-
-var initialState = {
-    'tested': false
+const initialState = {
+    tested: false,
 };
 
-var TestReducer = function(state, action)
-{
-    if(typeof(state) === 'undefined')
-    {
-        state = new Immutable.Map(initialState);
-    }
+const TestReducer = (previousState, action) => {
+    const state = previousState || new Immutable.Map(initialState);
 
-    switch(action.type)
-    {
-        case ActionTypes.TEST_ACTION:
-            return state.set('tested', true);
-        default:
-            return state;
+    switch (action.type) {
+    case TEST_ACTION:
+        return state.set('tested', true);
+    default:
+        return state;
     }
 };
 
-module.exports = TestReducer;
+export default TestReducer;

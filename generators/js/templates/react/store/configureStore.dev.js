@@ -1,29 +1,21 @@
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
-import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import promise from 'redux-promise';
 import { browserHistory } from 'react-router';
 import { routerMiddleware } from 'react-router-redux';
 import { persistState } from 'redux-devtools';
-
 import DevTools from '../containers/DevTools';
-const reducers = require('../reducers/index');
+import reducers from '../reducers/index';
 
 const reducer = combineReducers(reducers);
 const router = routerMiddleware(browserHistory);
-const logger = createLogger();
+
+const sessionId = typeof window !== 'undefined' ? window.location.href.match(/[?&]debug_session=([^&#]+)\b/) : null;
 
 const enhancer = compose(
-    applyMiddleware(thunk, promise, router/*, logger*/),
+    applyMiddleware(thunk, promise, router),
     DevTools.instrument(),
-    persistState(
-        window.location.href.match(
-            /[?&]debug_session=([^&#]+)\b/
-        )
-    )
+    persistState(sessionId),
 );
 
-module.exports = function(initialState)
-{
-    return createStore(reducer, initialState, enhancer);
-};
+export default initialState => createStore(reducer, initialState, enhancer);

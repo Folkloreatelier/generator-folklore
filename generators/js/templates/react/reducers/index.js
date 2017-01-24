@@ -1,6 +1,7 @@
 import { routerReducer } from 'react-router-redux';
+import TestReducer from './TestReducer';
 
-module.exports = {
-    test: require('./TestReducer'),
-    routing: routerReducer
+export default {
+    test: TestReducer,
+    routing: routerReducer,
 };

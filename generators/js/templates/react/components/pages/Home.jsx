@@ -1,16 +1,9 @@
-var React = require('react');
+import React from 'react';
 
-var HomePage = React.createClass({
+const HomePage = (props) => {
+    return (
+        <div>Accueil</div>
+    );
+};
 
-    render: function()
-    {
-        /*jshint ignore:start */
-        return (
-            <div>Accueil</div>
-        );
-        /*jshint ignore:end */
-    }
-
-});
-
-module.exports = HomePage;
+export default HomePage;

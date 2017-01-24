@@ -10,7 +10,7 @@ $color-text: $color-black;
 /**
  * Fonts
  */
-$font-text: Helvetica, Arial,sans-serif;
+$font-text: Helvetica, Arial, sans-serif;
 $font-title: Georgia, serif;
 
 /**
@@ -23,6 +23,6 @@ $large-screen: 1000px;
 /**
  * Media queries
  */
-$mq-small-screen: "only screen and (min-width: #{$small-screen})";
-$mq-medium-screen: "only screen and (min-width: #{$medium-screen})";
-$mq-large-screen: "only screen and (min-width: #{$large-screen})";
+$mq-small-screen: 'only screen and (min-width: #{$small-screen})';
+$mq-medium-screen: 'only screen and (min-width: #{$medium-screen})';
+$mq-large-screen: 'only screen and (min-width: #{$large-screen})';

@@ -4,111 +4,111 @@ var path = require('path');
 var colors = require('colors');
 
 module.exports = Generator.extend({
-    
+
     // The name `constructor` is important here
     constructor: function ()
     {
         Generator.apply(this, arguments);
-        
+
         this.argument('project_name', {
             type: String,
             required: false
         });
-        
+
         this.option('path', {
             type: String,
             desc: 'Path for the html project',
             defaults: './'
         });
-        
+
         this.option('src-path', {
             type: String,
             desc: 'Path for source',
             defaults: './src'
         });
-        
+
         this.option('tmp-path', {
             type: String,
             desc: 'Path for temp files',
             defaults: './.tmp'
         });
-        
+
         this.option('dest-path', {
             type: String,
             desc: 'Path for build',
             defaults: './dist'
         });
-        
+
         this.option('js-path', {
             type: String,
             desc: 'Path for the javascript',
             defaults: 'js'
         });
-        
+
         this.option('css-path', {
             type: String,
             desc: 'Path for the css',
             defaults: 'css'
         });
-        
+
         this.option('scss-path', {
             type: String,
             desc: 'Path for the scss',
             defaults: 'scss'
         });
-        
+
         this.option('images-path', {
             type: String,
             desc: 'Path for the images',
             defaults: 'img'
         });
-        
+
         this.option('build-path', {
             type: String,
             desc: 'Path for the build tools',
             defaults: 'build'
         });
-        
+
         this.option('server', {
             type: Boolean,
             defaults: false,
             desc: 'Add a node.js server'
         });
-        
+
         this.option('server-path', {
             type: String,
             desc: 'Path for the node.js server'
         });
     },
-    
+
     prompting: {
-        
+
         welcome: function()
         {
             if(this.options.quiet)
             {
                 return;
             }
-            
+
             console.log('\n----------------------'.yellow);
             console.log('HTML Generator');
             console.log('----------------------\n'.yellow);
         },
-        
+
         prompts: function ()
         {
             var prompts = [];
-            
+
             if(!this.project_name)
             {
                 prompts.push(this.prompts.project_name);
             }
-            
+
             if(!prompts.length)
             {
                 return;
             }
-            
+
             return this.prompt(prompts)
                 .then(function (answers)
                 {
@@ -118,9 +118,9 @@ module.exports = Generator.extend({
                     }
                 }.bind(this));
         }
-        
+
     },
-    
+
     configuring: function()
     {
         var projectPath = this.destinationPath();
@@ -135,7 +135,7 @@ module.exports = Generator.extend({
         var cssPath = _.get(this.options, 'css-path');
         var imagesPath = _.get(this.options, 'images-path');
         var skipInstall = _.get(this.options, 'skip-install', false);
-        
+
         this.composeWith('folklore:js', {
             arguments: [this.project_name],
             options: {
@@ -145,7 +145,7 @@ module.exports = Generator.extend({
                 'quiet': true
             }
         });
-        
+
         this.composeWith('folklore:scss', {
             arguments: [this.project_name],
             options: {
@@ -155,7 +155,7 @@ module.exports = Generator.extend({
                 'quiet': true
             }
         });
-        
+
         if(this.options.server)
         {
             this.composeWith('folklore:server', {
@@ -168,7 +168,7 @@ module.exports = Generator.extend({
                 }
             });
         }
-        
+
         this.composeWith('folklore:build', {
             arguments: [this.project_name],
             options: {
@@ -202,7 +202,7 @@ module.exports = Generator.extend({
             }
         });
     },
-    
+
     writing:
     {
         html: function()
@@ -210,7 +210,7 @@ module.exports = Generator.extend({
             var srcPath = _.get(this.options, 'src-path');
             var jsPath = _.get(this.options, 'js-path', 'js').replace(/^\/?/, '/');
             var cssPath = _.get(this.options, 'css-path', 'css').replace(/^\/?/, '/');
-            
+
             var indexSrcPath = this.templatePath('index.html');
             var indexDestPath = this.destinationPath(path.join(srcPath, 'index.html'));
             this.fs.copyTpl(indexSrcPath, indexDestPath, {
@@ -219,7 +219,15 @@ module.exports = Generator.extend({
                 cssPath: cssPath
             });
         },
-        
+
+        editorconfig: function()
+        {
+            var projectPath = _.get(this.options, 'path');
+            var srcPath = this.templatePath('editorconfig');
+            var destPath = this.destinationPath(path.join(projectPath, '.editorconfig'));
+            this.fs.copy(srcPath, destPath);
+        },
+
         gitignore: function()
         {
             var srcPath = this.templatePath('gitignore');
@@ -227,5 +235,5 @@ module.exports = Generator.extend({
             this.fs.copy(srcPath, destPath);
         }
     }
-    
+
 });

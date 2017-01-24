@@ -1,18 +1,12 @@
-var React = require('react');
+import React from 'react';
 
-var App = React.createClass({
+const App = (props) => {
+    const { children } = props;
+    return (
+        <div>
+            { children }
+        </div>
+    );
+};
 
-    render: function()
-    {
-        /*jshint ignore:start */
-        return (
-            <div>
-                { this.props.children }
-            </div>
-        );
-        /*jshint ignore:end */
-    }
-
-});
-
-module.exports = App;
+export default App;

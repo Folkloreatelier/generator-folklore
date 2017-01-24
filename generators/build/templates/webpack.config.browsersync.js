@@ -4,13 +4,14 @@ var _ = require('lodash');
 var path = require('path');
 
 module.exports = _.merge({}, webpackConfig, {
-    
+
     plugins: [
         new webpack.DefinePlugin({
-            'process.env':{
-                'NODE_ENV': JSON.stringify('development')
-            }
+            'process.env': {
+                'NODE_ENV': JSON.stringify('development'),
+            },
+            '__DEV__': JSON.stringify(true),
         })
     ]
-    
+
 });

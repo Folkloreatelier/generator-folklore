@@ -1,14 +1,24 @@
-var ActionTypes = require('./ActionTypes');
+/**
+ * Constants
+ */
+const TEST_ACTION = 'TEST_ACTION';
 
-var TestActions = {
+/**
+ * Actions creator
+ */
+const testAction = () => ({
+    type: TEST_ACTION,
+});
 
-    testAction: function()
-    {
-        return {
-            type: ActionTypes.TEST_ACTION
-        };
-    }
-
+/**
+ * Exports
+ */
+const TestActions = {
+    testAction,
 };
 
-module.exports = TestActions;
+export default TestActions;
+export {
+    TEST_ACTION,
+    testAction,
+};

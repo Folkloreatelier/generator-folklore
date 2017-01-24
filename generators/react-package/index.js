@@ -159,11 +159,23 @@ module.exports = Generator.extend({
                 this.fs.delete(indexPath);
             }
 
+            var indexTestPath = this.destinationPath('src/__tests__/index-test.js');
+            if (this.fs.exists(indexTestPath)) {
+                this.fs.delete(indexTestPath);
+            }
+
             var srcPath = this.templatePath('src');
             var destPath = this.destinationPath('src');
             this.fs.copyTpl(srcPath, destPath, {
                 componentName: this.component_name
             });
+        },
+
+        storybookConfig: function()
+        {
+            var srcPath = this.templatePath('storybook.config.js');
+            var destPath = this.destinationPath('.storybook/config.js');
+            this.fs.copy(srcPath, destPath);
         },
 
         webpackConfig: function()
@@ -191,6 +203,16 @@ module.exports = Generator.extend({
                 srcPath: jsExamplesPath,
                 tmpPath: jsTmpPath
             });
+        },
+
+        packageJSON: function()
+        {
+            var packagePath = this.destinationPath('package.json');
+            this.fs.extendJSON(packagePath, {
+                scripts: {
+                    storybook: 'start-storybook -p 9001 -c .storybook'
+                }
+            });
         }
 
     },
@@ -212,7 +234,10 @@ module.exports = Generator.extend({
 
             this.npmInstall([
                 'domready@latest',
-                'jquery@latest'
+                'jquery@latest',
+                'enzyme@latest',
+                'react-test-renderer@latest',
+                '@kadira/storybook@latest'
             ], {
                 'saveDev': true
             });

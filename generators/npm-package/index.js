@@ -190,9 +190,10 @@ module.exports = Generator.extend({
         {
             var srcPath = this.templatePath('_package.json');
             var destPath = this.destinationPath('package.json');
-            this.fs.copyTpl(srcPath, destPath, {
-                name: this.package_name
-            });
+            var packageJSON = this.fs.readJSON(srcPath);
+            packageJSON.name = this.package_name;
+            var currentPackageJSON = this.fs.exists(destPath) ? this.fs.readJSON(destPath):{};
+            this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
         },
 
         editorconfig: function()
@@ -214,8 +215,9 @@ module.exports = Generator.extend({
                 'eslint-plugin-import@latest',
                 'eslint-plugin-jsx-a11y@latest',
                 'eslint-plugin-react@latest',
+                'jest@latest',
             ], {
-                'saveDev': true,
+                saveDev: true,
             });
         }
     }

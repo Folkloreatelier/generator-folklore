@@ -526,7 +526,6 @@ module.exports = Generator.extend({
                 var jsPath = _.get(this.options, 'js-path', 'js');
                 var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 scripts = _.extend(scripts, {
-                    'test': 'mocha',
                     'jshint:dist': 'jshint '+path.join(jsSrcPath, '/**.js'),
                     'jshint': 'npm run jshint:dist',
                     'jscs': 'jscs '+path.join(jsSrcPath, '/**.js'),

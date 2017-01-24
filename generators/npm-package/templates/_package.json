@@ -1,5 +1,5 @@
 {
-    "name": "<%= name %>",
+    "name": "",
     "version": "0.1.0",
     "author": {
         "name": "Folklore",
@@ -10,5 +10,8 @@
             "name": "David Mongeau-Petitpas",
             "email": "dmp@atelierfolklore.ca"
         }
-    ]
+    ],
+    "scripts": {
+        "test": "jest"
+    }
 }

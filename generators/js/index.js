@@ -152,6 +152,9 @@ module.exports = Generator.extend({
 
         graphqlRelay: function()
         {
+            if(!this.react_features || this.react_features.indexOf('relay') === -1) {
+                return;
+            }
             var graphqlPath = _.get(this.options, 'relay-graphql-path');
             var srcPath = this.templatePath('graphql');
             var destPath = this.destinationPath(graphqlPath);

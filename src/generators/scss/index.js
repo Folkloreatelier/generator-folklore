@@ -29,7 +29,7 @@ module.exports = class ScssGenerator extends Generator {
                 if (this.options.quiet) {
                     return;
                 }
-                console.log(chalk);
+
                 console.log(chalk.yellow('\n----------------------'));
                 console.log('SCSS Generator');
                 console.log(chalk.yellow('----------------------\n'));
@@ -39,7 +39,7 @@ module.exports = class ScssGenerator extends Generator {
                 const prompts = [];
 
                 if (!this.project_name) {
-                    prompts.push(Generator.prompts.project_name);
+                    prompts.push(ScssGenerator.prompts.project_name);
                 }
 
                 if (!prompts.length) {

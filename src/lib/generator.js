@@ -5,6 +5,14 @@ import _ from 'lodash';
 
 class Generator extends generators.Base {
 
+    static prompts = {
+        project_name: {
+            type: 'input',
+            name: 'project_name',
+            message: 'What is the name of the project?',
+        },
+    };
+
     static getConfigPath() {
         const home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
         return path.join(home, '.config/yeoman-generator-folklore/config.json');
@@ -12,14 +20,6 @@ class Generator extends generators.Base {
 
     constructor(...args) {
         super(...args);
-
-        this.promps = {
-            project_name: {
-                type: 'input',
-                name: 'project_name',
-                message: 'What is the name of the project?',
-            },
-        };
 
         this.option('quiet', {
             type: Boolean,

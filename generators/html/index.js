@@ -187,7 +187,9 @@ module.exports = Generator.extend({
                 'webpack-entry': {
                     'main': './index',
                     'config': './config',
-                    'vendor': ['jquery', 'lodash']
+                    'vendor': [
+                        'lodash'
+                    ]
                 },
                 'browsersync-base-dir': [
                     tmpPath,

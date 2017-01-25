@@ -348,9 +348,7 @@ module.exports = Generator.extend({
                     newEntries[entry[0]] = entry.slice(1);
                 });
                 entries = newEntries;
-            }
-            else
-            {
+            } else if (!entries) {
                 entries = {
                     main: './index'
                 };

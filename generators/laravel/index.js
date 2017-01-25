@@ -345,6 +345,7 @@ module.exports = Generator.extend({
             var files = [
                 'gulpfile.js',
                 'package.json',
+                'webpack.mix.js',
                 'config/app.php',
                 'routes/web.php',
                 'public/css/app.css',
@@ -424,6 +425,16 @@ module.exports = Generator.extend({
         {
             var srcPath = this.templatePath('editorconfig');
             var destPath = this.destinationPath('.editorconfig');
+            this.fs.copy(srcPath, destPath);
+        },
+
+        gitignore: function()
+        {
+            var srcPath = this.templatePath('gitignore');
+            var destPath = this.destinationPath('.gitignore');
+            if (this.fs.exists(destPath)) {
+                this.fs.delete(destPath);
+            }
             this.fs.copy(srcPath, destPath);
         },
 

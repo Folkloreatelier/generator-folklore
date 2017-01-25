@@ -53,8 +53,8 @@ domready(() => {
         for (let ii = 0, nodesCount = nodes.length; ii < nodesCount; ii += 1) {
             node = nodes[ii].node;
             props = nodes[ii].data;
-            if (props.routes && props.url) {
-                routes = createRoutes(props.routes);
+            if (props.url) {
+                routes = createRoutes(props.routes || null);
                 match({
                     routes,
                     location: props.url,

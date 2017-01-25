@@ -13,11 +13,8 @@ import configureStore from '../store/configureStore';
 import DevTools from './DevTools';
 
 const propTypes = {
-    bubble: React.PropTypes.object,
     url: React.PropTypes.string.isRequired,
-    routes: React.PropTypes.object.isRequired,
     routerRoutes: React.PropTypes.object,
-    sections: React.PropTypes.array.isRequired,
     renderProps: React.PropTypes.object,
 };
 
@@ -36,16 +33,8 @@ class Root extends Component {
                 initialEntries: [props.url],
             }) : browserHistory;
 
-        const bubbles = {};
-        if (props.bubble) {
-            const url = props.bubble.snippet.link.replace(/https?:\/\/[^/]+\//, '').replace(/^react\//, '');
-            bubbles[url] = props.bubble;
-        }
-
         const store = configureStore({
-            routes: new Immutable.Map(props.routes),
-            sections: new Immutable.List(props.sections),
-            bubbles: new Immutable.Map(bubbles),
+
         });
 
         const history = syncHistoryWithStore(
@@ -83,7 +72,7 @@ class Root extends Component {
             );
         }
 
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
             return (
                 <Provider store={store}>
                     <div>

@@ -7,7 +7,7 @@ import Home from './containers/pages/Home';
 
 
 export default (routes) => {
-    const url = typeof routes !== 'undefined' ? new URL(routes) : null;
+    const url = typeof routes !== 'undefined' && routes ? new URL(routes) : null;
     return (
         <Route path="*" component={App}>
             <IndexRoute component={Home} />

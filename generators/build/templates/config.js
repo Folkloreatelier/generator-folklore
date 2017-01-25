@@ -1,5 +1,5 @@
 module.exports = {
-    
+
     <% if(hasBrowserSync) { %>/**
      * Browsersync
      */
@@ -8,14 +8,15 @@ module.exports = {
             baseDir: <%- JSON.stringify(browserSyncBaseDir).replace(/\"/gi, '\'') %>,
             index: 'index.html'
         },
-        
+
         <% if(browserSyncProxy) { %>
+        host: '<%= browserSyncHost %>',
         proxy: '<%= browserSyncProxy %>',
         <% } %>
-        
+
         files: <%- JSON.stringify(browserSyncFiles).replace(/\"/gi, '\'') %>
     },
-    
+
     /**
      * Webpack middleware
      */
@@ -30,12 +31,12 @@ module.exports = {
             aggregateTimeout: 300,
             poll: true
         },
-        
+
         stats: {
             colors: true
         }
     },<% } %>
-    
+
     /**
      * PostCSS
      */
@@ -44,7 +45,7 @@ module.exports = {
             browsers: '> 5%'
         }
     },
-    
+
     /**
      * Modernizr
      */
@@ -83,5 +84,5 @@ module.exports = {
 
         'customTests' : []
     }
-    
+
 };

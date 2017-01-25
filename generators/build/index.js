@@ -181,6 +181,10 @@ module.exports = Generator.extend({
             defaults: true
         });
 
+        this.option('browsersync-host', {
+            type: String
+        });
+
         this.option('browsersync-proxy', {
             type: String
         });
@@ -241,6 +245,7 @@ module.exports = Generator.extend({
             var buildPath = _.get(this.options, 'path', false);
             var tmpPath = _.get(this.options, 'tmp-path');
             var hasBrowserSync = _.get(this.options, 'browsersync', false);
+            var browserSyncHost = _.get(this.options, 'browsersync-host', null);
             var browserSyncProxy = _.get(this.options, 'browsersync-proxy', null);
             var browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir', []);
             var browserSyncFiles = _.get(this.options, 'browsersync-files', []);
@@ -249,6 +254,7 @@ module.exports = Generator.extend({
 
             var templateData = {
                 hasBrowserSync: hasBrowserSync,
+                browserSyncHost: browserSyncHost && browserSyncHost.length ? browserSyncHost:null,
                 browserSyncProxy: browserSyncProxy && browserSyncProxy.length ? browserSyncProxy:null,
                 browserSyncBaseDir: _.isArray(browserSyncBaseDir) ? browserSyncBaseDir:[browserSyncBaseDir],
                 browserSyncFiles: _.isArray(browserSyncFiles) ? browserSyncFiles:[browserSyncFiles],

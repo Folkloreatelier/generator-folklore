@@ -35,6 +35,12 @@ module.exports = Generator.extend({
             defaults: 'http://<%= project_host %>.local.flklr.ca'
         });
 
+        this.option('proxy-url', {
+            type: String,
+            desc: 'Project proxy url',
+            defaults: 'http://<%= project_host %>.homestead.flklr.ca'
+        });
+
         this.option('tmp-path', {
             type: String,
             desc: 'Path for temp files',
@@ -233,6 +239,10 @@ module.exports = Generator.extend({
             project_host: this.project_host,
             project_name: this.project_name
         }).replace(/^(http)?(s)?(\:\/\/)?/, 'http$2://');
+        var urlProxy = _.template(_.get(this.options, 'proxy-url', _.get(this.options, 'local-url')))({
+            project_host: this.project_host,
+            project_name: this.project_name
+        }).replace(/^(http)?(s)?(\:\/\/)?/, 'http$2://');
 
         this.composeWith('folklore:js', {
             arguments: [this.project_name],
@@ -265,16 +275,17 @@ module.exports = Generator.extend({
                 'scss-path': scssPath,
                 'css-path': cssPath,
                 'images-path': imagesPath,
-                'webpack-entry-vendor': {
+                'webpack-entry': {
                     'main': './index',
                     'config': './config',
-                    'vendor': ['jquery', 'lodash']
+                    'vendor': ['lodash']
                 },
                 'browsersync-base-dir': [
                     tmpPath,
                     publicPath
                 ],
-                'browsersync-proxy': urlLocal,
+                'browsersync-host': urlLocal.replace(/^https?\:\/\//, ''),
+                'browsersync-proxy': urlProxy,
                 'browsersync-files': [
                     'config/**/*.php',
                     'app/**/*.php',
@@ -456,7 +467,8 @@ module.exports = Generator.extend({
                 return;
             }
 
-            this.spawnCommand('composer', ['install']);
+            var done = this.async();
+            this.spawnCommand('composer', ['install']).on('close', done);
         },
 
         permissions: function()
@@ -467,16 +479,24 @@ module.exports = Generator.extend({
 
         keyGenerate: function()
         {
-            if (this.fs.exists('vendor')) {
-                this.spawnCommand('php', ['artisan', 'key:generate']);
+            var skipInstall = _.get(this.options, 'skip-install', false);
+            if (skipInstall) {
+                return;
             }
+
+            var done = this.async();
+            this.spawnCommand('php', ['artisan', 'key:generate']).on('close', done);
         },
 
         vendorPublish: function()
         {
-            if (this.fs.exists('vendor')) {
-                this.spawnCommand('php', ['artisan', 'vendor:publish']);
+            var skipInstall = _.get(this.options, 'skip-install', false);
+            if (skipInstall) {
+                return;
             }
+
+            var done = this.async();
+            this.spawnCommand('php', ['artisan', 'vendor:publish']).on('close', done);
         }
 
     },

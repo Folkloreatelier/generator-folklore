@@ -36,7 +36,7 @@ bundler.plugin('done', function (stats)
             timeout: 100000
         });
     }
-    
+
     browserSync.reload();
 });
 
@@ -45,9 +45,9 @@ bundler.plugin('done', function (stats)
  */
 var browserSyncOptions = {
     logFileChanges: false,
-    
+
     middleware: [],
-    
+
     plugins: [
         'bs-fullscreen-message'
     ]
@@ -77,10 +77,9 @@ if(browserSyncOptions.proxy)
     browserSyncOptions.proxy = null;
     delete browserSyncOptions.proxy;
     browserSyncOptions = _.merge({
-        host: proxyHost.host,
         open: 'external'
     }, browserSyncOptions);
-    
+
     /**
      * Static middleware
      */
@@ -91,10 +90,10 @@ if(browserSyncOptions.proxy)
         serveStaticMiddlewares[dir] = servestaticMiddleware(dir);
     });
     var staticMiddleware = function(req,res,next) {
-        
+
         var requestUrl = url.parse(req.url);
         var urlPath = requestUrl.pathname;
-        
+
         var middleware;
         for(var key in serveStaticMiddlewares)
         {
@@ -107,7 +106,7 @@ if(browserSyncOptions.proxy)
                 }
             } catch(e) {}
         }
-        
+
         return next();
     };
     browserSyncOptions.middleware.push(staticMiddleware);

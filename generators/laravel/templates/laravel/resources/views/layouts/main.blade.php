@@ -14,7 +14,7 @@
 
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-ico">
 	<link rel="icon" href="/favicon.gif" type="image/gif">
-	
+
 	@section('head:opengraph')
         <!-- Open Graph meta -->
 		<meta property="og:locale" content="{{ $locale }}_CA">
@@ -26,9 +26,10 @@
 		<meta property="og:description" content="@yield('description')">
 		<meta property="og:url" content="{{ Request::url() }}">
     @show
-	
+
 	@section('head:scripts')
 		<!-- Head Javascript -->
+		<script src="https://cdn.polyfill.io/v2/polyfill.min.js" type="text/javascript"></script>
 		<script src="{{ asset('js/modernizr.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/config.js') }}" type="text/javascript"></script>
 		@stack('scripts:head')
@@ -36,7 +37,7 @@
 			app_config('locale', '{{ $locale }}');
 		</script>
 	@show
-	
+
 	@section('head:styles')
 		<!-- CSS -->
 		<link href="{{ asset('css/main.css') }}" rel="stylesheet" type="text/css">
@@ -81,7 +82,7 @@
 		<script src="{{ asset('js/main.js') }}" type="text/javascript"></script>
 		@stack('scripts:footer')
 	@show
-    
+
     @section('body:styles')
 		<!-- Footer styles -->
 		@stack('styles:footer')

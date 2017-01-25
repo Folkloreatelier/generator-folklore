@@ -317,11 +317,12 @@ module.exports = Generator.extend({
                 });
 
                 var source, destination;
-                for (var i in files)
-                {
+                for (var i in files) {
                     source = path.join(cachePath, files[i]);
                     destination = path.join(destinationPath, files[i]);
-                    this.bulkCopy(source, destination);
+                    if (!this.fs.exists(destination)) {
+                        this.fs.copy(source, destination);
+                    }
                 }
 
                 done();
@@ -350,14 +351,23 @@ module.exports = Generator.extend({
             }
         },
 
+        packageJSON: function()
+        {
+            var jsonPath = this.destinationPath('package.json');
+            var packageJSON = this.fs.exists(jsonPath) ? this.fs.readJSON(jsonPath):{};
+            packageJSON.scripts = {};
+            packageJSON.devDependencies = {};
+            this.fs.writeJSON(jsonPath, packageJSON);
+        },
+
         composerJSON: function()
         {
             var src = this.destinationPath('composer.json');
             this.fs.extendJSON(src, {
                 require: {
                     'folklore/image': '^0.3',
-                    'folklore/locale': '^2.0',
-                    'barryvdh/laravel-debugbar': '^2.2'
+                    'folklore/locale': '^2.1',
+                    'barryvdh/laravel-debugbar': '^2.3'
                 }
             });
         },
@@ -441,8 +451,8 @@ module.exports = Generator.extend({
 
         composer: function()
         {
-            if(this.options['skip-install'])
-            {
+            var skipInstall = _.get(this.options, 'skip-install', false);
+            if (skipInstall) {
                 return;
             }
 
@@ -457,12 +467,16 @@ module.exports = Generator.extend({
 
         keyGenerate: function()
         {
-            this.spawnCommand('php', ['artisan', 'key:generate']);
+            if (this.fs.exists('vendor')) {
+                this.spawnCommand('php', ['artisan', 'key:generate']);
+            }
         },
 
         vendorPublish: function()
         {
-            this.spawnCommand('php', ['artisan', 'vendor:publish']);
+            if (this.fs.exists('vendor')) {
+                this.spawnCommand('php', ['artisan', 'vendor:publish']);
+            }
         }
 
     },

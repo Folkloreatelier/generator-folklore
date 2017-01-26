@@ -196,7 +196,7 @@ module.exports = Generator.extend({
                     srcPath
                 ],
                 'browsersync-files': [
-                    path.join(tmpPath, 'scss/*.scss'),
+                    path.join(tmpPath, 'css/*.css'),
                     path.join(srcPath, '*.html')
                 ],
                 'skip-install': skipInstall,

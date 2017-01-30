@@ -6,16 +6,17 @@ var path = require('path');
 var outputPath = path.join(process.env.PWD, '<%= destPath %>');
 
 module.exports = _.merge({}, webpackConfig, {
-    
+
     output: {
         path: outputPath
     },
-    
+
     plugins: [
         new webpack.DefinePlugin({
             'process.env':{
                 'NODE_ENV': JSON.stringify('production')
-            }
+            },
+            '__DEV__': JSON.stringify(false),
         }),
         new webpack.optimize.UglifyJsPlugin({
             compress: {
@@ -23,5 +24,5 @@ module.exports = _.merge({}, webpackConfig, {
             }
         })
     ]
-    
+
 });

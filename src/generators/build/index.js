@@ -530,14 +530,14 @@ module.exports = Generator.extend({
                 var jsPath = _.get(this.options, 'js-path', 'js');
                 var jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 scripts = _.extend(scripts, {
-                    'jshint:dist': 'jshint '+path.join(jsSrcPath, '/**.js'),
-                    'jshint': 'npm run jshint:dist',
+                    'lint:dist': 'eslint '+path.join(jsSrcPath, '/**.js'),
+                    'lint': 'npm run lint:dist',
                     'jscs': 'jscs '+path.join(jsSrcPath, '/**.js'),
                     'webpack:dist': 'webpack --config '+webpackConfigFile,
                     'webpack': 'npm run webpack:dist',
                     'scripts:dist': 'npm run webpack:dist',
                     'scripts': 'npm run scripts:dist',
-                    'build:js': 'npm run jshint && npm run scripts'
+                    'build:js': 'npm run lint && npm run scripts'
                 });
                 scriptsBuild.push('npm run build:js');
             }

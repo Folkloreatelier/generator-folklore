@@ -242,6 +242,9 @@ module.exports = Generator.extend({
     writing: {
         config: function()
         {
+            var srcPath = _.get(this.options, 'src-path');
+            var destPath = _.get(this.options, 'dest-path');
+
             var buildPath = _.get(this.options, 'path', false);
             var tmpPath = _.get(this.options, 'tmp-path');
             var hasBrowserSync = _.get(this.options, 'browsersync', false);
@@ -252,18 +255,24 @@ module.exports = Generator.extend({
             var jsPath = _.get(this.options, 'js-path', 'js');
             var jsTmpPath = _.get(this.options, 'js-tmp-path', null) || path.join(tmpPath, jsPath);
 
+            var imagesPath = _.get(this.options, 'images-path', 'img');
+            var imagesSrcPath = _.get(this.options, 'images-src-path', null) || path.join(srcPath, imagesPath, '**/*.{jpg,png,jpeg,gif,svg}');
+            var imagesDestPath = _.get(this.options, 'images-dest-path', null) || path.join(destPath, imagesPath);
+
             var templateData = {
                 hasBrowserSync: hasBrowserSync,
                 browserSyncHost: browserSyncHost && browserSyncHost.length ? browserSyncHost:null,
                 browserSyncProxy: browserSyncProxy && browserSyncProxy.length ? browserSyncProxy:null,
                 browserSyncBaseDir: _.isArray(browserSyncBaseDir) ? browserSyncBaseDir:[browserSyncBaseDir],
                 browserSyncFiles: _.isArray(browserSyncFiles) ? browserSyncFiles:[browserSyncFiles],
+                imagesSrcPath: imagesSrcPath,
+                imagesDestPath: imagesDestPath,
                 modernizrDestPath: path.join(jsTmpPath, 'modernizr.js')
             };
 
-            var srcPath = this.templatePath('config.js');
-            var destPath = this.destinationPath(path.join(buildPath, 'config.js'));
-            this.fs.copyTpl(srcPath, destPath, templateData);
+            var configSrcPath = this.templatePath('config.js');
+            var configDestPath = this.destinationPath(path.join(buildPath, 'config.js'));
+            this.fs.copyTpl(configSrcPath, configDestPath, templateData);
         },
 
         browsersync: function()
@@ -481,11 +490,8 @@ module.exports = Generator.extend({
 
             if(_.get(this.options, 'images'))
             {
-                var imagesPath = _.get(this.options, 'images-path', 'img');
-                var imagesSrcPath = _.get(this.options, 'images-src-path', null) || path.join(srcPath, imagesPath, '**/*.{jpg,png,jpeg,gif,svg}');
-                var imagesDestPath = _.get(this.options, 'images-dest-path', null) || path.join(destPath, imagesPath);
                 scripts = _.extend(scripts, {
-                    'imagemin:dist': 'imagemin '+imagesSrcPath+' --out-dir='+imagesDestPath,
+                    'imagemin:dist': 'node ./build/imagemin.js',
                     'imagemin': 'npm run imagemin:dist',
                     'build:images': 'npm run imagemin:dist',
                 });

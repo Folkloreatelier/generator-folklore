@@ -5,13 +5,13 @@ var path = require('path');
 
 var outputPath = path.join(process.env.PWD, '<%= destPath %>');
 
-module.exports = _.merge({}, webpackConfig, {
+module.exports = _.extend({}, webpackConfig, {
 
-    output: {
+    output: _.extend({}, webpackConfig.output, {
         path: outputPath
-    },
+    }),
 
-    plugins: [
+    plugins: [].concat(webpackConfig.plugins).concat([
         new webpack.DefinePlugin({
             'process.env':{
                 'NODE_ENV': JSON.stringify('production')
@@ -23,6 +23,6 @@ module.exports = _.merge({}, webpackConfig, {
                 warnings: false
             }
         })
-    ]
+    ])
 
 });

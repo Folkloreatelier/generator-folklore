@@ -48,7 +48,7 @@ domready(() => {
     let routes;
     for (let i = 0, elementsCount = elements.length; i < elementsCount; i += 1) {
         el = elements[i];
-        componentName = el.dataset.hypernovaKey;
+        componentName = el.dataset ? el.dataset.hypernovaKey : el.getAttribute('data-hypernova-key');
         nodes = loadHypernova(componentName);
         for (let ii = 0, nodesCount = nodes.length; ii < nodesCount; ii += 1) {
             node = nodes[ii].node;

@@ -321,6 +321,19 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
+            imagemin() {
+                if (!_.get(this.options, 'images', false)) {
+                    return;
+                }
+
+                const templateData = {};
+
+                const buildPath = _.get(this.options, 'path');
+                const srcPath = this.templatePath('imagemin.js');
+                const destPath = this.destinationPath(path.join(buildPath, 'imagemin.js'));
+                this.fs.copyTpl(srcPath, destPath, templateData);
+            },
+
             webpack() {
                 if (!_.get(this.options, 'js', false)) {
                     return;

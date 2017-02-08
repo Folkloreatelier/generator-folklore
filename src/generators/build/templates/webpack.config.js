@@ -36,40 +36,46 @@ module.exports = {
         rules: [
             {
                 test: /.jsx?$/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 exclude: /node_modules/
             },
             {
                 test: /.json$/,
-                loader: 'json',
+                loader: 'json-loader',
                 exclude: /node_modules/,
             },
             {
                 test: /.html$/,
-                loader: 'html',
+                loader: 'html-loader',
                 exclude: /node_modules/,
             },
             {
                 test: /\.svg$/,
                 exclude: /(node_modules|bower_components|\.tmp)/,
-                loader: 'babel?presets[]=es2015&presets[]=react!svg-react'
+                use: [
+                    'babel-loader?presets[]=es2015&presets[]=react',
+                    'svg-react-loader'
+                ]
             },
             {
                 test: /\.scss$/,
-                loader: 'style!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]!sass'
+                use: [
+                    'style-loader!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]',
+                    'sass-loader'
+                ]
             }
             <% if(entries.config) { %>
             ,{
                 test: require.resolve(path.join(contextPath, 'config')),
                 enforce: 'post',
-                loader: 'expose?app_config'
+                loader: 'expose-loader?app_config'
             }
             <% } %>
         ]
     },
 
     resolve: {
-        extensions: ['', '.js', '.jsx', '.es6'],
+        extensions: ['.js', '.jsx', '.es6'],
         alias: {
             underscore: 'lodash'
         },

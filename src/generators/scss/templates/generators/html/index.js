@@ -89,9 +89,9 @@ module.exports = Generator.extend({
                 return;
             }
 
-            console.log('\n----------------------'.yellow);
+            console.log(chalk.yellow('\n----------------------'));
             console.log('HTML Generator');
-            console.log('----------------------\n'.yellow);
+            console.log(chalk.yellow('----------------------\n'));
         },
 
         prompts: function prompts() {

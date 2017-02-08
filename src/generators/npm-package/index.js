@@ -1,225 +1,208 @@
-var Generator = require('../../lib/generator');
-var _ = require('lodash');
-var path = require('path');
-var colors = require('colors');
+import _ from 'lodash';
+import path from 'path';
+import chalk from 'chalk';
+import Generator from '../../lib/generator';
 
-module.exports = Generator.extend({
+module.exports = class NpmPackageGenerator extends Generator {
 
-    // The name `constructor` is important here
-    constructor: function ()
-    {
-        Generator.apply(this, arguments);
+    constructor(...args) {
+        super(...args);
 
         this.argument('package_name', {
             type: String,
-            required: false
+            required: false,
         });
 
         this.option('src-path', {
             type: String,
             desc: 'Path for source',
-            defaults: './src'
+            defaults: './src',
         });
 
         this.option('tmp-path', {
             type: String,
             desc: 'Path for temp files',
-            defaults: './.tmp'
+            defaults: './.tmp',
         });
 
         this.option('dest-path', {
             type: String,
             desc: 'Path for build',
-            defaults: './dist'
+            defaults: './dist',
         });
 
         this.option('build-path', {
             type: String,
             desc: 'Path for build',
-            defaults: './build'
+            defaults: './build',
         });
 
         this.option('browsersync-base-dir', {
             type: String,
-            desc: 'BrowserSync base directories'
+            desc: 'BrowserSync base directories',
         });
 
         this.option('browsersync-files', {
             type: String,
-            desc: 'BrowserSync files to watch'
+            desc: 'BrowserSync files to watch',
         });
 
         this.option('webpack-config', {
             type: Boolean,
             desc: 'Add a webpack config file',
-            defaults: true
+            defaults: true,
         });
 
         this.option('webpack-config-browsersync', {
             type: Boolean,
             desc: 'Add a webpack config file for browsersync',
-            defaults: true
+            defaults: true,
         });
+    }
 
-    },
+    get prompting() {
+        return {
+            welcome() {
+                if (this.options.quiet) {
+                    return;
+                }
 
-    prompting: {
+                console.log(chalk.yellow('\n----------------------'));
+                console.log('NPM Package Generator');
+                console.log(chalk.yellow('----------------------\n'));
+            },
 
-        welcome: function()
-        {
-            if(this.options.quiet)
-            {
-                return;
-            }
+            prompts() {
+                const prompts = [];
 
-            console.log('\n----------------------'.yellow);
-            console.log('NPM Package Generator');
-            console.log('----------------------\n'.yellow);
-        },
+                if (!this.package_name) {
+                    prompts.push({
+                        type: 'input',
+                        name: 'package_name',
+                        message: 'Name of the package:',
+                    });
+                }
 
-        prompts: function ()
-        {
-            var prompts = [];
+                if (!prompts.length) {
+                    return null;
+                }
 
-            if(!this.package_name)
-            {
-                prompts.push({
-                    type: 'input',
-                    name: 'package_name',
-                    message: 'Name of the package:'
-                });
-            }
+                return this.prompt(prompts)
+                    .then((answers) => {
+                        if (answers.package_name) {
+                            this.package_name = answers.package_name;
+                        }
+                    });
+            },
+        };
+    }
 
-            if(!prompts.length)
-            {
-                return;
-            }
-
-            return this.prompt(prompts)
-                .then(function (answers)
-                {
-                    if(answers.package_name)
-                    {
-                        this.package_name = answers.package_name;
-                    }
-                }.bind(this));
-        }
-    },
-
-    configuring: function()
-    {
-        var projectPath = this.destinationPath();
-        var srcPath = _.get(this.options, 'src-path');
-        var destPath = _.get(this.options, 'dest-path');
-        var tmpPath = _.get(this.options, 'tmp-path');
-        var buildPath = _.get(this.options, 'build-path');
-        var skipInstall = _.get(this.options, 'skip-install', false);
-        var webpackConfig = _.get(this.options, 'webpack-config', false);
-        var webpackConfigBrowsersync = _.get(this.options, 'webpack-config-browsersync', false);
-        var browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir') || [
+    configuring() {
+        const projectPath = this.destinationPath();
+        const srcPath = _.get(this.options, 'src-path');
+        const destPath = _.get(this.options, 'dest-path');
+        const tmpPath = _.get(this.options, 'tmp-path');
+        const buildPath = _.get(this.options, 'build-path');
+        const skipInstall = _.get(this.options, 'skip-install', false);
+        const webpackConfig = _.get(this.options, 'webpack-config', false);
+        const webpackConfigBrowsersync = _.get(this.options, 'webpack-config-browsersync', false);
+        const browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir') || [
             tmpPath,
-            srcPath
+            srcPath,
         ];
-        var browserSyncFiles = _.get(this.options, 'browsersync-files') || [
-            path.join(srcPath, '*.html')
+        const browserSyncFiles = _.get(this.options, 'browsersync-files') || [
+            path.join(srcPath, '*.html'),
         ];
 
         this.composeWith('folklore:build', {
             arguments: [this.package_name],
             options: {
                 'project-path': projectPath,
-                'path': buildPath,
+                path: buildPath,
                 'tmp-path': tmpPath,
                 'src-path': srcPath,
                 'dest-path': destPath,
                 'js-path': './',
-                'scss': false,
-                'images': false,
-                'copy': false,
+                scss: false,
+                images: false,
+                copy: false,
                 'clean-dest': true,
-                'modernizr': false,
+                modernizr: false,
                 'webpack-config': webpackConfig,
                 'webpack-config-browsersync': webpackConfigBrowsersync,
                 'browsersync-base-dir': browserSyncBaseDir,
                 'browsersync-files': browserSyncFiles,
                 'skip-install': skipInstall,
-                'quiet': true
-            }
+                quiet: true,
+            },
         });
-    },
-
-    writing: {
-
-        src: function()
-        {
-            var srcPath = this.templatePath('src');
-            var destPath = this.destinationPath('src');
-            this.directory(srcPath, destPath);
-        },
-
-        gitignore: function()
-        {
-            var projectPath = this.destinationPath();
-            var srcPath = this.templatePath('gitignore');
-            var destPath = this.destinationPath('.gitignore');
-            this.fs.copy(srcPath, destPath);
-        },
-
-        eslintrc: function()
-        {
-            var srcPath = this.templatePath('eslintrc');
-            var destPath = this.destinationPath('.eslintrc');
-            this.fs.copy(srcPath, destPath);
-        },
-
-        babelrc: function()
-        {
-            var srcPath = this.templatePath('babelrc');
-            var destPath = this.destinationPath('.babelrc');
-            this.fs.copy(srcPath, destPath);
-        },
-
-        readme: function()
-        {
-            var srcPath = this.templatePath('Readme.md');
-            var destPath = this.destinationPath('Readme.md');
-            this.fs.copy(srcPath, destPath);
-        },
-
-        packageJSON: function()
-        {
-            var srcPath = this.templatePath('_package.json');
-            var destPath = this.destinationPath('package.json');
-            var packageJSON = this.fs.readJSON(srcPath);
-            packageJSON.name = this.package_name;
-            var currentPackageJSON = this.fs.exists(destPath) ? this.fs.readJSON(destPath):{};
-            this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
-        },
-
-        editorconfig: function()
-        {
-            var srcPath = this.templatePath('editorconfig');
-            var destPath = this.destinationPath('.editorconfig');
-            this.fs.copy(srcPath, destPath);
-        }
-
-    },
-
-    install: {
-        npm: function()
-        {
-            this.npmInstall([
-                'babel-eslint@latest',
-                'eslint@latest',
-                'eslint-config-airbnb@latest',
-                'eslint-plugin-import@latest',
-                'eslint-plugin-jsx-a11y@latest',
-                'eslint-plugin-react@latest',
-                'jest@latest',
-            ], {
-                saveDev: true,
-            });
-        }
     }
 
-});
+    get writing() {
+        return {
+            src() {
+                const srcPath = this.templatePath('src');
+                const destPath = this.destinationPath('src');
+                this.directory(srcPath, destPath);
+            },
+
+            gitignore() {
+                const srcPath = this.templatePath('gitignore');
+                const destPath = this.destinationPath('.gitignore');
+                this.fs.copy(srcPath, destPath);
+            },
+
+            eslintrc() {
+                const srcPath = this.templatePath('eslintrc');
+                const destPath = this.destinationPath('.eslintrc');
+                this.fs.copy(srcPath, destPath);
+            },
+
+            babelrc() {
+                const srcPath = this.templatePath('babelrc');
+                const destPath = this.destinationPath('.babelrc');
+                this.fs.copy(srcPath, destPath);
+            },
+
+            readme() {
+                const srcPath = this.templatePath('Readme.md');
+                const destPath = this.destinationPath('Readme.md');
+                this.fs.copy(srcPath, destPath);
+            },
+
+            packageJSON() {
+                const srcPath = this.templatePath('_package.json');
+                const destPath = this.destinationPath('package.json');
+                const packageJSON = this.fs.readJSON(srcPath);
+                packageJSON.name = this.package_name;
+                const currentPackageJSON = this.fs.exists(destPath) ?
+                    this.fs.readJSON(destPath) : {};
+                this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
+            },
+
+            editorconfig() {
+                const srcPath = this.templatePath('editorconfig');
+                const destPath = this.destinationPath('.editorconfig');
+                this.fs.copy(srcPath, destPath);
+            },
+        };
+    }
+
+    get install() {
+        return {
+            npm() {
+                this.npmInstall([
+                    'babel-eslint@latest',
+                    'eslint@latest',
+                    'eslint-config-airbnb@latest',
+                    'eslint-plugin-import@latest',
+                    'eslint-plugin-jsx-a11y@latest',
+                    'eslint-plugin-react@latest',
+                    'jest@latest',
+                ], {
+                    saveDev: true,
+                });
+            },
+        };
+    }
+};

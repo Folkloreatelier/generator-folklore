@@ -1,171 +1,161 @@
-var Generator = require('../../lib/generator');
-var _ = require('lodash');
-var path = require('path');
-var colors = require('colors');
+import _ from 'lodash';
+import path from 'path';
+import chalk from 'chalk';
+import Generator from '../../lib/generator';
 
-module.exports = Generator.extend({
+module.exports = class HTMLGenerator extends Generator {
 
     // The name `constructor` is important here
-    constructor: function ()
-    {
-        Generator.apply(this, arguments);
+    constructor(...args) {
+        super(...args);
 
         this.argument('project_name', {
             type: String,
-            required: false
+            required: false,
         });
 
         this.option('path', {
             type: String,
             desc: 'Path for the html project',
-            defaults: './'
+            defaults: './',
         });
 
         this.option('src-path', {
             type: String,
             desc: 'Path for source',
-            defaults: './src'
+            defaults: './src',
         });
 
         this.option('tmp-path', {
             type: String,
             desc: 'Path for temp files',
-            defaults: './.tmp'
+            defaults: './.tmp',
         });
 
         this.option('dest-path', {
             type: String,
             desc: 'Path for build',
-            defaults: './dist'
+            defaults: './dist',
         });
 
         this.option('js-path', {
             type: String,
             desc: 'Path for the javascript',
-            defaults: 'js'
+            defaults: 'js',
         });
 
         this.option('css-path', {
             type: String,
             desc: 'Path for the css',
-            defaults: 'css'
+            defaults: 'css',
         });
 
         this.option('scss-path', {
             type: String,
             desc: 'Path for the scss',
-            defaults: 'scss'
+            defaults: 'scss',
         });
 
         this.option('images-path', {
             type: String,
             desc: 'Path for the images',
-            defaults: 'img'
+            defaults: 'img',
         });
 
         this.option('build-path', {
             type: String,
             desc: 'Path for the build tools',
-            defaults: 'build'
+            defaults: 'build',
         });
 
         this.option('server', {
             type: Boolean,
             defaults: false,
-            desc: 'Add a node.js server'
+            desc: 'Add a node.js server',
         });
 
         this.option('server-path', {
             type: String,
-            desc: 'Path for the node.js server'
+            desc: 'Path for the node.js server',
         });
-    },
+    }
 
-    prompting: {
+    get prompting() {
+        return {
+            welcome() {
+                if (this.options.quiet) {
+                    return;
+                }
 
-        welcome: function()
-        {
-            if(this.options.quiet)
-            {
-                return;
-            }
+                console.log(chalk.yellow('\n----------------------'));
+                console.log('HTML Generator');
+                console.log(chalk.yellow('----------------------\n'));
+            },
 
-            console.log('\n----------------------'.yellow);
-            console.log('HTML Generator');
-            console.log('----------------------\n'.yellow);
-        },
+            prompts() {
+                const prompts = [];
 
-        prompts: function ()
-        {
-            var prompts = [];
+                if (!this.project_name) {
+                    prompts.push(Generator.prompts.project_name);
+                }
 
-            if(!this.project_name)
-            {
-                prompts.push(this.prompts.project_name);
-            }
+                if (!prompts.length) {
+                    return null;
+                }
 
-            if(!prompts.length)
-            {
-                return;
-            }
+                return this.prompt(prompts)
+                    .then((answers) => {
+                        if (answers.project_name) {
+                            this.project_name = answers.project_name;
+                        }
+                    });
+            },
+        };
+    }
 
-            return this.prompt(prompts)
-                .then(function (answers)
-                {
-                    if(answers.project_name)
-                    {
-                        this.project_name = answers.project_name;
-                    }
-                }.bind(this));
-        }
-
-    },
-
-    configuring: function()
-    {
-        var projectPath = this.destinationPath();
-        var srcPath = _.get(this.options, 'src-path');
-        var destPath = _.get(this.options, 'dest-path');
-        var tmpPath = _.get(this.options, 'tmp-path');
-        var buildPath = _.get(this.options, 'build-path') || (projectPath + '/build');
-        var jsPath = _.get(this.options, 'js-path');
-        var jsSrcPath = path.join(projectPath, srcPath, jsPath);
-        var scssPath = _.get(this.options, 'scss-path');
-        var scssSrcPath = path.join(projectPath, srcPath, scssPath);
-        var cssPath = _.get(this.options, 'css-path');
-        var imagesPath = _.get(this.options, 'images-path');
-        var skipInstall = _.get(this.options, 'skip-install', false);
+    configuring() {
+        const projectPath = this.destinationPath();
+        const srcPath = _.get(this.options, 'src-path');
+        const destPath = _.get(this.options, 'dest-path');
+        const tmpPath = _.get(this.options, 'tmp-path');
+        const buildPath = _.get(this.options, 'build-path') || `${projectPath}/build`;
+        const jsPath = _.get(this.options, 'js-path');
+        const jsSrcPath = path.join(projectPath, srcPath, jsPath);
+        const scssPath = _.get(this.options, 'scss-path');
+        const scssSrcPath = path.join(projectPath, srcPath, scssPath);
+        const cssPath = _.get(this.options, 'css-path');
+        const imagesPath = _.get(this.options, 'images-path');
+        const skipInstall = _.get(this.options, 'skip-install', false);
 
         this.composeWith('folklore:js', {
             arguments: [this.project_name],
             options: {
                 'project-path': projectPath,
-                'path': jsSrcPath,
+                path: jsSrcPath,
                 'skip-install': skipInstall,
-                'quiet': true
-            }
+                quiet: true,
+            },
         });
 
         this.composeWith('folklore:scss', {
             arguments: [this.project_name],
             options: {
                 'project-path': projectPath,
-                'path': scssSrcPath,
+                path: scssSrcPath,
                 'skip-install': skipInstall,
-                'quiet': true
-            }
+                quiet: true,
+            },
         });
 
-        if(this.options.server)
-        {
+        if (this.options.server) {
             this.composeWith('folklore:server', {
                 arguments: [this.project_name],
                 options: {
                     'project-path': projectPath,
-                    'path': _.get(this.options, 'server-path') || (projectPath + '/server'),
+                    path: _.get(this.options, 'server-path') || `${projectPath}/server`,
                     'skip-install': skipInstall,
-                    'quiet': true
-                }
+                    quiet: true,
+                },
             });
         }
 
@@ -173,7 +163,7 @@ module.exports = Generator.extend({
             arguments: [this.project_name],
             options: {
                 'project-path': projectPath,
-                'path': buildPath,
+                path: buildPath,
                 'tmp-path': tmpPath,
                 'src-path': srcPath,
                 'dest-path': destPath,
@@ -181,61 +171,58 @@ module.exports = Generator.extend({
                 'scss-path': scssPath,
                 'css-path': cssPath,
                 'images-path': imagesPath,
-                'copy': true,
+                copy: true,
                 'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
                 'clean-dest': true,
                 'webpack-entry': {
-                    'main': './index',
-                    'config': './config',
-                    'vendor': [
-                        'lodash'
-                    ]
+                    main: './index',
+                    config: './config',
+                    vendor: [
+                        'lodash',
+                    ],
                 },
                 'browsersync-base-dir': [
                     tmpPath,
-                    srcPath
+                    srcPath,
                 ],
                 'browsersync-files': [
                     path.join(tmpPath, 'css/*.css'),
-                    path.join(srcPath, '*.html')
+                    path.join(srcPath, '*.html'),
                 ],
                 'skip-install': skipInstall,
-                'quiet': true
-            }
+                quiet: true,
+            },
         });
-    },
-
-    writing:
-    {
-        html: function()
-        {
-            var srcPath = _.get(this.options, 'src-path');
-            var jsPath = _.get(this.options, 'js-path', 'js').replace(/^\/?/, '/');
-            var cssPath = _.get(this.options, 'css-path', 'css').replace(/^\/?/, '/');
-
-            var indexSrcPath = this.templatePath('index.html');
-            var indexDestPath = this.destinationPath(path.join(srcPath, 'index.html'));
-            this.fs.copyTpl(indexSrcPath, indexDestPath, {
-                title: this.project_name,
-                jsPath: jsPath,
-                cssPath: cssPath
-            });
-        },
-
-        editorconfig: function()
-        {
-            var projectPath = _.get(this.options, 'path');
-            var srcPath = this.templatePath('editorconfig');
-            var destPath = this.destinationPath(path.join(projectPath, '.editorconfig'));
-            this.fs.copy(srcPath, destPath);
-        },
-
-        gitignore: function()
-        {
-            var srcPath = this.templatePath('gitignore');
-            var destPath = this.destinationPath('.gitignore');
-            this.fs.copy(srcPath, destPath);
-        }
     }
 
-});
+    get writing() {
+        return {
+            html() {
+                const srcPath = _.get(this.options, 'src-path');
+                const jsPath = _.get(this.options, 'js-path', 'js').replace(/^\/?/, '/');
+                const cssPath = _.get(this.options, 'css-path', 'css').replace(/^\/?/, '/');
+
+                const indexSrcPath = this.templatePath('index.html');
+                const indexDestPath = this.destinationPath(path.join(srcPath, 'index.html'));
+                this.fs.copyTpl(indexSrcPath, indexDestPath, {
+                    title: this.project_name,
+                    jsPath,
+                    cssPath,
+                });
+            },
+
+            editorconfig() {
+                const projectPath = _.get(this.options, 'path');
+                const srcPath = this.templatePath('editorconfig');
+                const destPath = this.destinationPath(path.join(projectPath, '.editorconfig'));
+                this.fs.copy(srcPath, destPath);
+            },
+
+            gitignore() {
+                const srcPath = this.templatePath('gitignore');
+                const destPath = this.destinationPath('.gitignore');
+                this.fs.copy(srcPath, destPath);
+            },
+        };
+    }
+};

@@ -7,9 +7,10 @@
   ],
   "main": "index.js",
   "scripts": {
+    "clean:lib": "rm -rf lib/*",
     "copy:templates": "find src/ -type d | grep -i templates$ | sed 's/src\\/\\///g' | xargs -I{} cp -r \"src/{}\" \"lib/{}\"",
     "compile": "babel -d lib/ src/",
-    "build": "npm run compile && npm run copy:templates",
+    "build": "npm run clean:lib && npm run compile && npm run copy:templates",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

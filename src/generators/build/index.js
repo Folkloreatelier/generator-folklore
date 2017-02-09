@@ -103,12 +103,12 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
-        this.option('webpack-config-build', {
+        this.option('webpack-config-prod', {
             type: Boolean,
             defaults: true,
         });
 
-        this.option('webpack-config-browsersync', {
+        this.option('webpack-config-dev', {
             type: Boolean,
             defaults: true,
         });
@@ -117,11 +117,15 @@ module.exports = class AppGenerator extends Generator {
             type: String,
         });
 
-        this.option('webpack-config-build-path', {
+        this.option('webpack-config-base-path', {
             type: String,
         });
 
-        this.option('webpack-config-browsersync-path', {
+        this.option('webpack-config-prod-path', {
+            type: String,
+        });
+
+        this.option('webpack-config-dev-path', {
             type: String,
         });
 
@@ -380,17 +384,21 @@ module.exports = class AppGenerator extends Generator {
                     configSrcPath = _.get(this.options, 'webpack-config-path') || this.templatePath('webpack.config.js');
                     configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
-                }
 
-                if (_.get(this.options, 'webpack-config-build')) {
-                    configSrcPath = _.get(this.options, 'webpack-config-build-path') || this.templatePath('webpack.config.build.js');
-                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.build.js'));
+                    configSrcPath = _.get(this.options, 'webpack-config-base-path') || this.templatePath('webpack.config.base.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.base.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
 
-                if (this.options.browsersync && _.get(this.options, 'webpack-config-browsersync')) {
-                    configSrcPath = _.get(this.options, 'webpack-config-browsersync-path') || this.templatePath('webpack.config.browsersync.js');
-                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.browsersync.js'));
+                if (_.get(this.options, 'webpack-config-prod')) {
+                    configSrcPath = _.get(this.options, 'webpack-config-prod-path') || this.templatePath('webpack.config.prod.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.prod.js'));
+                    this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+                }
+
+                if (this.options.browsersync && _.get(this.options, 'webpack-config-dev')) {
+                    configSrcPath = _.get(this.options, 'webpack-config-dev-path') || this.templatePath('webpack.config.dev.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dev.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
             },
@@ -510,7 +518,7 @@ module.exports = class AppGenerator extends Generator {
                     scripts['lint:dist'] = `eslint ${path.join(jsSrcPath, '/**.js')}`;
                     scripts.lint = 'npm run lint:dist';
                     scripts.jscs = `jscs ${path.join(jsSrcPath, '/**.js')}`;
-                    scripts['webpack:dist'] = `webpack --config ${webpackConfigFile}`;
+                    scripts['webpack:dist'] = `webpack --env=prod  --config ${webpackConfigFile} --progress --colors`;
                     scripts.webpack = 'npm run webpack:dist';
                     scripts['scripts:dist'] = 'npm run webpack:dist';
                     scripts.scripts = 'npm run scripts:dist';
@@ -584,6 +592,10 @@ module.exports = class AppGenerator extends Generator {
                     'svg-react-loader@latest',
                     'webpack@latest',
                     'webpack-dev-middleware@latest',
+                    'webpack-merge@latest',
+                    'imagemin-mozjpeg@latest',
+                    'imagemin-pngquant@latest',
+                    'pretty-bytes@latest',
                 ], {
                     saveDev: true,
                 });

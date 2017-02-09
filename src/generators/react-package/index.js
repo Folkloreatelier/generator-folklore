@@ -119,7 +119,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                 'build-path': buildPath,
                 'skip-install': skipInstall,
                 'webpack-config': false,
-                'webpack-config-browsersync': false,
+                'webpack-config-dev': false,
                 'browsersync-base-dir': [
                     tmpPath,
                     examplesPath,

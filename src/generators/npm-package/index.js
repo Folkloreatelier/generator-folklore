@@ -105,7 +105,7 @@ module.exports = class NpmPackageGenerator extends Generator {
         const buildPath = _.get(this.options, 'build-path');
         const skipInstall = _.get(this.options, 'skip-install', false);
         const webpackConfig = _.get(this.options, 'webpack-config', false);
-        const webpackConfigBrowsersync = _.get(this.options, 'webpack-config-browsersync', false);
+        const webpackConfigDev = _.get(this.options, 'webpack-config-dev', false);
         const browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir') || [
             tmpPath,
             srcPath,
@@ -129,7 +129,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                 'clean-dest': true,
                 modernizr: false,
                 'webpack-config': webpackConfig,
-                'webpack-config-browsersync': webpackConfigBrowsersync,
+                'webpack-config-dev': webpackConfigDev,
                 'browsersync-base-dir': browserSyncBaseDir,
                 'browsersync-files': browserSyncFiles,
                 'skip-install': skipInstall,

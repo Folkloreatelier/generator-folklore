@@ -6,7 +6,7 @@ module.exports = {
     browsersync: {
         server: {
             baseDir: <%- JSON.stringify(browserSyncBaseDir).replace(/\"/gi, '\'') %>,
-            index: 'index.html'
+            index: 'index.html',
         },
 
         <% if(browserSyncProxy) { %>
@@ -14,7 +14,7 @@ module.exports = {
         proxy: '<%= browserSyncProxy %>',
         <% } %>
 
-        files: <%- JSON.stringify(browserSyncFiles).replace(/\"/gi, '\'') %>
+        files: <%- JSON.stringify(browserSyncFiles).replace(/\"/gi, '\'') %>,
     },
 
     /**
@@ -29,19 +29,19 @@ module.exports = {
 
         watchOptions: {
             aggregateTimeout: 300,
-            poll: true
+            poll: true,
         },
 
         stats: {
-            colors: true
-        }
+            colors: true,
+        },
     },<% } %>
 
     imagemin: {
         files: [
-            '<%= imagesSrcPath %>'
+            '<%= imagesSrcPath %>',
         ],
-        output: '<%= imagesDestPath %>'
+        output: '<%= imagesDestPath %>',
     },
 
     /**
@@ -49,47 +49,47 @@ module.exports = {
      */
     postcss: {
         autoprefixer: {
-            browsers: '> 5%'
-        }
+            browsers: '> 5%',
+        },
     },
 
     /**
      * Modernizr
      */
     modernizr: {
-        'cache' : true,
+        cache: true,
 
-        'devFile' : false,
+        devFile: false,
 
-        'dest' : '<%= modernizrDestPath %>',
+        dest: '<%= modernizrDestPath %>',
 
-        'options' : [
+        options: [
             'setClasses',
             'addTest',
             'html5printshiv',
             'testProp',
-            'fnBind'
+            'fnBind',
         ],
 
-        'uglify' : false,
+        uglify: false,
 
-        'tests' : [],
+        tests: [],
 
-        'excludeTests': [],
+        excludeTests: [],
 
-        'crawl' : true,
+        crawl: true,
 
-        'useBuffers' : false,
+        useBuffers: false,
 
-        'files' : {
-            'src': [
+        files: {
+            src: [
                 '*[^(g|G)runt(file)?].{js,css,scss}',
                 '**[^node_modules]/**/*.{js,css,scss}',
-                '!lib/**/*'
-            ]
+                '!lib/**/*',
+            ],
         },
 
-        'customTests' : []
+        customTests: [],
     }
 
 };

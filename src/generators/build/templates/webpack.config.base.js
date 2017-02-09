@@ -20,13 +20,16 @@ module.exports = {
 
     plugins: [
         new webpack.optimize.CommonsChunkPlugin({
-            names: ['vendor', 'manifest'],
+            name: 'manifest',
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
             chunks: ['main'],
         }),
     ],
 
     module: {
-        rules: [
+        rules: [
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
@@ -56,14 +59,12 @@ module.exports = {
                     'style-loader!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]',
                     'sass-loader',
                 ],
-            },
-            <% if(entries.config) { %>
+            },<% if(entries.config) { %>
             {
                 test: require.resolve(path.join(contextPath, 'config')),
                 enforce: 'post',
-                loader: 'expose-loader?app_config'
-            },
-            <% } %>
+                loader: 'expose-loader?app_config',
+            },<% } %>
         ],
     },
 

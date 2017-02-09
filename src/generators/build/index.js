@@ -512,7 +512,7 @@ module.exports = class AppGenerator extends Generator {
                 }
 
                 if (_.get(this.options, 'js')) {
-                    const webpackConfigFile = path.join(buildPath, 'webpack.config.build.js');
+                    const webpackConfigFile = path.join(buildPath, 'webpack.config.prod.js');
                     const jsPath = _.get(this.options, 'js-path', 'js');
                     const jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                     scripts['lint:dist'] = `eslint ${path.join(jsSrcPath, '/**.js')}`;

@@ -31,6 +31,7 @@
 		<!-- Head Javascript -->
 		<script src="https://cdn.polyfill.io/v2/polyfill.min.js" type="text/javascript"></script>
 		<script src="{{ asset('js/modernizr.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/manifest.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/config.js') }}" type="text/javascript"></script>
 		@stack('scripts:head')
 		<script type="text/javascript">

@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import Generator from '../../lib/generator';
 
 module.exports = class AppGenerator extends Generator {
@@ -17,57 +18,71 @@ module.exports = class AppGenerator extends Generator {
         });
     }
 
-    prompting() {
-        const prompts = [];
-
-        if (!this.project_name) {
-            prompts.push(this.prompts.project_name);
-        }
-
-        if (!this.type) {
-            prompts.push({
-                type: 'list',
-                name: 'type',
-                message: 'What type of project?',
-                choices: [
-                    {
-                        name: 'HTML',
-                        value: 'html',
-                    },
-                    {
-                        name: 'Laravel',
-                        value: 'laravel',
-                    },
-                    {
-                        name: 'Javascript',
-                        value: 'js',
-                    },
-                    {
-                        name: 'NPM Package',
-                        value: 'npm-package',
-                    },
-                    {
-                        name: 'React Package',
-                        value: 'react-package',
-                    },
-                ],
-            });
-        }
-
-        if (!prompts.length) {
-            return null;
-        }
-
-        return this.prompt(prompts)
-            .then((answers) => {
-                if (answers.type) {
-                    this.type = answers.type;
+    get prompting() {
+        return {
+            welcome() {
+                if (this.options.quiet) {
+                    return;
                 }
 
-                if (answers.project_name) {
-                    this.project_name = answers.project_name;
+                console.log(chalk.yellow('\n----------------------'));
+                console.log('FOLKLORE Generator');
+                console.log(chalk.yellow('----------------------\n'));
+            },
+
+            prompts() {
+                const prompts = [];
+
+                if (!this.project_name) {
+                    prompts.push(Generator.prompts.project_name);
                 }
-            });
+
+                if (!this.type) {
+                    prompts.push({
+                        type: 'list',
+                        name: 'type',
+                        message: 'What type of project?',
+                        choices: [
+                            {
+                                name: 'HTML',
+                                value: 'html',
+                            },
+                            {
+                                name: 'Laravel',
+                                value: 'laravel',
+                            },
+                            {
+                                name: 'Javascript',
+                                value: 'js',
+                            },
+                            {
+                                name: 'NPM Package',
+                                value: 'npm-package',
+                            },
+                            {
+                                name: 'React Package',
+                                value: 'react-package',
+                            },
+                        ],
+                    });
+                }
+
+                if (!prompts.length) {
+                    return null;
+                }
+
+                return this.prompt(prompts)
+                    .then((answers) => {
+                        if (answers.type) {
+                            this.type = answers.type;
+                        }
+
+                        if (answers.project_name) {
+                            this.project_name = answers.project_name;
+                        }
+                    });
+            },
+        };
     }
 
     configuring() {

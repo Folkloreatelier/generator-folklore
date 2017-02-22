@@ -454,7 +454,7 @@ module.exports = class AppGenerator extends Generator {
 
                 if (_.get(this.options, 'browsersync')) {
                     const browserSyncPath = path.join(buildPath, 'browsersync.js');
-                    scripts.browsersync = `node ${browserSyncPath}`;
+                    scripts.browsersync = `node -r babel-register ${browserSyncPath}`;
                     scripts['server:prepare'] = 'echo "Preparing server..."';
                     scripts.server = 'npm run server:prepare && concurrently "npm run watch" "npm run browsersync"';
                     scripts.start = 'npm run server';
@@ -462,8 +462,8 @@ module.exports = class AppGenerator extends Generator {
 
                 if (_.get(this.options, 'modernizr')) {
                     const modernizrPath = path.join(buildPath, 'modernizr.js');
-                    scripts['modernizr:dist'] = `node ${modernizrPath} --prod`;
-                    scripts['modernizr:server'] = `node ${modernizrPath}`;
+                    scripts['modernizr:dist'] = `node -r babel-register ${modernizrPath} --prod`;
+                    scripts['modernizr:server'] = `node -r babel-register ${modernizrPath}`;
                     scripts.modernizr = 'npm run modernizr:dist';
                     scripts['build:modernizr'] = 'npm run modernizr:dist';
                     if (_.get(this.options, 'browsersync')) {
@@ -475,7 +475,7 @@ module.exports = class AppGenerator extends Generator {
                 }
 
                 if (_.get(this.options, 'images')) {
-                    scripts['imagemin:dist'] = 'node ./build/imagemin.js';
+                    scripts['imagemin:dist'] = 'node -r babel-register ./build/imagemin.js';
                     scripts.imagemin = 'npm run imagemin:dist';
                     scripts['build:images'] = 'npm run imagemin:dist';
                     scriptsBuild.push('npm run build:images');
@@ -512,13 +512,13 @@ module.exports = class AppGenerator extends Generator {
                 }
 
                 if (_.get(this.options, 'js')) {
-                    const webpackConfigFile = path.join(buildPath, 'webpack.config.prod.js');
+                    const webpackConfigFile = path.join(buildPath, 'webpack.config.js');
                     const jsPath = _.get(this.options, 'js-path', 'js');
                     const jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                     scripts['lint:dist'] = `eslint ${path.join(jsSrcPath, '/**.js')}`;
                     scripts.lint = 'npm run lint:dist';
                     scripts.jscs = `jscs ${path.join(jsSrcPath, '/**.js')}`;
-                    scripts['webpack:dist'] = `webpack --env=prod  --config ${webpackConfigFile} --progress --colors`;
+                    scripts['webpack:dist'] = `node -r babel-register ./node_modules/webpack/bin/webpack --env=dist  --config ${webpackConfigFile} --progress --colors`;
                     scripts.webpack = 'npm run webpack:dist';
                     scripts['scripts:dist'] = 'npm run webpack:dist';
                     scripts.scripts = 'npm run scripts:dist';
@@ -563,6 +563,7 @@ module.exports = class AppGenerator extends Generator {
                     'autoprefixer@latest',
                     'babel-core@latest',
                     'babel-loader@latest',
+                    'babel-register@latest',
                     'babel-plugin-transform-class-properties@latest',
                     'babel-preset-es2015@latest',
                     'babel-preset-react@latest',

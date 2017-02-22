@@ -1,14 +1,15 @@
 #!/usr/bin/env node
-const program = require('commander');
-const modernizr = require('customizr');
-const settings = require('./config').modernizr;
+import program from 'commander';
+import modernizr from 'customizr';
+import config from './config';
 
+const settings = config.modernizr;
 program
     .option('-p, --prod', 'Production build')
     .parse(process.argv);
 
 if (program.prod) {
-    settings.dest = '<%= destPath %>';
+    settings.dest = 'dist/js/modernizr.js';
     settings.uglify = true;
     settings.cache = false;
 }

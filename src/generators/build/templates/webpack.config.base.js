@@ -1,11 +1,11 @@
-const webpack = require('webpack');
-const path = require('path');
+import webpack from 'webpack';
+import path from 'path';
 
 const contextPath = path.join(process.env.PWD, '<%= srcPath %>');
 const outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
 const publicPath = '<%= publicPath %>';
 
-module.exports = {
+module.exports = env => ({
 
     context: contextPath,
 
@@ -95,4 +95,4 @@ module.exports = {
     cache: true,
     watch: false,
 
-};
+});

@@ -90,6 +90,6 @@ module.exports = {
         },
 
         customTests: [],
-    }
+    },
 
 };

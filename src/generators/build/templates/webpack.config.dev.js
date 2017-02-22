@@ -1,9 +1,9 @@
-const webpackMerge = require('webpack-merge');
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.config.base');
+import webpackMerge from 'webpack-merge';
+import webpack from 'webpack';
+import webpackConfig from './webpack.config.base';
 
-module.exports = () => (
-    webpackMerge(webpackConfig, {
+export default env => (
+    webpackMerge(webpackConfig(env), {
 
         plugins: [
             new webpack.DefinePlugin({

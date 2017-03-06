@@ -2,7 +2,7 @@ import webpackMerge from 'webpack-merge';
 import webpack from 'webpack';
 import webpackConfig from './webpack.config.base';
 
-export default env => (
+module.exports = env => (
     webpackMerge(webpackConfig(env), {
 
         plugins: [

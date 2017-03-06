@@ -1,6 +1,6 @@
-const path = require('path');
+import path from 'path';
 
-export default (env) => {
-    const configPath = path.join(__dirname, `./webpack.config.${env}.js`);
-    return require(configPath)(env);
+module.exports = (env) => {
+    const createConfig = require(path.join(__dirname, `./webpack.config.${env}`));
+    return createConfig(env);
 };

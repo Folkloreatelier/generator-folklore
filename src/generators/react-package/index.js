@@ -169,8 +169,6 @@ module.exports = class ReactPackageGenerator extends Generator {
                 const srcPath = _.get(this.options, 'src-path');
                 const tmpPath = _.get(this.options, 'tmp-path');
                 const examplesPath = _.get(this.options, 'examples-path');
-                const jsTmpPath = path.join(tmpPath, 'js');
-                const jsExamplesPath = path.join(examplesPath, 'js');
 
                 // Main
                 const configBaseSrcPath = this.templatePath('webpack.config.base.js');
@@ -185,8 +183,8 @@ module.exports = class ReactPackageGenerator extends Generator {
                 const configDevSrcPath = this.templatePath('webpack.config.dev.js');
                 const configDevDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dev.js'));
                 this.fs.copyTpl(configDevSrcPath, configDevDestPath, {
-                    srcPath: jsExamplesPath,
-                    tmpPath: jsTmpPath,
+                    srcPath: examplesPath,
+                    tmpPath,
                 });
             },
 
@@ -221,6 +219,8 @@ module.exports = class ReactPackageGenerator extends Generator {
                     'enzyme@latest',
                     'react-test-renderer@latest',
                     '@kadira/storybook@latest',
+                    'extract-text-webpack-plugin@latest',
+                    'html-webpack-plugin@latest',
                 ], {
                     saveDev: true,
                 });

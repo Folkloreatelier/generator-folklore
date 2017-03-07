@@ -103,7 +103,7 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
-        this.option('webpack-config-prod', {
+        this.option('webpack-config-dist', {
             type: Boolean,
             defaults: true,
         });
@@ -126,7 +126,7 @@ module.exports = class AppGenerator extends Generator {
             type: String,
         });
 
-        this.option('webpack-config-prod-path', {
+        this.option('webpack-config-dist-path', {
             type: String,
         });
 
@@ -397,9 +397,9 @@ module.exports = class AppGenerator extends Generator {
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
 
-                if (_.get(this.options, 'webpack-config-prod')) {
-                    configSrcPath = _.get(this.options, 'webpack-config-prod-path') || this.templatePath('webpack.config.prod.js');
-                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.prod.js'));
+                if (_.get(this.options, 'webpack-config-dist')) {
+                    configSrcPath = _.get(this.options, 'webpack-config-dist-path') || this.templatePath('webpack.config.dist.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dist.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
 
@@ -469,7 +469,7 @@ module.exports = class AppGenerator extends Generator {
 
                 if (_.get(this.options, 'modernizr')) {
                     const modernizrPath = path.join(buildPath, 'modernizr.js');
-                    scripts['modernizr:dist'] = `node -r babel-register ${modernizrPath} --prod`;
+                    scripts['modernizr:dist'] = `node -r babel-register ${modernizrPath} --dist`;
                     scripts['modernizr:server'] = `node -r babel-register ${modernizrPath}`;
                     scripts.modernizr = 'npm run modernizr:dist';
                     scripts['build:modernizr'] = 'npm run modernizr:dist';

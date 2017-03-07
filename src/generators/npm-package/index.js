@@ -126,6 +126,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                 scss: false,
                 images: false,
                 copy: false,
+                watch: false,
                 'clean-dest': true,
                 modernizr: false,
                 'webpack-config-base': webpackConfigBase,

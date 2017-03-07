@@ -463,7 +463,11 @@ module.exports = class AppGenerator extends Generator {
                     const browserSyncPath = path.join(buildPath, 'browsersync.js');
                     scripts.browsersync = `node -r babel-register ${browserSyncPath}`;
                     scripts['server:prepare'] = 'echo "Preparing server..."';
-                    scripts.server = 'npm run server:prepare && concurrently "npm run watch" "npm run browsersync"';
+                    if (_.get(this.options, 'watch')) {
+                        scripts.server = 'npm run server:prepare && concurrently "npm run watch" "npm run browsersync"';
+                    } else {
+                        scripts.server = 'npm run server:prepare && npm run browsersync';
+                    }
                     scripts.start = 'npm run server';
                 }
 

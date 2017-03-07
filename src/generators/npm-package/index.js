@@ -13,6 +13,12 @@ module.exports = class NpmPackageGenerator extends Generator {
             required: false,
         });
 
+        this.option('src', {
+            type: Boolean,
+            desc: 'Includes src path',
+            defaults: true,
+        });
+
         this.option('src-path', {
             type: String,
             desc: 'Path for source',
@@ -142,6 +148,9 @@ module.exports = class NpmPackageGenerator extends Generator {
     get writing() {
         return {
             src() {
+                if (!this.options.src) {
+                    return;
+                }
                 const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath('src');
                 this.directory(srcPath, destPath);

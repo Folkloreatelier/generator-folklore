@@ -113,6 +113,7 @@ module.exports = class ReactPackageGenerator extends Generator {
         this.composeWith('folklore:npm-package', {
             arguments: [this.package_name],
             options: {
+                src: false,
                 'src-path': srcPath,
                 'dest-path': destPath,
                 'tmp-path': tmpPath,
@@ -141,16 +142,6 @@ module.exports = class ReactPackageGenerator extends Generator {
             },
 
             src() {
-                const indexPath = this.destinationPath('src/index.js');
-                if (this.fs.exists(indexPath)) {
-                    this.fs.delete(indexPath);
-                }
-
-                const indexTestPath = this.destinationPath('src/__tests__/index-test.js');
-                if (this.fs.exists(indexTestPath)) {
-                    this.fs.delete(indexTestPath);
-                }
-
                 const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath('src');
                 this.fs.copyTpl(srcPath, destPath, {

@@ -56,7 +56,8 @@ module.exports = env => ({
             {
                 test: /\.scss$/,
                 use: [
-                    'style-loader!css?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]',
+                    'style-loader'
+                    'css-loader?modules&importLoaders=1&sourceMap&localIdentName=[local]___[hash:base64:5]',
                     'sass-loader',
                 ],
             },<% if(entries.config) { %>

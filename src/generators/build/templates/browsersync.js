@@ -88,8 +88,9 @@ if (browserSyncOptions.proxy) {
                     return serveStaticMiddlewares[key](req, res, next);
                 }
             } catch (e) {
-                console.error(e;)
+                console.error(e);
             }
+            return null;
         });
 
         return next();

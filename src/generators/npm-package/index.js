@@ -47,15 +47,15 @@ module.exports = class NpmPackageGenerator extends Generator {
             desc: 'BrowserSync files to watch',
         });
 
-        this.option('webpack-config', {
+        this.option('webpack-config-base', {
             type: Boolean,
-            desc: 'Add a webpack config file',
+            desc: 'Add a base webpack config file',
             defaults: true,
         });
 
-        this.option('webpack-config-browsersync', {
+        this.option('webpack-config-dev', {
             type: Boolean,
-            desc: 'Add a webpack config file for browsersync',
+            desc: 'Add a dev webpack config file',
             defaults: true,
         });
     }
@@ -104,7 +104,7 @@ module.exports = class NpmPackageGenerator extends Generator {
         const tmpPath = _.get(this.options, 'tmp-path');
         const buildPath = _.get(this.options, 'build-path');
         const skipInstall = _.get(this.options, 'skip-install', false);
-        const webpackConfig = _.get(this.options, 'webpack-config', false);
+        const webpackConfigBase = _.get(this.options, 'webpack-config-base', false);
         const webpackConfigDev = _.get(this.options, 'webpack-config-dev', false);
         const browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir') || [
             tmpPath,
@@ -128,7 +128,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                 copy: false,
                 'clean-dest': true,
                 modernizr: false,
-                'webpack-config': webpackConfig,
+                'webpack-config-base': webpackConfigBase,
                 'webpack-config-dev': webpackConfigDev,
                 'browsersync-base-dir': browserSyncBaseDir,
                 'browsersync-files': browserSyncFiles,

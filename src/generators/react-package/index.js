@@ -118,7 +118,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                 'tmp-path': tmpPath,
                 'build-path': buildPath,
                 'skip-install': skipInstall,
-                'webpack-config': false,
+                'webpack-config-base': false,
                 'webpack-config-dev': false,
                 'browsersync-base-dir': [
                     tmpPath,
@@ -173,18 +173,18 @@ module.exports = class ReactPackageGenerator extends Generator {
                 const jsExamplesPath = path.join(examplesPath, 'js');
 
                 // Main
-                const configSrcPath = this.templatePath('webpack.config.js');
-                const configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
-                this.fs.copyTpl(configSrcPath, configDestPath, {
+                const configBaseSrcPath = this.templatePath('webpack.config.base.js');
+                const configBaseDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.base.js'));
+                this.fs.copyTpl(configBaseSrcPath, configBaseDestPath, {
                     srcPath,
                     tmpPath,
                     componentName: this.component_name,
                 });
 
                 // Browser sync
-                const configBrowsersyncSrcPath = this.templatePath('webpack.config.browsersync.js');
-                const configBrowsersyncDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.browsersync.js'));
-                this.fs.copyTpl(configBrowsersyncSrcPath, configBrowsersyncDestPath, {
+                const configDevSrcPath = this.templatePath('webpack.config.dev.js');
+                const configDevDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dev.js'));
+                this.fs.copyTpl(configDevSrcPath, configDevDestPath, {
                     srcPath: jsExamplesPath,
                     tmpPath: jsTmpPath,
                 });

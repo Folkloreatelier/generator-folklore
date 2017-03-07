@@ -108,6 +108,11 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
+        this.option('webpack-config-base', {
+            type: Boolean,
+            defaults: true,
+        });
+
         this.option('webpack-config-dev', {
             type: Boolean,
             defaults: true,
@@ -384,7 +389,9 @@ module.exports = class AppGenerator extends Generator {
                     configSrcPath = _.get(this.options, 'webpack-config-path') || this.templatePath('webpack.config.js');
                     configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+                }
 
+                if (_.get(this.options, 'webpack-config-base')) {
                     configSrcPath = _.get(this.options, 'webpack-config-base-path') || this.templatePath('webpack.config.base.js');
                     configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.base.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);

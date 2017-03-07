@@ -3,15 +3,15 @@
     <head>
         <title>Example</title>
 
-        <% for(var i = 0, fl = htmlWebpackPlugin.files.css.length; i < fl; i += 1) { %>
-        <link rel="stylesheet" type="text/css" href="<%= htmlWebpackPlugin.files.css[i] %>" />
-        <% } %>
+        <%% for(var i = 0, fl = htmlWebpackPlugin.files.css.length; i < fl; i += 1) { %>
+        <link rel="stylesheet" type="text/css" href="<%%= htmlWebpackPlugin.files.css[i] %>" />
+        <%% } %>
     </head>
     <body>
         <div id="app"></div>
 
-        <% for(i = 0, fl = htmlWebpackPlugin.files.js.length; i < fl; i += 1) { %>
-        <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
-        <% } %>
+        <%% for(i = 0, fl = htmlWebpackPlugin.files.js.length; i < fl; i += 1) { %>
+        <script type="text/javascript" src="<%%= htmlWebpackPlugin.files.js[i] %>"></script>
+        <%% } %>
     </body>
 </html>

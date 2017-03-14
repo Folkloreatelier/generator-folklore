@@ -49,6 +49,11 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
+        this.option('release', {
+            type: Boolean,
+            defaults: true,
+        });
+
         this.option('modernizr', {
             type: Boolean,
             defaults: true,
@@ -343,6 +348,19 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
+            release() {
+                if (!_.get(this.options, 'release', false)) {
+                    return;
+                }
+
+                const templateData = {};
+
+                const buildPath = _.get(this.options, 'path');
+                const srcPath = this.templatePath('release.sh');
+                const destPath = this.destinationPath(path.join(buildPath, 'release.sh'));
+                this.fs.copyTpl(srcPath, destPath, templateData);
+            },
+
             webpack() {
                 if (!_.get(this.options, 'js', false)) {
                     return;
@@ -457,6 +475,10 @@ module.exports = class AppGenerator extends Generator {
                     scripts['copy:dist'] = copyScripts.join(' && ');
                     scripts.copy = 'npm run copy:dist';
                     scriptsBuildFiles.push('npm run copy');
+                }
+
+                if (_.get(this.options, 'release')) {
+                    scripts.release = path.join(buildPath, 'release.sh');
                 }
 
                 if (_.get(this.options, 'browsersync')) {

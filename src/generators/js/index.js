@@ -240,6 +240,7 @@ module.exports = class JsGenerator extends Generator {
                     'eslint-plugin-import@latest',
                     'eslint-plugin-jsx-a11y@latest',
                     'eslint-plugin-react@latest',
+                    'html-webpack-plugin@latest',
                 ], {
                     saveDev: true,
                 });

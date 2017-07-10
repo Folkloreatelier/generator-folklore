@@ -8,7 +8,7 @@ program
     .option('-d, --dist', 'Production build')
     .parse(process.argv);
 
-if (program.prod) {
+if (program.dist) {
     settings.dest = 'dist/js/modernizr.js';
     settings.uglify = true;
     settings.cache = false;

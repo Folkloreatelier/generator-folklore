@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-import program from 'commander';
-import modernizr from 'customizr';
-import config from './config';
+/* eslint-disable import/no-extraneous-dependencies */
+const program = require('commander');
+const modernizr = require('customizr');
+const config = require('./config');
+/* eslint-enable import/no-extraneous-dependencies */
 
 const settings = config.modernizr;
 program
@@ -9,7 +11,7 @@ program
     .parse(process.argv);
 
 if (program.dist) {
-    settings.dest = 'dist/js/modernizr.js';
+    settings.dest = 'public/js/modernizr.js';
     settings.uglify = true;
     settings.cache = false;
 }

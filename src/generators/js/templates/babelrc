@@ -1,19 +1,56 @@
 {
-    "presets": [
-        {
+    "env": {<%
+    if(hotReloading) { %>
+        "dev": {
             "plugins": [
-                "transform-class-properties"<% if(react_features.indexOf('relay') !== -1) { %>,
-                [
-                    "transform-relay-hot",
-                    {
-                        "schemaJsonFilepath": "./graphql/schema.json",
-                        "watchInterval": 2000
-                    }
-                ]<% } %>
+                "react-hot-loader/babel"
             ]
-        },
-        "es2015",
-        "react",
-        "stage-0"
+        },<% } %><% if(compile) { %>
+        "compile": {
+            "plugins": [
+                ["css-modules-transform", {
+                    "preprocessCss": "./build/process-scss.js",
+                    "extensions": [".css", ".scss"],
+                    "generateScopedName": "[name]_[local]"
+                }]
+            ]
+        },<% } %>
+        "test": {
+            "presets": [
+                "env",
+                "react"
+            ],
+            "plugins": [
+                "dynamic-import-node"
+            ]
+        }
+    },
+    "presets": [
+        ["env", {
+            "modules": false,
+            "targets": {
+                "browsers": [
+                    "> 1%",
+                    "last 2 versions",
+                    "ios >= 7",
+                    "ie >= 9"
+                ]
+            },
+            "useBuiltIns": true
+        }],
+        "react"
+    ],
+    "plugins": [
+        "syntax-dynamic-import",
+        ["transform-object-rest-spread", {
+            "useBuiltIns": true
+        }]<%
+        if(excludeRuntime) { %>,
+        ["transform-runtime", {
+            "helpers": true,
+            "polyfill": false,
+            "regenerator": true,
+            "moduleName": "babel-runtime"
+        }]<% } %>
     ]
 }

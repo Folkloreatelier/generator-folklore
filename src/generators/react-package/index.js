@@ -9,12 +9,12 @@ module.exports = class ReactPackageGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('package_name', {
+        this.argument('package-name', {
             type: String,
             required: false,
         });
 
-        this.argument('component_name', {
+        this.argument('component-name', {
             type: String,
             required: false,
         });
@@ -65,21 +65,21 @@ module.exports = class ReactPackageGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.package_name) {
+                if (!this.options['package-name']) {
                     prompts.push({
                         type: 'input',
-                        name: 'package_name',
+                        name: 'package-name',
                         message: 'Name of the package:',
                     });
                 }
 
-                if (!this.component_name) {
+                if (!this.options['component-name']) {
                     prompts.push({
                         type: 'input',
-                        name: 'component_name',
+                        name: 'component-name',
                         message: 'Name of the component:',
                         default: (answers) => {
-                            const packageName = (this.package_name || answers.package_name);
+                            const packageName = (this.options['package-name'] || answers['package-name']);
                             return packageName ? pascal(packageName) : undefined;
                         },
                     });
@@ -91,11 +91,11 @@ module.exports = class ReactPackageGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.package_name) {
-                            this.package_name = answers.package_name;
+                        if (answers['package-name']) {
+                            this.options['package-name'] = answers['package-name'];
                         }
-                        if (answers.component_name) {
-                            this.component_name = answers.component_name;
+                        if (answers['component-name']) {
+                            this.options['component-name'] = answers['component-name'];
                         }
                     });
             },
@@ -111,25 +111,23 @@ module.exports = class ReactPackageGenerator extends Generator {
         const skipInstall = _.get(this.options, 'skip-install', false);
 
         this.composeWith('folklore:npm-package', {
-            arguments: [this.package_name],
-            options: {
-                src: false,
-                'src-path': srcPath,
-                'dest-path': destPath,
-                'tmp-path': tmpPath,
-                'build-path': buildPath,
-                'skip-install': skipInstall,
-                'webpack-config-base': false,
-                'webpack-config-dev': false,
-                'browsersync-base-dir': [
-                    tmpPath,
-                    examplesPath,
-                ],
-                'browsersync-files': [
-                    path.join(examplesPath, '**'),
-                ],
-                quiet: true,
-            },
+            package_name: this.options['package-name'],
+            src: false,
+            'src-path': srcPath,
+            'dest-path': destPath,
+            'tmp-path': tmpPath,
+            'build-path': buildPath,
+            'skip-install': skipInstall,
+            'webpack-config-base': false,
+            'webpack-config-dev': false,
+            'browsersync-base-dir': [
+                tmpPath,
+                examplesPath,
+            ],
+            'browsersync-files': [
+                path.join(examplesPath, '**'),
+            ],
+            quiet: true,
         });
     }
 
@@ -138,14 +136,14 @@ module.exports = class ReactPackageGenerator extends Generator {
             examples() {
                 const srcPath = this.templatePath('examples');
                 const destPath = this.destinationPath('examples');
-                this.directory(srcPath, destPath);
+                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
             },
 
             src() {
                 const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath('src');
                 this.fs.copyTpl(srcPath, destPath, {
-                    componentName: this.component_name,
+                    componentName: this.options['component-name'],
                 });
             },
 
@@ -167,7 +165,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                 this.fs.copyTpl(configBaseSrcPath, configBaseDestPath, {
                     srcPath,
                     tmpPath,
-                    componentName: this.component_name,
+                    componentName: this.options['component-name'],
                 });
 
                 // Browser sync
@@ -197,14 +195,12 @@ module.exports = class ReactPackageGenerator extends Generator {
                     return;
                 }
 
-                this.npmInstall([
+                this.yarnInstall([
                     'react@latest',
                     'react-dom@latest',
-                ], {
-                    save: true,
-                });
+                ]);
 
-                this.npmInstall([
+                this.yarnInstall([
                     'domready@latest',
                     'jquery@latest',
                     'enzyme@latest',
@@ -213,7 +209,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                     'extract-text-webpack-plugin@latest',
                     'html-webpack-plugin@latest',
                 ], {
-                    saveDev: true,
+                    dev: true,
                 });
             },
         };

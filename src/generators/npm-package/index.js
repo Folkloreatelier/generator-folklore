@@ -8,7 +8,7 @@ module.exports = class NpmPackageGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('package_name', {
+        this.argument('package-name', {
             type: String,
             required: false,
         });
@@ -81,10 +81,10 @@ module.exports = class NpmPackageGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.package_name) {
+                if (!this.options['package-name']) {
                     prompts.push({
                         type: 'input',
-                        name: 'package_name',
+                        name: 'package-name',
                         message: 'Name of the package:',
                     });
                 }
@@ -95,8 +95,8 @@ module.exports = class NpmPackageGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.package_name) {
-                            this.package_name = answers.package_name;
+                        if (answers['package-name']) {
+                            this.options['package-name'] = answers['package-name'];
                         }
                     });
             },
@@ -121,27 +121,25 @@ module.exports = class NpmPackageGenerator extends Generator {
         ];
 
         this.composeWith('folklore:build', {
-            arguments: [this.package_name],
-            options: {
-                'project-path': projectPath,
-                path: buildPath,
-                'tmp-path': tmpPath,
-                'src-path': srcPath,
-                'dest-path': destPath,
-                'js-path': './',
-                scss: false,
-                images: false,
-                copy: false,
-                watch: false,
-                'clean-dest': true,
-                modernizr: false,
-                'webpack-config-base': webpackConfigBase,
-                'webpack-config-dev': webpackConfigDev,
-                'browsersync-base-dir': browserSyncBaseDir,
-                'browsersync-files': browserSyncFiles,
-                'skip-install': skipInstall,
-                quiet: true,
-            },
+            package_name: this.options['package-name'],
+            'project-path': projectPath,
+            path: buildPath,
+            'tmp-path': tmpPath,
+            'src-path': srcPath,
+            'dest-path': destPath,
+            'js-path': './',
+            scss: false,
+            images: false,
+            copy: false,
+            watch: false,
+            'clean-dest': true,
+            modernizr: false,
+            'webpack-config-base': webpackConfigBase,
+            'webpack-config-dev': webpackConfigDev,
+            'browsersync-base-dir': browserSyncBaseDir,
+            'browsersync-files': browserSyncFiles,
+            'skip-install': skipInstall,
+            quiet: true,
         });
     }
 
@@ -153,7 +151,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                 }
                 const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath('src');
-                this.directory(srcPath, destPath);
+                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
             },
 
             gitignore() {
@@ -184,7 +182,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                 const srcPath = this.templatePath('_package.json');
                 const destPath = this.destinationPath('package.json');
                 const packageJSON = this.fs.readJSON(srcPath);
-                packageJSON.name = this.package_name;
+                packageJSON.name = this.options['package-name'];
                 const currentPackageJSON = this.fs.exists(destPath) ?
                     this.fs.readJSON(destPath) : {};
                 this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
@@ -201,7 +199,7 @@ module.exports = class NpmPackageGenerator extends Generator {
     get install() {
         return {
             npm() {
-                this.npmInstall([
+                this.yarnInstall([
                     'babel-eslint@latest',
                     'eslint@latest',
                     'eslint-config-airbnb@latest',
@@ -210,7 +208,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                     'eslint-plugin-react@latest',
                     'jest@latest',
                 ], {
-                    saveDev: true,
+                    dev: true,
                 });
             },
         };

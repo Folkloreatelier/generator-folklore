@@ -1,16 +1,20 @@
-import BrowserSync from 'browser-sync';
-import webpack from 'webpack';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import proxyMiddleware from 'proxy-middleware';
-import servestaticMiddleware from 'serve-static';
-import stripAnsi from 'strip-ansi';
-import url from 'url';
-import path from 'path';
-import fs from 'fs';
-import _ from 'lodash';
+/* eslint-disable import/no-extraneous-dependencies */
+const BrowserSync = require('browser-sync');
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');<%
+if(options['webpack-hot-reload']) { %>
+const webpackHotMiddleware = require('webpack-hot-middleware');<% } %>
+const proxyMiddleware = require('proxy-middleware');
+const servestaticMiddleware = require('serve-static');
+const stripAnsi = require('strip-ansi');
+const url = require('url');
+const path = require('path');
+const fs = require('fs');
+const _ = require('lodash');
+/* eslint-enable import/no-extraneous-dependencies */
 
-import config from './config';
-import createWebpackConfig from './webpack.config';
+const config = require('./config');
+const createWebpackConfig = require('./webpack.config');
 
 const webpackConfig = createWebpackConfig('dev');
 const browserSyncConfig = _.get(config, 'browsersync', {});
@@ -58,7 +62,9 @@ const webpackMiddlewareOptions = _.merge({
  * Webpack middleware
  */
 const webpackMiddleware = webpackDevMiddleware(bundler, webpackMiddlewareOptions);
-browserSyncOptions.middleware.push(webpackMiddleware);
+browserSyncOptions.middleware.push(webpackMiddleware);<% if(options['webpack-hot-reload']) { %>
+browserSyncOptions.middleware.push(webpackHotMiddleware(bundler));
+<% } %>
 
 /**
  * Proxy

@@ -9,7 +9,7 @@ module.exports = class AppGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
@@ -106,6 +106,16 @@ module.exports = class AppGenerator extends Generator {
         this.option('webpack-config', {
             type: Boolean,
             defaults: true,
+        });
+
+        this.option('webpack-hot-reload', {
+            type: Boolean,
+            defaults: false,
+        });
+
+        this.option('webpack-html', {
+            type: Boolean,
+            defaults: false,
         });
 
         this.option('webpack-config-dist', {
@@ -228,7 +238,7 @@ module.exports = class AppGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(this.prompts.project_name);
                 }
 
@@ -238,8 +248,8 @@ module.exports = class AppGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
                     });
             },
@@ -295,7 +305,9 @@ module.exports = class AppGenerator extends Generator {
                     return;
                 }
 
-                const templateData = {};
+                const templateData = {
+                    options: this.options,
+                };
 
                 const buildPath = _.get(this.options, 'path');
                 const srcPath = this.templatePath('browsersync.js');
@@ -322,7 +334,7 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(modernizrSrcPath, modernizrDestPath, templateData);
             },
 
-            postcss() {
+            postcssConfig() {
                 if (!_.get(this.options, 'scss', false)) {
                     return;
                 }
@@ -330,8 +342,8 @@ module.exports = class AppGenerator extends Generator {
                 const templateData = {};
 
                 const buildPath = _.get(this.options, 'path');
-                const srcPath = this.templatePath('postcss.js');
-                const destPath = this.destinationPath(path.join(buildPath, 'postcss.js'));
+                const srcPath = this.templatePath('postcss.config.js');
+                const destPath = this.destinationPath(path.join(buildPath, 'postcss.config.js'));
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
@@ -391,8 +403,28 @@ module.exports = class AppGenerator extends Generator {
                         main: './index',
                     };
                 }
+                if (this.options['webpack-hot-reload']) {
+                    const hotReloadEntries = [
+                        'babel-polyfill',
+                        'react-hot-loader/patch',
+                        'webpack/hot/dev-server',
+                        'webpack-hot-middleware/client?reload=true',
+                    ];
+                    if (typeof entries.main !== 'undefined') {
+                        entries.main = [
+                            ...hotReloadEntries,
+                            ...(!_.isArray(entries.main) ? [entries.main] : entries.main),
+                        ];
+                    } else if (_.isString(entries) || _.isArray(entries)) {
+                        entries = [
+                            ...hotReloadEntries,
+                            ...(!_.isArray(entries) ? [entries] : entries),
+                        ];
+                    }
+                }
 
                 const templateData = {
+                    options: this.options,
                     srcPath: jsSrcPath,
                     tmpPath: jsTmpPath,
                     destPath: jsDestPath,
@@ -592,15 +624,18 @@ module.exports = class AppGenerator extends Generator {
                     return;
                 }
 
-                this.npmInstall([
+                this.yarnInstall([
                     'autoprefixer@latest',
                     'babel-core@latest',
                     'babel-loader@latest',
                     'babel-register@latest',
+                    'babel-plugin-dynamic-import-node@latest',
+                    'babel-plugin-syntax-dynamic-import@latest',
+                    'babel-plugin-transform-es2015-spread@latest',
+                    'babel-plugin-transform-object-rest-spread@latest',
                     'babel-plugin-transform-class-properties@latest',
-                    'babel-preset-es2015@latest',
+                    'babel-preset-env@latest',
                     'babel-preset-react@latest',
-                    'babel-preset-stage-0@latest',
                     'brfs@latest',
                     'browser-sync@latest',
                     'bs-fullscreen-message@latest',
@@ -610,12 +645,17 @@ module.exports = class AppGenerator extends Generator {
                     'cssnano@latest',
                     'customizr@latest',
                     'expose-loader@latest',
+                    'extract-text-webpack-plugin@latest',
                     'html-loader@latest',
                     'imagemin-cli@latest',
+                    'imagemin-mozjpeg@latest',
+                    'imagemin-pngquant@latest',
                     'imports-loader@latest',
                     'json-loader@latest',
                     'node-sass@latest',
                     'postcss-cli@latest',
+                    'postcss-loader@latest',
+                    'pretty-bytes@latest',
                     'proxy-middleware@latest',
                     'raw-loader@latest',
                     'transform-loader@latest',
@@ -627,12 +667,26 @@ module.exports = class AppGenerator extends Generator {
                     'webpack@latest',
                     'webpack-dev-middleware@latest',
                     'webpack-merge@latest',
-                    'imagemin-mozjpeg@latest',
-                    'imagemin-pngquant@latest',
-                    'pretty-bytes@latest',
                 ], {
-                    saveDev: true,
+                    dev: true,
                 });
+
+                if (this.options['webpack-html']) {
+                    this.yarnInstall([
+                        'autoprefixer@latest',
+                    ], {
+                        dev: true,
+                    });
+                }
+
+                if (this.options['webpack-hot-reload']) {
+                    this.yarnInstall([
+                        'webpack-hot-middleware@latest',
+                        'react-hot-loader@^3.0.0-beta.7',
+                    ], {
+                        dev: true,
+                    });
+                }
             },
 
             sass() {

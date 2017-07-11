@@ -9,7 +9,7 @@ module.exports = class HTMLGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
@@ -95,7 +95,7 @@ module.exports = class HTMLGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(Generator.prompts.project_name);
                 }
 
@@ -105,8 +105,8 @@ module.exports = class HTMLGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
                     });
             },
@@ -114,6 +114,7 @@ module.exports = class HTMLGenerator extends Generator {
     }
 
     configuring() {
+        const projectName = _.get(this.options, 'project-name');
         const projectPath = this.destinationPath();
         const srcPath = _.get(this.options, 'src-path');
         const destPath = _.get(this.options, 'dest-path');
@@ -128,84 +129,80 @@ module.exports = class HTMLGenerator extends Generator {
         const skipInstall = _.get(this.options, 'skip-install', false);
 
         this.composeWith('folklore:js', {
-            arguments: [this.project_name],
-            options: {
-                'project-path': projectPath,
-                path: jsSrcPath,
-                'skip-install': skipInstall,
-                quiet: true,
-            },
+            'project-name': projectName,
+            'project-path': projectPath,
+            'react-hot-reload': true,
+            path: jsSrcPath,
+            'skip-install': skipInstall,
+            quiet: true,
         });
 
         this.composeWith('folklore:scss', {
-            arguments: [this.project_name],
-            options: {
-                'project-path': projectPath,
-                path: scssSrcPath,
-                'skip-install': skipInstall,
-                quiet: true,
-            },
+            'project-name': projectName,
+            'project-path': projectPath,
+            path: scssSrcPath,
+            'skip-install': skipInstall,
+            quiet: true,
         });
 
         if (this.options.server) {
             this.composeWith('folklore:server', {
-                arguments: [this.project_name],
-                options: {
-                    'project-path': projectPath,
-                    path: _.get(this.options, 'server-path') || `${projectPath}/server`,
-                    'skip-install': skipInstall,
-                    quiet: true,
-                },
+                'project-name': projectName,
+                'project-path': projectPath,
+                path: _.get(this.options, 'server-path') || `${projectPath}/server`,
+                'skip-install': skipInstall,
+                quiet: true,
             });
         }
 
         this.composeWith('folklore:build', {
-            arguments: [this.project_name],
-            options: {
-                'project-path': projectPath,
-                path: buildPath,
-                'tmp-path': tmpPath,
-                'src-path': srcPath,
-                'dest-path': destPath,
-                'js-path': jsPath,
-                'scss-path': scssPath,
-                'css-path': cssPath,
-                'images-path': imagesPath,
-                copy: true,
-                'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
-                'clean-dest': true,
-                'webpack-entry': {
-                    main: './index',
-                    config: './config',
-                    vendor: [
-                        'lodash',
-                    ],
-                },
-                'browsersync-base-dir': [
-                    tmpPath,
-                    srcPath,
+            'project-name': projectName,
+            'project-path': projectPath,
+            path: buildPath,
+            'tmp-path': tmpPath,
+            'src-path': srcPath,
+            'dest-path': destPath,
+            'js-path': jsPath,
+            'scss-path': scssPath,
+            'css-path': cssPath,
+            'images-path': imagesPath,
+            copy: true,
+            'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
+            'clean-dest': true,
+            'webpack-entry': {
+                main: './index',
+                config: './config',
+                vendor: [
+                    'lodash',
                 ],
-                'browsersync-files': [
-                    path.join(tmpPath, 'css/*.css'),
-                    path.join(srcPath, '*.html'),
-                ],
-                'skip-install': skipInstall,
-                quiet: true,
             },
+            'webpack-hot-reload': true,
+            'webpack-html': true,
+            'browsersync-base-dir': [
+                tmpPath,
+                srcPath,
+            ],
+            'browsersync-files': [
+                path.join(tmpPath, 'css/*.css'),
+                path.join(srcPath, '*.html'),
+            ],
+            'skip-install': skipInstall,
+            quiet: true,
         });
     }
 
     get writing() {
         return {
             html() {
+                const projectName = _.get(this.options, 'project-name');
                 const srcPath = _.get(this.options, 'src-path');
                 const jsPath = _.get(this.options, 'js-path', 'js').replace(/^\/?/, '/');
                 const cssPath = _.get(this.options, 'css-path', 'css').replace(/^\/?/, '/');
 
-                const indexSrcPath = this.templatePath('index.html');
-                const indexDestPath = this.destinationPath(path.join(srcPath, 'index.html'));
+                const indexSrcPath = this.templatePath('index.html.ejs');
+                const indexDestPath = this.destinationPath(path.join(srcPath, 'index.html.ejs'));
                 this.fs.copyTpl(indexSrcPath, indexDestPath, {
-                    title: this.project_name,
+                    title: projectName || 'Prototype',
                     jsPath,
                     cssPath,
                 });

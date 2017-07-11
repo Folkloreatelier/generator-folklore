@@ -258,7 +258,7 @@ module.exports = class LaravelGenerator extends Generator {
             'scss-path': scssPath,
             'css-path': cssPath,
             'images-path': imagesPath,
-            'webpack-entry': {
+            'webpack-entries': {
                 main: './index',
                 config: './config',
                 vendor: ['lodash'],

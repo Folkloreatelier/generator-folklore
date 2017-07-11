@@ -81,26 +81,26 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('js-src-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('js-tmp-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('js-dest-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('webpack-public-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('webpack-entry', {
             type: String,
+        });
+
+        this.option('webpack-entries', {
+            type: Object,
         });
 
         this.option('webpack-config', {
@@ -161,12 +161,10 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('images-src-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('images-dest-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('scss', {
@@ -186,17 +184,14 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('scss-src-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('scss-tmp-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('scss-dest-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('browsersync', {
@@ -283,9 +278,9 @@ module.exports = class AppGenerator extends Generator {
                     browserSyncProxy: browserSyncProxy && browserSyncProxy.length ?
                         browserSyncProxy : null,
                     browserSyncBaseDir: _.isArray(browserSyncBaseDir) ?
-                        browserSyncBaseDir : [browserSyncBaseDir],
+                        browserSyncBaseDir : browserSyncBaseDir.split(','),
                     browserSyncFiles: _.isArray(browserSyncFiles) ?
-                        browserSyncFiles : [browserSyncFiles],
+                        browserSyncFiles : browserSyncFiles.split(','),
                     imagesSrcPath,
                     imagesDestPath,
                     modernizrDestPath: path.join(jsTmpPath, 'modernizr.js'),
@@ -387,25 +382,28 @@ module.exports = class AppGenerator extends Generator {
                 const jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 const jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
                 const publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
-                let entries = _.get(this.options, 'webpack-entry', []);
+                const entry = _.get(this.options, 'webpack-entry', null);
+                let entries = {};
+                if (entry !== null) {
+                    entries = {
+                        main: entry,
+                    };
+                } else {
+                    entries = _.get(this.options, 'webpack-entries', []);
+                }
                 if (entries && !_.isObject(entries)) {
                     const newEntries = {};
                     if (!_.isArray(entries)) {
                         entries = entries.length ? [entries] : [];
                     }
-                    entries.forEach((entry) => {
-                        const entryParts = entry.split(',');
+                    entries.forEach((it) => {
+                        const entryParts = it.split(',');
                         newEntries[entryParts[0]] = entryParts.slice(1);
                     });
                     entries = newEntries;
-                } else if (!entries) {
-                    entries = {
-                        main: './index',
-                    };
                 }
                 if (this.options['webpack-hot-reload']) {
                     const hotReloadEntries = [
-                        'babel-polyfill',
                         'react-hot-loader/patch',
                         'webpack/hot/dev-server',
                         'webpack-hot-middleware/client?reload=true',

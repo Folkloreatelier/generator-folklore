@@ -41,7 +41,7 @@ module.exports = class HTMLGenerator extends Generator {
         this.option('js-path', {
             type: String,
             desc: 'Path for the javascript',
-            defaults: 'js',
+            defaults: '',
         });
 
         this.option('css-path', {
@@ -53,7 +53,7 @@ module.exports = class HTMLGenerator extends Generator {
         this.option('scss-path', {
             type: String,
             desc: 'Path for the scss',
-            defaults: 'scss',
+            defaults: 'styles',
         });
 
         this.option('images-path', {
@@ -169,7 +169,7 @@ module.exports = class HTMLGenerator extends Generator {
             copy: true,
             'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
             'clean-dest': true,
-            'webpack-entry': {
+            'webpack-entries': {
                 main: './index',
                 config: './config',
                 vendor: [

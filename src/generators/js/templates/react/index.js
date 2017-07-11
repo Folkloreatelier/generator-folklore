@@ -72,7 +72,6 @@ domready(() => {
                 './hypernova',
                 './routes',
             ], () => {
-                this.debug('Hot reloading...');
                 createRoutes = require('./routes').default; // eslint-disable-line global-require
                 HypernovaComponents = require('./hypernova').default; // eslint-disable-line global-require
                 renderHypernovaElements(hypernovaElements);

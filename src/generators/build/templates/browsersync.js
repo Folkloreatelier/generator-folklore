@@ -34,8 +34,12 @@ bundler.plugin('done', (stats) => {
             body: stripAnsi(stats.toString()),
             timeout: 100000,
         });
-    }
+    }<%
+    if(options['webpack-hot-reload']) { %>
+    return null;
+    <% } else { %>
     return browserSync.reload();
+    <% } %>
 });
 
 /**

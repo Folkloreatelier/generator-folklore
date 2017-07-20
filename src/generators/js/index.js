@@ -214,6 +214,8 @@ module.exports = class JsGenerator extends Generator {
                 }
 
                 this.yarnInstall([
+                    'babel-plugin-add-module-exports@latest',
+                    'babel-preset-airbnb@latest',
                     'domready@latest',
                     'fastclick@latest',
                     'hoist-non-react-statics@latest',

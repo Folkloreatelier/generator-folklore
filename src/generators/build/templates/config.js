@@ -90,7 +90,7 @@ module.exports = {
 
         tests: [],
 
-        excludeTests: [],
+        excludeTests: ['hidden'],
 
         crawl: true,
 

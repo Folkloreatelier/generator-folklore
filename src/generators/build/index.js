@@ -554,8 +554,8 @@ module.exports = class AppGenerator extends Generator {
 
                     scripts['postcss:dist'] = `postcss -c ${postcssConfigFile} -u autoprefixer -u cssnano -d ${scssDestPath} ${path.join(scssTmpPath, '/**/*.css')}`;
                     scripts.postcss = 'npm run postcss:dist';
-                    scripts['sass:dist'] = `node-sass -r ${scssSrcPath} --output ${scssTmpPath}`;
-                    scripts['sass:watch'] = `node-sass -r --watch ${scssSrcPath} --output ${scssTmpPath}`;
+                    scripts['sass:dist'] = `node-sass --source-map .tmp/css --include-path ./node_modules -r ${scssSrcPath} --output ${scssTmpPath}`;
+                    scripts['sass:watch'] = `node-sass --source-map .tmp/css --include-path ./node_modules -r --watch ${scssSrcPath} --output ${scssTmpPath}`;
                     scripts['styles:dist'] = 'npm run sass:dist && npm run postcss:dist';
                     scripts['styles:watch'] = 'npm run sass:watch';
                     scripts.styles = 'npm run styles:dist';

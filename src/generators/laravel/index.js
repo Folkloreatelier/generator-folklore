@@ -355,6 +355,7 @@ module.exports = class LaravelGenerator extends Generator {
                     require: {
                         'folklore/image': '^0.3',
                         'folklore/locale': '^2.1',
+                        'folklore/laravel-hypernova': '^0.1',
                         'barryvdh/laravel-debugbar': '^2.3',
                     },
                 });

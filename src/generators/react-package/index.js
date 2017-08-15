@@ -70,6 +70,10 @@ module.exports = class ReactPackageGenerator extends Generator {
                         type: 'input',
                         name: 'package-name',
                         message: 'Name of the package:',
+                        default: () => {
+                            const parts = process.cwd().split(path.sep);
+                            return parts[parts.length - 1];
+                        },
                     });
                 }
 
@@ -111,15 +115,22 @@ module.exports = class ReactPackageGenerator extends Generator {
         const skipInstall = _.get(this.options, 'skip-install', false);
 
         this.composeWith('folklore:npm-package', {
-            package_name: this.options['package-name'],
+            'package-name': this.options['package-name'],
             src: false,
             'src-path': srcPath,
             'dest-path': destPath,
             'tmp-path': tmpPath,
             'build-path': buildPath,
             'skip-install': skipInstall,
-            'webpack-config-base': false,
-            'webpack-config-dev': false,
+            'webpack-html': true,
+            'webpack-dev-context': 'examples',
+            'webpack-dist-entries': {
+                [this.options['package-name']]: './index',
+            },
+            'webpack-dev-entries': {
+                main: './js/index',
+            },
+            'webpack-hot-reload': true,
             'browsersync-base-dir': [
                 tmpPath,
                 examplesPath,
@@ -151,30 +162,6 @@ module.exports = class ReactPackageGenerator extends Generator {
                 const srcPath = this.templatePath('storybook.config.js');
                 const destPath = this.destinationPath('.storybook/config.js');
                 this.fs.copy(srcPath, destPath);
-            },
-
-            webpackConfig() {
-                const buildPath = _.get(this.options, 'build-path');
-                const srcPath = _.get(this.options, 'src-path');
-                const tmpPath = _.get(this.options, 'tmp-path');
-                const examplesPath = _.get(this.options, 'examples-path');
-
-                // Main
-                const configBaseSrcPath = this.templatePath('webpack.config.base.js');
-                const configBaseDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.base.js'));
-                this.fs.copyTpl(configBaseSrcPath, configBaseDestPath, {
-                    srcPath,
-                    tmpPath,
-                    componentName: this.options['component-name'],
-                });
-
-                // Browser sync
-                const configDevSrcPath = this.templatePath('webpack.config.dev.js');
-                const configDevDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dev.js'));
-                this.fs.copyTpl(configDevSrcPath, configDevDestPath, {
-                    srcPath: examplesPath,
-                    tmpPath,
-                });
             },
 
             packageJSON() {

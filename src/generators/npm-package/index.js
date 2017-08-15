@@ -53,6 +53,33 @@ module.exports = class NpmPackageGenerator extends Generator {
             desc: 'BrowserSync files to watch',
         });
 
+        this.option('webpack-html', {
+            type: Boolean,
+            desc: 'Add html to webpack',
+            defaults: false,
+        });
+
+        this.option('webpack-dev-context', {
+            type: String,
+            desc: 'Specify dev context path',
+        });
+
+        this.option('webpack-dev-entries', {
+            type: Object,
+            desc: 'Specify dev entries',
+        });
+
+        this.option('webpack-dist-entries', {
+            type: Object,
+            desc: 'Specify dist entries',
+        });
+
+        this.option('webpack-hot-reload', {
+            type: Boolean,
+            desc: 'Add hot reloading',
+            defaults: false,
+        });
+
         this.option('webpack-config-base', {
             type: Boolean,
             desc: 'Add a base webpack config file',
@@ -112,6 +139,14 @@ module.exports = class NpmPackageGenerator extends Generator {
         const skipInstall = _.get(this.options, 'skip-install', false);
         const webpackConfigBase = _.get(this.options, 'webpack-config-base', false);
         const webpackConfigDev = _.get(this.options, 'webpack-config-dev', false);
+        const webpackHtml = _.get(this.options, 'webpack-html', false);
+        const webpackHotReload = _.get(this.options, 'webpack-hot-reload', false);
+        const webpackDevContext = _.get(this.options, 'webpack-dev-context', null);
+        const webpackDevEntries = _.get(this.options, 'webpack-dev-entries', null);
+        const webpackDistEntries = _.get(this.options, 'webpack-dist-entries', null);
+        const webpackEntries = webpackDevEntries !== null && webpackDistEntries !== null ? null : {
+            [this.options['package-name']]: './index',
+        };
         const browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir') || [
             tmpPath,
             srcPath,
@@ -121,7 +156,7 @@ module.exports = class NpmPackageGenerator extends Generator {
         ];
 
         this.composeWith('folklore:build', {
-            package_name: this.options['package-name'],
+            'project-name': this.options['package-name'],
             'project-path': projectPath,
             path: buildPath,
             'tmp-path': tmpPath,
@@ -136,6 +171,12 @@ module.exports = class NpmPackageGenerator extends Generator {
             modernizr: false,
             'webpack-config-base': webpackConfigBase,
             'webpack-config-dev': webpackConfigDev,
+            'webpack-html': webpackHtml,
+            'webpack-hot-reload': webpackHotReload,
+            'webpack-dev-context': webpackDevContext,
+            'webpack-entries': webpackEntries,
+            'webpack-dist-entries': webpackDistEntries,
+            'webpack-dev-entries': webpackDevEntries,
             'browsersync-base-dir': browserSyncBaseDir,
             'browsersync-files': browserSyncFiles,
             'skip-install': skipInstall,

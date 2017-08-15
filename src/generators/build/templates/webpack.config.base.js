@@ -64,7 +64,8 @@ module.exports = (env) => {
 
         context: contextPath,
 
-        entry: <%- JSON.stringify(entries, null, 4).replace(/\"/gi, "'") %>,
+        <% if (entries !== null) { %>entry: <%- JSON.stringify(entries, null, 4).replace(/\"/gi, "'") %>,
+        <% } %>
 
         output: {
             path: outputPath,

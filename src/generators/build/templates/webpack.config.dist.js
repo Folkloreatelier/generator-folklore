@@ -12,6 +12,9 @@ const outputPath = path.join(process.env.PWD, '<%= destPath %>');
 module.exports = env => (
     webpackMerge(webpackConfig(env), {
 
+        <% if (distEntries !== null) { %>entry: <%- JSON.stringify(distEntries, null, 4).replace(/\"/gi, "'") %>,
+        <% } %>
+
         output: {
             path: outputPath,
         },

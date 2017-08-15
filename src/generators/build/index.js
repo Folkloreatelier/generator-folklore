@@ -3,6 +3,33 @@ import path from 'path';
 import chalk from 'chalk';
 import Generator from '../../lib/generator';
 
+const getWebpackEntries = (webpackEntry, webpackEntries) => {
+    if (webpackEntry === null && webpackEntries === null) {
+        return null;
+    }
+    const entry = webpackEntry;
+    let entries = {};
+    if (entry !== null) {
+        entries = {
+            main: entry,
+        };
+    } else {
+        entries = webpackEntries;
+    }
+    if (entries && !_.isObject(entries)) {
+        const newEntries = {};
+        if (!_.isArray(entries)) {
+            entries = entries.length ? [entries] : [];
+        }
+        entries.forEach((it) => {
+            const entryParts = it.split(',');
+            newEntries[entryParts[0]] = entryParts.slice(1);
+        });
+        entries = newEntries;
+    }
+    return entries;
+};
+
 module.exports = class AppGenerator extends Generator {
 
     // The name `constructor` is important here
@@ -83,6 +110,10 @@ module.exports = class AppGenerator extends Generator {
             type: String,
         });
 
+        this.option('js-src-path', {
+            type: String,
+        });
+
         this.option('js-tmp-path', {
             type: String,
         });
@@ -100,6 +131,26 @@ module.exports = class AppGenerator extends Generator {
         });
 
         this.option('webpack-entries', {
+            type: Object,
+        });
+
+        this.option('webpack-dev-entry', {
+            type: String,
+        });
+
+        this.option('webpack-dev-entries', {
+            type: Object,
+        });
+
+        this.option('webpack-dev-context', {
+            type: String,
+        });
+
+        this.option('webpack-dist-entry', {
+            type: String,
+        });
+
+        this.option('webpack-dist-entries', {
             type: Object,
         });
 
@@ -165,6 +216,11 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('images-dest-path', {
             type: String,
+        });
+
+        this.option('postcss', {
+            type: Boolean,
+            defaults: true,
         });
 
         this.option('scss', {
@@ -330,7 +386,7 @@ module.exports = class AppGenerator extends Generator {
             },
 
             postcssConfig() {
-                if (!_.get(this.options, 'scss', false)) {
+                if (!_.get(this.options, 'scss', false) && !_.get(this.options, 'postcss', false)) {
                     return;
                 }
 
@@ -381,42 +437,37 @@ module.exports = class AppGenerator extends Generator {
                 const jsTmpPath = _.get(this.options, 'js-tmp-path', null) || path.join(tmpPath, jsPath);
                 const jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 const jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
-                const publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
-                const entry = _.get(this.options, 'webpack-entry', null);
-                let entries = {};
-                if (entry !== null) {
-                    entries = {
-                        main: entry,
-                    };
-                } else {
-                    entries = _.get(this.options, 'webpack-entries', []);
-                }
-                if (entries && !_.isObject(entries)) {
-                    const newEntries = {};
-                    if (!_.isArray(entries)) {
-                        entries = entries.length ? [entries] : [];
-                    }
-                    entries.forEach((it) => {
-                        const entryParts = it.split(',');
-                        newEntries[entryParts[0]] = entryParts.slice(1);
-                    });
-                    entries = newEntries;
-                }
+                const devContext = _.get(this.options, 'webpack-dev-context', null);
+                const publicPath = _.get(this.options, 'webpack-public-path', null) || '/';
+                const entries = getWebpackEntries(
+                    _.get(this.options, 'webpack-entry', null),
+                    _.get(this.options, 'webpack-entries', []),
+                );
+                const distEntries = getWebpackEntries(
+                    _.get(this.options, 'webpack-dist-entry', null),
+                    _.get(this.options, 'webpack-dist-entries', []),
+                );
+                let devEntries = getWebpackEntries(
+                    _.get(this.options, 'webpack-dev-entry', null),
+                    _.get(this.options, 'webpack-dev-entries', null),
+                ) || _.clone(entries);
                 if (this.options['webpack-hot-reload']) {
                     const hotReloadEntries = [
                         'react-hot-loader/patch',
                         'webpack/hot/dev-server',
                         'webpack-hot-middleware/client?reload=true',
                     ];
-                    if (typeof entries.main !== 'undefined') {
-                        entries.main = [
+                    if (_.isObject(devEntries)) {
+                        const firstKey = Object.keys(devEntries)[0];
+                        const value = devEntries[firstKey];
+                        devEntries[firstKey] = [
                             ...hotReloadEntries,
-                            ...(!_.isArray(entries.main) ? [entries.main] : entries.main),
+                            ...(!_.isArray(value) ? [value] : value),
                         ];
-                    } else if (_.isString(entries) || _.isArray(entries)) {
-                        entries = [
+                    } else if (_.isString(devEntries) || _.isArray(devEntries)) {
+                        devEntries = [
                             ...hotReloadEntries,
-                            ...(!_.isArray(entries) ? [entries] : entries),
+                            ...(!_.isArray(devEntries) ? [devEntries] : devEntries),
                         ];
                     }
                 }
@@ -424,10 +475,13 @@ module.exports = class AppGenerator extends Generator {
                 const templateData = {
                     options: this.options,
                     srcPath: jsSrcPath,
+                    devContext,
                     tmpPath: jsTmpPath,
                     destPath: jsDestPath,
                     publicPath,
                     entries,
+                    distEntries,
+                    devEntries,
                 };
 
                 let configSrcPath;

@@ -3,10 +3,18 @@ const webpackMerge = require('webpack-merge');
 const webpack = require('webpack');
 <% if (options['webpack-html']) { %>const HtmlWebpackPlugin = require('html-webpack-plugin');<% } %>
 const webpackConfig = require('./webpack.config.base');
+<% if (devContext !== null) { %>const path = require('path');<% } %>
 /* eslint-enable import/no-extraneous-dependencies */
+
+<% if (devContext !== null) { %>const contextPath = path.join(process.env.PWD, '<%= devContext %>');<% } %>
 
 module.exports = env => (
     webpackMerge(webpackConfig(env), {
+
+        <% if (devContext !== null) { %>context: contextPath,
+        <% } %>
+        <% if (devEntries !== null) { %>entry: <%- JSON.stringify(devEntries, null, 4).replace(/\"/gi, "'") %>,
+        <% } %>
 
         devtool: 'source-map',
 

@@ -9,6 +9,14 @@
         {
             "name": "David Mongeau-Petitpas",
             "email": "dmp@atelierfolklore.ca"
+        },
+        {
+            "name": "Nicolas Roy-Bourdages",
+            "email": "nrb@atelierfolklore.ca"
+        },
+        {
+            "name": "Hugo St-Onge",
+            "email": "hso@atelierfolklore.ca"
         }
     ],
     "scripts": {

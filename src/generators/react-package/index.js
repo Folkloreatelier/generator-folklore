@@ -192,7 +192,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                     'jquery@latest',
                     'enzyme@latest',
                     'react-test-renderer@latest',
-                    '@kadira/storybook@latest',
+                    '@storybook/react@latest',
                     'extract-text-webpack-plugin@latest',
                     'html-webpack-plugin@latest',
                 ], {

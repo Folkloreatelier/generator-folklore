@@ -147,7 +147,7 @@ module.exports = class ReactPackageGenerator extends Generator {
             examples() {
                 const srcPath = this.templatePath('examples');
                 const destPath = this.destinationPath('examples');
-                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
+                this.fs.copyTpl(srcPath, destPath, this);
             },
 
             src() {
@@ -158,10 +158,10 @@ module.exports = class ReactPackageGenerator extends Generator {
                 });
             },
 
-            storybookConfig() {
-                const srcPath = this.templatePath('storybook.config.js');
-                const destPath = this.destinationPath('.storybook/config.js');
-                this.fs.copy(srcPath, destPath);
+            storybook() {
+                const srcPath = this.templatePath('storybook');
+                const destPath = this.destinationPath('.storybook');
+                this.fs.copyTpl(srcPath, destPath, {});
             },
 
             packageJSON() {
@@ -184,6 +184,7 @@ module.exports = class ReactPackageGenerator extends Generator {
 
                 this.yarnInstall([
                     'react@latest',
+                    'prop-types@latest',
                     'react-dom@latest',
                 ]);
 
@@ -193,6 +194,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                     'enzyme@latest',
                     'react-test-renderer@latest',
                     '@storybook/react@latest',
+                    '@storybook/addon-actions@latest',
                     'extract-text-webpack-plugin@latest',
                     'html-webpack-plugin@latest',
                 ], {

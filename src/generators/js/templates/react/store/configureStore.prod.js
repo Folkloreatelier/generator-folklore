@@ -5,9 +5,12 @@ import { browserHistory } from 'react-router';
 import { routerMiddleware } from 'react-router-redux';
 
 import reducers from '../reducers/index';
+import withUrlGeneratorMiddleware from './withUrlGeneratorMiddleware';
 
-const reducer = combineReducers(reducers);
-const router = routerMiddleware(browserHistory);
-const enhancer = applyMiddleware(thunk, promise, router);
-
-export default initialState => createStore(reducer, initialState, enhancer);
+export default (initialState, urlGenerator) => {
+    const reducer = combineReducers(reducers);
+    const router = routerMiddleware(browserHistory);
+    const withUrlGenerator = withUrlGeneratorMiddleware(urlGenerator);
+    const enhancer = applyMiddleware(withUrlGenerator, thunk, promise, router);
+    return createStore(reducer, initialState, enhancer);
+};

@@ -10,11 +10,11 @@ const defaultProps = {
 
 class <%= componentName %> extends Component {
 
-    constructor (props) {
+    constructor(props) {
         super(props);
     }
 
-    render () {
+    render() {
         return (
             <div />
         );

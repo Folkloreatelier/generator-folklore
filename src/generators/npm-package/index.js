@@ -8,9 +8,15 @@ module.exports = class NpmPackageGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('package_name', {
+        this.argument('package-name', {
             type: String,
             required: false,
+        });
+
+        this.option('src', {
+            type: Boolean,
+            desc: 'Includes src path',
+            defaults: true,
         });
 
         this.option('src-path', {
@@ -47,15 +53,42 @@ module.exports = class NpmPackageGenerator extends Generator {
             desc: 'BrowserSync files to watch',
         });
 
-        this.option('webpack-config', {
+        this.option('webpack-html', {
             type: Boolean,
-            desc: 'Add a webpack config file',
+            desc: 'Add html to webpack',
+            defaults: false,
+        });
+
+        this.option('webpack-dev-context', {
+            type: String,
+            desc: 'Specify dev context path',
+        });
+
+        this.option('webpack-dev-entries', {
+            type: Object,
+            desc: 'Specify dev entries',
+        });
+
+        this.option('webpack-dist-entries', {
+            type: Object,
+            desc: 'Specify dist entries',
+        });
+
+        this.option('webpack-hot-reload', {
+            type: Boolean,
+            desc: 'Add hot reloading',
+            defaults: false,
+        });
+
+        this.option('webpack-config-base', {
+            type: Boolean,
+            desc: 'Add a base webpack config file',
             defaults: true,
         });
 
-        this.option('webpack-config-browsersync', {
+        this.option('webpack-config-dev', {
             type: Boolean,
-            desc: 'Add a webpack config file for browsersync',
+            desc: 'Add a dev webpack config file',
             defaults: true,
         });
     }
@@ -75,10 +108,10 @@ module.exports = class NpmPackageGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.package_name) {
+                if (!this.options['package-name']) {
                     prompts.push({
                         type: 'input',
-                        name: 'package_name',
+                        name: 'package-name',
                         message: 'Name of the package:',
                     });
                 }
@@ -89,8 +122,8 @@ module.exports = class NpmPackageGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.package_name) {
-                            this.package_name = answers.package_name;
+                        if (answers['package-name']) {
+                            this.options['package-name'] = answers['package-name'];
                         }
                     });
             },
@@ -104,8 +137,16 @@ module.exports = class NpmPackageGenerator extends Generator {
         const tmpPath = _.get(this.options, 'tmp-path');
         const buildPath = _.get(this.options, 'build-path');
         const skipInstall = _.get(this.options, 'skip-install', false);
-        const webpackConfig = _.get(this.options, 'webpack-config', false);
-        const webpackConfigBrowsersync = _.get(this.options, 'webpack-config-browsersync', false);
+        const webpackConfigBase = _.get(this.options, 'webpack-config-base', false);
+        const webpackConfigDev = _.get(this.options, 'webpack-config-dev', false);
+        const webpackHtml = _.get(this.options, 'webpack-html', false);
+        const webpackHotReload = _.get(this.options, 'webpack-hot-reload', false);
+        const webpackDevContext = _.get(this.options, 'webpack-dev-context', null);
+        const webpackDevEntries = _.get(this.options, 'webpack-dev-entries', null);
+        const webpackDistEntries = _.get(this.options, 'webpack-dist-entries', null);
+        const webpackEntries = webpackDevEntries !== null && webpackDistEntries !== null ? null : {
+            [this.options['package-name']]: './index',
+        };
         const browserSyncBaseDir = _.get(this.options, 'browsersync-base-dir') || [
             tmpPath,
             srcPath,
@@ -115,35 +156,43 @@ module.exports = class NpmPackageGenerator extends Generator {
         ];
 
         this.composeWith('folklore:build', {
-            arguments: [this.package_name],
-            options: {
-                'project-path': projectPath,
-                path: buildPath,
-                'tmp-path': tmpPath,
-                'src-path': srcPath,
-                'dest-path': destPath,
-                'js-path': './',
-                scss: false,
-                images: false,
-                copy: false,
-                'clean-dest': true,
-                modernizr: false,
-                'webpack-config': webpackConfig,
-                'webpack-config-browsersync': webpackConfigBrowsersync,
-                'browsersync-base-dir': browserSyncBaseDir,
-                'browsersync-files': browserSyncFiles,
-                'skip-install': skipInstall,
-                quiet: true,
-            },
+            'project-name': this.options['package-name'],
+            'project-path': projectPath,
+            path: buildPath,
+            'tmp-path': tmpPath,
+            'src-path': srcPath,
+            'dest-path': destPath,
+            'js-path': './',
+            scss: false,
+            images: false,
+            copy: false,
+            watch: false,
+            'clean-dest': true,
+            modernizr: false,
+            'webpack-config-base': webpackConfigBase,
+            'webpack-config-dev': webpackConfigDev,
+            'webpack-html': webpackHtml,
+            'webpack-hot-reload': webpackHotReload,
+            'webpack-dev-context': webpackDevContext,
+            'webpack-entries': webpackEntries,
+            'webpack-dist-entries': webpackDistEntries,
+            'webpack-dev-entries': webpackDevEntries,
+            'browsersync-base-dir': browserSyncBaseDir,
+            'browsersync-files': browserSyncFiles,
+            'skip-install': skipInstall,
+            quiet: true,
         });
     }
 
     get writing() {
         return {
             src() {
+                if (!this.options.src) {
+                    return;
+                }
                 const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath('src');
-                this.directory(srcPath, destPath);
+                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
             },
 
             gitignore() {
@@ -174,7 +223,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                 const srcPath = this.templatePath('_package.json');
                 const destPath = this.destinationPath('package.json');
                 const packageJSON = this.fs.readJSON(srcPath);
-                packageJSON.name = this.package_name;
+                packageJSON.name = this.options['package-name'];
                 const currentPackageJSON = this.fs.exists(destPath) ?
                     this.fs.readJSON(destPath) : {};
                 this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
@@ -191,7 +240,7 @@ module.exports = class NpmPackageGenerator extends Generator {
     get install() {
         return {
             npm() {
-                this.npmInstall([
+                this.yarnInstall([
                     'babel-eslint@latest',
                     'eslint@latest',
                     'eslint-config-airbnb@latest',
@@ -200,7 +249,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                     'eslint-plugin-react@latest',
                     'jest@latest',
                 ], {
-                    saveDev: true,
+                    dev: true,
                 });
             },
         };

@@ -5,16 +5,15 @@ module.exports = {
      */
     browsersync: {
         server: {
-            baseDir: <%- JSON.stringify(browserSyncBaseDir).replace(/\"/gi, '\'') %>,
-            index: 'index.html'
-        },
+            baseDir: <%- JSON.stringify(browserSyncBaseDir, null, 4).replace(/\"/gi, '\'') %>,
+            index: 'index.html',
+        },<% if(browserSyncProxy) { %>
 
-        <% if(browserSyncProxy) { %>
         host: '<%= browserSyncHost %>',
         proxy: '<%= browserSyncProxy %>',
         <% } %>
-
-        files: <%- JSON.stringify(browserSyncFiles).replace(/\"/gi, '\'') %>
+        files: <%- JSON.stringify(browserSyncFiles, null, 4).replace(/\"/gi, '\'') %>,
+        ghostMode: false,
     },
 
     /**
@@ -29,67 +28,83 @@ module.exports = {
 
         watchOptions: {
             aggregateTimeout: 300,
-            poll: true
+            poll: false,
+            ignored: /node_modules/,
         },
 
         stats: {
-            colors: true
-        }
+            colors: true,
+        },
     },<% } %>
 
     imagemin: {
         files: [
-            '<%= imagesSrcPath %>'
+            '<%= imagesSrcPath %>',
         ],
-        output: '<%= imagesDestPath %>'
+        output: '<%= imagesDestPath %>',
     },
 
     /**
      * PostCSS
      */
     postcss: {
-        autoprefixer: {
-            browsers: '> 5%'
-        }
+        map: {
+            inline: false,
+        },
+        plugins: {
+            autoprefixer: {},
+            cssnano: {
+                preset: 'default',
+                zindex: false,
+            },
+        },
+        env: {
+            dev: {
+                plugins: {
+                    autoprefixer: false,
+                    cssnano: false,
+                },
+            },
+        },
     },
 
     /**
      * Modernizr
      */
     modernizr: {
-        'cache' : true,
+        cache: true,
 
-        'devFile' : false,
+        devFile: false,
 
-        'dest' : '<%= modernizrDestPath %>',
+        dest: '<%= modernizrDestPath %>',
 
-        'options' : [
+        options: [
             'setClasses',
             'addTest',
             'html5printshiv',
             'testProp',
-            'fnBind'
+            'fnBind',
         ],
 
-        'uglify' : false,
+        uglify: false,
 
-        'tests' : [],
+        tests: [],
 
-        'excludeTests': [],
+        excludeTests: ['hidden'],
 
-        'crawl' : true,
+        crawl: true,
 
-        'useBuffers' : false,
+        useBuffers: false,
 
-        'files' : {
-            'src': [
+        files: {
+            src: [
                 '*[^(g|G)runt(file)?].{js,css,scss}',
                 '**[^node_modules]/**/*.{js,css,scss}',
-                '!lib/**/*'
-            ]
+                '!lib/**/*',
+            ],
         },
 
-        'customTests' : []
-    }
+        customTests: [],
+    },
 
 };

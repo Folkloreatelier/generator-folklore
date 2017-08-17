@@ -8,7 +8,7 @@ const initialState = {
 };
 
 const TestReducer = (previousState, action) => {
-    const state = previousState || new Immutable.Map(initialState);
+    const state = previousState || initialState;
 
     switch (action.type) {
     case TEST_ACTION:

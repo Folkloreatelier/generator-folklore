@@ -1,110 +1,108 @@
-/**
- * Require Browsersync along with webpack and middleware for it
- */
-var browserSync = require('browser-sync').create();
-var webpack = require('webpack');
-var webpackDevMiddleware = require('webpack-dev-middleware');
-var proxyMiddleware = require('proxy-middleware');
-var servestaticMiddleware = require('serve-static');
-var stripAnsi = require('strip-ansi');
-var url = require('url');
-var path = require('path');
-var fs = require('fs');
-var _ = require('lodash');
+/* eslint-disable import/no-extraneous-dependencies */
+const BrowserSync = require('browser-sync');
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');<%
+if(options['webpack-hot-reload']) { %>
+const webpackHotMiddleware = require('webpack-hot-middleware');<% } %>
+const proxyMiddleware = require('proxy-middleware');
+const servestaticMiddleware = require('serve-static');
+const stripAnsi = require('strip-ansi');
+const url = require('url');
+const path = require('path');
+const fs = require('fs');
+const _ = require('lodash');
+/* eslint-enable import/no-extraneous-dependencies */
 
-var buildConfig = require('./config');
-var browserSyncConfig = _.get(buildConfig, 'browsersync', {});
-var webpackMiddlewareConfig = _.get(buildConfig, 'webpackMiddleware', {});
+const config = require('./config');
+const createWebpackConfig = require('./webpack.config');
 
-/**
- * Require ./webpack.config.js and make a bundler from it
- */
-var webpackConfig = require('./webpack.config.browsersync');
-var bundler = webpack(webpackConfig);
+const webpackConfig = createWebpackConfig('dev');
+const browserSyncConfig = _.get(config, 'browsersync', {});
+const webpackMiddlewareConfig = _.get(config, 'webpackMiddleware', {});
+
+const browserSync = BrowserSync.create();
+const bundler = webpack(webpackConfig);
 
 /**
  * Reload all devices when bundle is complete
  * or send a fullscreen error message to the browser instead
  */
-bundler.plugin('done', function (stats)
-{
-    if (stats.hasErrors() || stats.hasWarnings())
-    {
+bundler.plugin('done', (stats) => {
+    if (stats.hasErrors() || stats.hasWarnings()) {
         return browserSync.sockets.emit('fullscreen:message', {
             title: 'Webpack Error:',
-            body:  stripAnsi(stats.toString()),
-            timeout: 100000
+            body: stripAnsi(stats.toString()),
+            timeout: 100000,
         });
-    }
-
-    browserSync.reload();
+    }<%
+    if(options['webpack-hot-reload']) { %>
+    return null;
+    <% } else { %>
+    return browserSync.reload();
+    <% } %>
 });
 
 /**
  * Browser sync options
  */
-var browserSyncOptions = {
+const browserSyncOptions = _.merge({
     logFileChanges: false,
 
     middleware: [],
 
     plugins: [
-        'bs-fullscreen-message'
-    ]
-};
-browserSyncOptions = _.merge(browserSyncOptions, browserSyncConfig);
+        'bs-fullscreen-message',
+    ],
+}, browserSyncConfig);
 
 /**
  * Webpack middleware options
  */
-var webpackMiddlewareOptions = {
-   publicPath: webpackConfig.output.publicPath
-};
-webpackMiddlewareOptions = _.merge(webpackMiddlewareOptions, webpackMiddlewareConfig);
+const webpackMiddlewareOptions = _.merge({
+    publicPath: webpackConfig.output.publicPath,
+}, webpackMiddlewareConfig);
 
 /**
  * Webpack middleware
  */
-var webpackMiddleware = webpackDevMiddleware(bundler, webpackMiddlewareOptions);
-browserSyncOptions.middleware.push(webpackMiddleware);
+const webpackMiddleware = webpackDevMiddleware(bundler, webpackMiddlewareOptions);
+browserSyncOptions.middleware.push(webpackMiddleware);<% if(options['webpack-hot-reload']) { %>
+browserSyncOptions.middleware.push(webpackHotMiddleware(bundler));
+<% } %>
 
 /**
  * Proxy
  */
-if(browserSyncOptions.proxy)
-{
-    var proxyHost = url.parse(browserSyncOptions.proxy);
+if (browserSyncOptions.proxy) {
+    const proxyHost = url.parse(browserSyncOptions.proxy);
     browserSyncOptions.proxy = null;
+    browserSyncOptions.open = 'external';
     delete browserSyncOptions.proxy;
-    browserSyncOptions = _.merge({
-        open: 'external'
-    }, browserSyncOptions);
 
     /**
      * Static middleware
      */
-    var baseDirs = _.get(browserSyncOptions, 'server.baseDir', []);
-    var serveStaticMiddlewares = {};
-    _.each(baseDirs, function(dir)
-    {
-        serveStaticMiddlewares[dir] = servestaticMiddleware(dir);
-    });
-    var staticMiddleware = function(req,res,next) {
+    const baseDirs = _.get(browserSyncOptions, 'server.baseDir', []);
+    const serveStaticMiddlewares = {};
+    for (let i = 0, bl = baseDirs.length; i < bl; i += 1) {
+        serveStaticMiddlewares[baseDirs[i]] = servestaticMiddleware(baseDirs[i]);
+    }
+    const staticMiddleware = (req, res, next) => {
+        const requestUrl = url.parse(req.url);
+        const urlPath = requestUrl.pathname;
 
-        var requestUrl = url.parse(req.url);
-        var urlPath = requestUrl.pathname;
-
-        var middleware;
-        for(var key in serveStaticMiddlewares)
-        {
-            middleware = serveStaticMiddlewares[key];
+        const staticMiddlewareKey = Object.keys(serveStaticMiddlewares).find((key) => {
             try {
-                stats = fs.lstatSync(path.join(key, urlPath));
-                if(stats.isFile())
-                {
-                    return middleware(req, res, next);
-                }
-            } catch(e) {}
+                const stats = fs.lstatSync(path.join(key, urlPath));
+                return stats.isFile();
+            } catch (e) {
+                // console.error(e);
+            }
+            return false;
+        });
+
+        if (staticMiddlewareKey) {
+            return serveStaticMiddlewares[staticMiddlewareKey](req, res, next);
         }
 
         return next();
@@ -114,7 +112,7 @@ if(browserSyncOptions.proxy)
     /**
      * Proxy middleware
      */
-    var proxyMiddlewareOptions = url.parse('http://'+proxyHost.host);
+    const proxyMiddlewareOptions = url.parse(`http://${proxyHost.host}`);
     proxyMiddlewareOptions.preserveHost = true;
     proxyMiddlewareOptions.via = 'browserSync';
     browserSyncOptions.middleware.push(proxyMiddleware(proxyMiddlewareOptions));

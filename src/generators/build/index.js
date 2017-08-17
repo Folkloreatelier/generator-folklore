@@ -3,13 +3,40 @@ import path from 'path';
 import chalk from 'chalk';
 import Generator from '../../lib/generator';
 
+const getWebpackEntries = (webpackEntry, webpackEntries) => {
+    if (webpackEntry === null && webpackEntries === null) {
+        return null;
+    }
+    const entry = webpackEntry;
+    let entries = {};
+    if (entry !== null) {
+        entries = {
+            main: entry,
+        };
+    } else {
+        entries = webpackEntries;
+    }
+    if (entries && !_.isObject(entries)) {
+        const newEntries = {};
+        if (!_.isArray(entries)) {
+            entries = entries.length ? [entries] : [];
+        }
+        entries.forEach((it) => {
+            const entryParts = it.split(',');
+            newEntries[entryParts[0]] = entryParts.slice(1);
+        });
+        entries = newEntries;
+    }
+    return entries;
+};
+
 module.exports = class AppGenerator extends Generator {
 
     // The name `constructor` is important here
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
@@ -49,6 +76,11 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
+        this.option('release', {
+            type: Boolean,
+            defaults: true,
+        });
+
         this.option('modernizr', {
             type: Boolean,
             defaults: true,
@@ -76,26 +108,50 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('js-src-path', {
             type: String,
-            defaults: null,
+        });
+
+        this.option('js-src-path', {
+            type: String,
         });
 
         this.option('js-tmp-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('js-dest-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('webpack-public-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('webpack-entry', {
             type: String,
+        });
+
+        this.option('webpack-entries', {
+            type: Object,
+        });
+
+        this.option('webpack-dev-entry', {
+            type: String,
+        });
+
+        this.option('webpack-dev-entries', {
+            type: Object,
+        });
+
+        this.option('webpack-dev-context', {
+            type: String,
+        });
+
+        this.option('webpack-dist-entry', {
+            type: String,
+        });
+
+        this.option('webpack-dist-entries', {
+            type: Object,
         });
 
         this.option('webpack-config', {
@@ -103,12 +159,27 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
-        this.option('webpack-config-build', {
+        this.option('webpack-hot-reload', {
+            type: Boolean,
+            defaults: false,
+        });
+
+        this.option('webpack-html', {
+            type: Boolean,
+            defaults: false,
+        });
+
+        this.option('webpack-config-dist', {
             type: Boolean,
             defaults: true,
         });
 
-        this.option('webpack-config-browsersync', {
+        this.option('webpack-config-base', {
+            type: Boolean,
+            defaults: true,
+        });
+
+        this.option('webpack-config-dev', {
             type: Boolean,
             defaults: true,
         });
@@ -117,11 +188,15 @@ module.exports = class AppGenerator extends Generator {
             type: String,
         });
 
-        this.option('webpack-config-build-path', {
+        this.option('webpack-config-base-path', {
             type: String,
         });
 
-        this.option('webpack-config-browsersync-path', {
+        this.option('webpack-config-dist-path', {
+            type: String,
+        });
+
+        this.option('webpack-config-dev-path', {
             type: String,
         });
 
@@ -137,12 +212,15 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('images-src-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('images-dest-path', {
             type: String,
-            defaults: null,
+        });
+
+        this.option('postcss', {
+            type: Boolean,
+            defaults: true,
         });
 
         this.option('scss', {
@@ -162,17 +240,14 @@ module.exports = class AppGenerator extends Generator {
 
         this.option('scss-src-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('scss-tmp-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('scss-dest-path', {
             type: String,
-            defaults: null,
         });
 
         this.option('browsersync', {
@@ -214,7 +289,7 @@ module.exports = class AppGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(this.prompts.project_name);
                 }
 
@@ -224,8 +299,8 @@ module.exports = class AppGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
                     });
             },
@@ -259,9 +334,9 @@ module.exports = class AppGenerator extends Generator {
                     browserSyncProxy: browserSyncProxy && browserSyncProxy.length ?
                         browserSyncProxy : null,
                     browserSyncBaseDir: _.isArray(browserSyncBaseDir) ?
-                        browserSyncBaseDir : [browserSyncBaseDir],
+                        browserSyncBaseDir : browserSyncBaseDir.split(','),
                     browserSyncFiles: _.isArray(browserSyncFiles) ?
-                        browserSyncFiles : [browserSyncFiles],
+                        browserSyncFiles : browserSyncFiles.split(','),
                     imagesSrcPath,
                     imagesDestPath,
                     modernizrDestPath: path.join(jsTmpPath, 'modernizr.js'),
@@ -281,7 +356,9 @@ module.exports = class AppGenerator extends Generator {
                     return;
                 }
 
-                const templateData = {};
+                const templateData = {
+                    options: this.options,
+                };
 
                 const buildPath = _.get(this.options, 'path');
                 const srcPath = this.templatePath('browsersync.js');
@@ -308,16 +385,16 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(modernizrSrcPath, modernizrDestPath, templateData);
             },
 
-            postcss() {
-                if (!_.get(this.options, 'scss', false)) {
+            postcssConfig() {
+                if (!_.get(this.options, 'scss', false) && !_.get(this.options, 'postcss', false)) {
                     return;
                 }
 
                 const templateData = {};
 
                 const buildPath = _.get(this.options, 'path');
-                const srcPath = this.templatePath('postcss.js');
-                const destPath = this.destinationPath(path.join(buildPath, 'postcss.js'));
+                const srcPath = this.templatePath('postcss.config.js');
+                const destPath = this.destinationPath(path.join(buildPath, 'postcss.config.js'));
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
@@ -334,6 +411,19 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
+            release() {
+                if (!_.get(this.options, 'release', false)) {
+                    return;
+                }
+
+                const templateData = {};
+
+                const buildPath = _.get(this.options, 'path');
+                const srcPath = this.templatePath('release.sh');
+                const destPath = this.destinationPath(path.join(buildPath, 'release.sh'));
+                this.fs.copyTpl(srcPath, destPath, templateData);
+            },
+
             webpack() {
                 if (!_.get(this.options, 'js', false)) {
                     return;
@@ -347,30 +437,51 @@ module.exports = class AppGenerator extends Generator {
                 const jsTmpPath = _.get(this.options, 'js-tmp-path', null) || path.join(tmpPath, jsPath);
                 const jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                 const jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
-                const publicPath = _.get(this.options, 'webpack-public-path', null) || jsPath.replace(/^\/?/, '/');
-                let entries = _.get(this.options, 'webpack-entry', []);
-                if (entries && !_.isObject(entries)) {
-                    const newEntries = {};
-                    if (!_.isArray(entries)) {
-                        entries = entries.length ? [entries] : [];
+                const devContext = _.get(this.options, 'webpack-dev-context', null);
+                const publicPath = _.get(this.options, 'webpack-public-path', null) || '/';
+                const entries = getWebpackEntries(
+                    _.get(this.options, 'webpack-entry', null),
+                    _.get(this.options, 'webpack-entries', []),
+                );
+                const distEntries = getWebpackEntries(
+                    _.get(this.options, 'webpack-dist-entry', null),
+                    _.get(this.options, 'webpack-dist-entries', []),
+                );
+                let devEntries = getWebpackEntries(
+                    _.get(this.options, 'webpack-dev-entry', null),
+                    _.get(this.options, 'webpack-dev-entries', null),
+                ) || _.clone(entries);
+                if (this.options['webpack-hot-reload']) {
+                    const hotReloadEntries = [
+                        'react-hot-loader/patch',
+                        'webpack/hot/dev-server',
+                        'webpack-hot-middleware/client?reload=true',
+                    ];
+                    if (_.isObject(devEntries)) {
+                        const firstKey = Object.keys(devEntries)[0];
+                        const value = devEntries[firstKey];
+                        devEntries[firstKey] = [
+                            ...hotReloadEntries,
+                            ...(!_.isArray(value) ? [value] : value),
+                        ];
+                    } else if (_.isString(devEntries) || _.isArray(devEntries)) {
+                        devEntries = [
+                            ...hotReloadEntries,
+                            ...(!_.isArray(devEntries) ? [devEntries] : devEntries),
+                        ];
                     }
-                    entries.forEach((entry) => {
-                        const entryParts = entry.split(',');
-                        newEntries[entryParts[0]] = entryParts.slice(1);
-                    });
-                    entries = newEntries;
-                } else if (!entries) {
-                    entries = {
-                        main: './index',
-                    };
                 }
 
                 const templateData = {
+                    options: this.options,
                     srcPath: jsSrcPath,
+                    devContext,
                     tmpPath: jsTmpPath,
                     destPath: jsDestPath,
                     publicPath,
                     entries,
+                    distEntries,
+                    devEntries,
                 };
 
                 let configSrcPath;
@@ -382,15 +493,21 @@ module.exports = class AppGenerator extends Generator {
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
 
-                if (_.get(this.options, 'webpack-config-build')) {
-                    configSrcPath = _.get(this.options, 'webpack-config-build-path') || this.templatePath('webpack.config.build.js');
-                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.build.js'));
+                if (_.get(this.options, 'webpack-config-base')) {
+                    configSrcPath = _.get(this.options, 'webpack-config-base-path') || this.templatePath('webpack.config.base.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.base.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
 
-                if (this.options.browsersync && _.get(this.options, 'webpack-config-browsersync')) {
-                    configSrcPath = _.get(this.options, 'webpack-config-browsersync-path') || this.templatePath('webpack.config.browsersync.js');
-                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.browsersync.js'));
+                if (_.get(this.options, 'webpack-config-dist')) {
+                    configSrcPath = _.get(this.options, 'webpack-config-dist-path') || this.templatePath('webpack.config.dist.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dist.js'));
+                    this.fs.copyTpl(configSrcPath, configDestPath, templateData);
+                }
+
+                if (this.options.browsersync && _.get(this.options, 'webpack-config-dev')) {
+                    configSrcPath = _.get(this.options, 'webpack-config-dev-path') || this.templatePath('webpack.config.dev.js');
+                    configDestPath = this.destinationPath(path.join(buildPath, 'webpack.config.dev.js'));
                     this.fs.copyTpl(configSrcPath, configDestPath, templateData);
                 }
             },
@@ -444,18 +561,26 @@ module.exports = class AppGenerator extends Generator {
                     scriptsBuildFiles.push('npm run copy');
                 }
 
+                if (_.get(this.options, 'release')) {
+                    scripts.release = path.join(buildPath, 'release.sh');
+                }
+
                 if (_.get(this.options, 'browsersync')) {
                     const browserSyncPath = path.join(buildPath, 'browsersync.js');
-                    scripts.browsersync = `node ${browserSyncPath}`;
+                    scripts.browsersync = `node -r babel-register ${browserSyncPath}`;
                     scripts['server:prepare'] = 'echo "Preparing server..."';
-                    scripts.server = 'npm run server:prepare && concurrently "npm run watch" "npm run browsersync"';
+                    if (_.get(this.options, 'watch')) {
+                        scripts.server = 'npm run server:prepare && concurrently "npm run watch" "npm run browsersync"';
+                    } else {
+                        scripts.server = 'npm run server:prepare && npm run browsersync';
+                    }
                     scripts.start = 'npm run server';
                 }
 
                 if (_.get(this.options, 'modernizr')) {
                     const modernizrPath = path.join(buildPath, 'modernizr.js');
-                    scripts['modernizr:dist'] = `node ${modernizrPath} --prod`;
-                    scripts['modernizr:server'] = `node ${modernizrPath}`;
+                    scripts['modernizr:dist'] = `node -r babel-register ${modernizrPath} --dist`;
+                    scripts['modernizr:server'] = `node -r babel-register ${modernizrPath}`;
                     scripts.modernizr = 'npm run modernizr:dist';
                     scripts['build:modernizr'] = 'npm run modernizr:dist';
                     if (_.get(this.options, 'browsersync')) {
@@ -467,7 +592,7 @@ module.exports = class AppGenerator extends Generator {
                 }
 
                 if (_.get(this.options, 'images')) {
-                    scripts['imagemin:dist'] = 'node ./build/imagemin.js';
+                    scripts['imagemin:dist'] = 'node -r babel-register ./build/imagemin.js';
                     scripts.imagemin = 'npm run imagemin:dist';
                     scripts['build:images'] = 'npm run imagemin:dist';
                     scriptsBuild.push('npm run build:images');
@@ -483,8 +608,8 @@ module.exports = class AppGenerator extends Generator {
 
                     scripts['postcss:dist'] = `postcss -c ${postcssConfigFile} -u autoprefixer -u cssnano -d ${scssDestPath} ${path.join(scssTmpPath, '/**/*.css')}`;
                     scripts.postcss = 'npm run postcss:dist';
-                    scripts['sass:dist'] = `node-sass -r ${scssSrcPath} --output ${scssTmpPath}`;
-                    scripts['sass:watch'] = `node-sass -r --watch ${scssSrcPath} --output ${scssTmpPath}`;
+                    scripts['sass:dist'] = `node-sass --source-map .tmp/css --include-path ./node_modules -r ${scssSrcPath} --output ${scssTmpPath}`;
+                    scripts['sass:watch'] = `node-sass --source-map .tmp/css --include-path ./node_modules -r --watch ${scssSrcPath} --output ${scssTmpPath}`;
                     scripts['styles:dist'] = 'npm run sass:dist && npm run postcss:dist';
                     scripts['styles:watch'] = 'npm run sass:watch';
                     scripts.styles = 'npm run styles:dist';
@@ -504,13 +629,13 @@ module.exports = class AppGenerator extends Generator {
                 }
 
                 if (_.get(this.options, 'js')) {
-                    const webpackConfigFile = path.join(buildPath, 'webpack.config.build.js');
+                    const webpackConfigFile = path.join(buildPath, 'webpack.config.js');
                     const jsPath = _.get(this.options, 'js-path', 'js');
                     const jsSrcPath = _.get(this.options, 'js-src-path', null) || path.join(srcPath, jsPath);
                     scripts['lint:dist'] = `eslint ${path.join(jsSrcPath, '/**.js')}`;
                     scripts.lint = 'npm run lint:dist';
                     scripts.jscs = `jscs ${path.join(jsSrcPath, '/**.js')}`;
-                    scripts['webpack:dist'] = `webpack --config ${webpackConfigFile}`;
+                    scripts['webpack:dist'] = `node -r babel-register ./node_modules/webpack/bin/webpack --env=dist  --config ${webpackConfigFile} --progress --colors`;
                     scripts.webpack = 'npm run webpack:dist';
                     scripts['scripts:dist'] = 'npm run webpack:dist';
                     scripts.scripts = 'npm run scripts:dist';
@@ -551,14 +676,18 @@ module.exports = class AppGenerator extends Generator {
                     return;
                 }
 
-                this.npmInstall([
+                this.yarnInstall([
                     'autoprefixer@latest',
                     'babel-core@latest',
                     'babel-loader@latest',
+                    'babel-register@latest',
+                    'babel-plugin-dynamic-import-node@latest',
+                    'babel-plugin-syntax-dynamic-import@latest',
+                    'babel-plugin-transform-es2015-spread@latest',
+                    'babel-plugin-transform-object-rest-spread@latest',
                     'babel-plugin-transform-class-properties@latest',
-                    'babel-preset-es2015@latest',
+                    'babel-preset-env@latest',
                     'babel-preset-react@latest',
-                    'babel-preset-stage-0@latest',
                     'brfs@latest',
                     'browser-sync@latest',
                     'bs-fullscreen-message@latest',
@@ -568,12 +697,17 @@ module.exports = class AppGenerator extends Generator {
                     'cssnano@latest',
                     'customizr@latest',
                     'expose-loader@latest',
+                    'extract-text-webpack-plugin@latest',
                     'html-loader@latest',
                     'imagemin-cli@latest',
+                    'imagemin-mozjpeg@latest',
+                    'imagemin-pngquant@latest',
                     'imports-loader@latest',
                     'json-loader@latest',
                     'node-sass@latest',
                     'postcss-cli@latest',
+                    'postcss-loader@latest',
+                    'pretty-bytes@latest',
                     'proxy-middleware@latest',
                     'raw-loader@latest',
                     'transform-loader@latest',
@@ -584,9 +718,27 @@ module.exports = class AppGenerator extends Generator {
                     'svg-react-loader@latest',
                     'webpack@latest',
                     'webpack-dev-middleware@latest',
+                    'webpack-merge@latest',
                 ], {
-                    saveDev: true,
+                    dev: true,
                 });
+
+                if (this.options['webpack-html']) {
+                    this.yarnInstall([
+                        'autoprefixer@latest',
+                    ], {
+                        dev: true,
+                    });
+                }
+
+                if (this.options['webpack-hot-reload']) {
+                    this.yarnInstall([
+                        'webpack-hot-middleware@latest',
+                        'react-hot-loader@^3.0.0-beta.7',
+                    ], {
+                        dev: true,
+                    });
+                }
             },
 
             sass() {

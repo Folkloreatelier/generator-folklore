@@ -1,9 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-const HomePage = (props) => {
-    return (
-        <div>Accueil</div>
-    );
-};
+const HomePage = props => (
+    <div>Accueil</div>
+);
 
-export default HomePage;
+const HomePageContainer = connect(state => ({
+    test: state.test,
+}))(HomePage);
+
+export default HomePageContainer;

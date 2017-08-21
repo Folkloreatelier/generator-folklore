@@ -1,8 +1,8 @@
 <?php namespace <%= namespace %>;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-class <%= baseClassName %>ServiceProvider extends ServiceProvider
+class <%= baseClassName %>ServiceProvider extends BaseServiceProvider
 {
 
     /**

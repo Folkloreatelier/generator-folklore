@@ -9,7 +9,7 @@ module.exports = class JsGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
@@ -27,6 +27,21 @@ module.exports = class JsGenerator extends Generator {
         this.option('relay-graphql-path', {
             type: String,
             defaults: './graphql',
+        });
+
+        this.option('react-hot-reload', {
+            type: Boolean,
+            defaults: false,
+        });
+
+        this.option('babel-compile', {
+            type: Boolean,
+            defaults: false,
+        });
+
+        this.option('babel-exclude-runtime', {
+            type: Boolean,
+            defaults: false,
         });
 
         this.option('path', {
@@ -54,11 +69,11 @@ module.exports = class JsGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(Generator.prompts.project_name);
                 }
 
-                if (!this.type) {
+                if (!this.options.type) {
                     prompts.push({
                         type: 'list',
                         name: 'type',
@@ -96,7 +111,7 @@ module.exports = class JsGenerator extends Generator {
                         },
                     ],
                     when: (answers) => {
-                        const type = this.type || answers.type;
+                        const type = this.options.type || answers.type;
                         return type === 'react';
                     },
                 });
@@ -108,15 +123,15 @@ module.exports = class JsGenerator extends Generator {
                 return this.prompt(prompts)
                     .then((answers) => {
                         if (answers.type) {
-                            this.type = answers.type;
+                            this.options.type = answers.type;
                         }
 
                         if (answers.react_features) {
                             this.react_features = answers.react_features;
                         }
 
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
                     });
             },
@@ -127,14 +142,14 @@ module.exports = class JsGenerator extends Generator {
         return {
             directory() {
                 const jsPath = _.get(this.options, 'path');
-                const srcPath = this.templatePath(this.type);
+                const srcPath = this.templatePath(this.options.type);
                 const destPath = this.destinationPath(jsPath);
-                this.directory(srcPath, destPath);
+                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
 
                 if (this.react_features.indexOf('relay') !== -1) {
                     const relaySrcPath = this.templatePath('relay');
                     const relayDestPath = this.destinationPath(jsPath);
-                    this.directory(relaySrcPath, relayDestPath);
+                    /* this.directory */this.fs.copyTpl(relaySrcPath, relayDestPath, this);
                 }
             },
 
@@ -145,7 +160,7 @@ module.exports = class JsGenerator extends Generator {
                 const graphqlPath = _.get(this.options, 'relay-graphql-path');
                 const srcPath = this.templatePath('graphql');
                 const destPath = this.destinationPath(graphqlPath);
-                this.directory(srcPath, destPath);
+                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
             },
 
             config() {
@@ -164,10 +179,16 @@ module.exports = class JsGenerator extends Generator {
 
             babelrc() {
                 const projectPath = _.get(this.options, 'project-path');
+                const reactHotReloading = _.get(this.options, 'react-hot-reload');
+                const babelCompile = _.get(this.options, 'babel-compile');
+                const babelExcludeRuntime = _.get(this.options, 'babel-exclude-runtime');
                 const srcPath = this.templatePath('babelrc');
                 const destPath = this.destinationPath(path.join(projectPath, '.babelrc'));
                 this.fs.copyTpl(srcPath, destPath, {
                     react_features: this.react_features,
+                    hotReloading: reactHotReloading,
+                    compile: babelCompile,
+                    excludeRuntime: babelExcludeRuntime,
                 });
             },
 
@@ -177,7 +198,7 @@ module.exports = class JsGenerator extends Generator {
                 const destPath = this.destinationPath(path.join(projectPath, 'package.json'));
 
                 const packageJSON = this.fs.readJSON(srcPath);
-                packageJSON.name = this.project_name;
+                packageJSON.name = this.options['project-name'];
                 const currentPackageJSON = this.fs.exists(destPath) ?
                     this.fs.readJSON(destPath) : {};
                 this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
@@ -192,7 +213,9 @@ module.exports = class JsGenerator extends Generator {
                     return;
                 }
 
-                this.npmInstall([
+                this.yarnInstall([
+                    'babel-plugin-add-module-exports@latest',
+                    'babel-preset-airbnb@latest',
                     'domready@latest',
                     'fastclick@latest',
                     'hoist-non-react-statics@latest',
@@ -202,11 +225,13 @@ module.exports = class JsGenerator extends Generator {
                     'keymirror@latest',
                     'lodash@latest',
                     'react@latest',
+                    'prop-types@latest',
                     'react-dom@latest',
                     'react-redux@latest',
-                    'react-router@latest',
+                    'history@3.0',
+                    'react-router@3.0',
                     'react-router-scroll@latest',
-                    'react-router-redux@latest',
+                    'react-router-redux@4.0',
                     'redux@latest',
                     'redux-thunk@latest',
                     'redux-logger@latest',
@@ -214,34 +239,39 @@ module.exports = class JsGenerator extends Generator {
                     'redux-devtools@latest',
                     'redux-devtools-log-monitor@latest',
                     'redux-devtools-dock-monitor@latest',
-                ], {
-                    save: true,
-                });
+                ]);
 
-                if (this.react_features.indexOf('relay') !== -1) {
-                    this.npmInstall([
-                        'react-relay@latest',
+                if (this.options['webpack-hot-reload']) {
+                    this.yarnInstall([
+                        'react-hot-loader@^3.0.0-beta.7',
                     ], {
-                        save: true,
-                    });
-
-                    this.npmInstall([
-                        'babel-relay-plugin@latest',
-                        'babel-plugin-transform-relay-hot@latest',
-                    ], {
-                        saveDev: true,
+                        dev: true,
                     });
                 }
 
-                this.npmInstall([
+                if (this.react_features.indexOf('relay') !== -1) {
+                    this.yarnInstall([
+                        'react-relay@latest',
+                    ]);
+
+                    this.yarnInstall([
+                        'babel-relay-plugin@latest',
+                        'babel-plugin-transform-relay-hot@latest',
+                    ], {
+                        dev: true,
+                    });
+                }
+
+                this.yarnInstall([
                     'babel-eslint@latest',
-                    'eslint@latest',
-                    'eslint-config-airbnb@latest',
-                    'eslint-plugin-import@latest',
-                    'eslint-plugin-jsx-a11y@latest',
-                    'eslint-plugin-react@latest',
+                    'eslint@3.19.0',
+                    'eslint-config-airbnb@15.0.2',
+                    'eslint-plugin-import@2.6.1',
+                    'eslint-plugin-jsx-a11y@5.1.1',
+                    'eslint-plugin-react@7.1.0',
+                    'html-webpack-plugin@latest',
                 ], {
-                    saveDev: true,
+                    dev: true,
                 });
             },
         };

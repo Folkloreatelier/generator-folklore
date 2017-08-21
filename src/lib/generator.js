@@ -1,14 +1,14 @@
-import generators from 'yeoman-generator';
+import BaseGenerator from 'yeoman-generator';
 import Immutable from 'immutable';
 import path from 'path';
 import _ from 'lodash';
 
-class Generator extends generators.Base {
+class Generator extends BaseGenerator {
 
     static prompts = {
         project_name: {
             type: 'input',
-            name: 'project_name',
+            name: 'project-name',
             message: 'What is the name of the project?',
         },
     };

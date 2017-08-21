@@ -7,7 +7,7 @@ module.exports = class ScssGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
@@ -38,7 +38,7 @@ module.exports = class ScssGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(ScssGenerator.prompts.project_name);
                 }
 
@@ -48,8 +48,8 @@ module.exports = class ScssGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
                     });
             },
@@ -61,7 +61,7 @@ module.exports = class ScssGenerator extends Generator {
             directory() {
                 const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath(_.get(this.options, 'path'));
-                this.directory(srcPath, destPath);
+                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
             },
 
             sasslint() {

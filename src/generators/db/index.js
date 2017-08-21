@@ -6,49 +6,49 @@ var mysql = require('mysql');
 var createMySQLClient = require('../../lib/mysql');
 
 module.exports = Generator.extend({
-    
+
     // The name `constructor` is important here
     constructor: function ()
     {
         Generator.apply(this, arguments);
-        
-        this.argument('database_name', {
+
+        this.argument('database-name', {
             type: String,
             required: false
         });
-        
+
         this.option('user', {
             type: String
         });
-        
+
         this.option('password', {
             type: String
         });
-        
+
         this.option('skip-user', {
             type: Boolean,
             defaults: false
         });
-        
+
         this.option('mysql-reset', {
             type: Boolean,
             defaults: false
         });
-        
+
         this.option('mysql-host', {
             type: String
         });
-        
+
         this.option('mysql-user', {
             type: String
         });
-        
+
         this.option('mysql-password', {
             type: String
         });
-        
+
         this.mysql = null;
-        
+
         this.on('end', function()
         {
             if(this.mysql)
@@ -58,7 +58,7 @@ module.exports = Generator.extend({
             }
         });
     },
-    
+
     initializing: function()
     {
         var configOptions = {
@@ -69,34 +69,34 @@ module.exports = Generator.extend({
         var force = _.get(this.options, 'mysql-reset');
         this.config = this.updateConfig(configOptions, force);
     },
-    
+
     prompting: {
-        
+
         welcome: function()
         {
             if(this.options.quiet)
             {
                 return;
             }
-            
+
             console.log(chalk.yellow('\n----------------------'));
             console.log('Database Generator');
             console.log(chalk.yellow('----------------------\n'));
         },
-        
+
         prompts: function ()
         {
             var prompts = [];
-            
-            if(!this.database_name)
+
+            if(!this.options['database-name'])
             {
                 prompts.push({
                     type: 'input',
-                    name: 'database_name',
+                    name: 'database-name',
                     message: 'Name of the database:'
                 });
             }
-            
+
             if(!this.config.mysql_host)
             {
                 prompts.push({
@@ -106,7 +106,7 @@ module.exports = Generator.extend({
                     default: 'localhost'
                 });
             }
-            
+
             if(!this.config.mysql_user)
             {
                 prompts.push({
@@ -116,7 +116,7 @@ module.exports = Generator.extend({
                     default: 'root'
                 });
             }
-            
+
             if(!this.config.mysql_password)
             {
                 prompts.push({
@@ -126,67 +126,67 @@ module.exports = Generator.extend({
                     default: 'root'
                 });
             }
-            
+
             if(!prompts.length)
             {
                 return;
             }
-            
+
             return this.prompt(prompts)
                 .then(function (answers)
                 {
                     var configPrompt = _.pick(answers, ['mysql_host', 'mysql_user', 'mysql_password']);
                     this.config = this.updateConfig(configPrompt);
-                    
-                    if(answers.database_name)
+
+                    if(answers['database-name'])
                     {
-                        this.database_name = answers.database_name;
+                        this.options['database-name'] = answers['database-name'];
                     }
                 }.bind(this));
         }
     },
-    
+
     configuring: function()
     {
         var config = this.getConfig();
-        
+
         this.mysql = mysql.createConnection({
             host     : config.mysql_host,
             user     : config.mysql_user,
             password : config.mysql_password
         });
         this.mysqlClient = createMySQLClient(this.mysql);
-        
+
         this.mysql.connect();
     },
-    
+
     writing:
     {
         createDatabase: function()
         {
             var done = this.async();
-            this.mysqlClient.createDatabase(this.database_name)
+            this.mysqlClient.createDatabase(this.options['database-name'])
                 .then(function()
                 {
-                    console.log('Database created: '.green+this.database_name);
+                    console.log('Database created: '.green+this.options['database-name']);
                     done();
                 }.bind(this), function(err)
                 {
                     return done(err);
                 });
         },
-        
+
         createUser: function()
         {
             if(this.options['skip-user'])
             {
                 return;
             }
-            
+
             var done = this.async();
-            var user = _.get(this.options, 'user') || this.database_name;
+            var user = _.get(this.options, 'user') || this.options['database-name'];
             var password = _.get(this.options, 'password') || this._getPassword();
-            this.mysqlClient.createDatabaseUser(this.database_name, user, password)
+            this.mysqlClient.createDatabaseUser(this.options['database-name'], user, password)
                 .then(function()
                 {
                     console.log('Database user created: '.green+user);
@@ -197,10 +197,10 @@ module.exports = Generator.extend({
                 });
         }
     },
-    
+
     _getPassword: function()
     {
         return 'password';
     }
-    
+
 });

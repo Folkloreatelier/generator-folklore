@@ -20,12 +20,12 @@ module.exports = class LaravelGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
 
-        this.argument('project_host', {
+        this.argument('project-host', {
             type: String,
             required: false,
         });
@@ -133,17 +133,17 @@ module.exports = class LaravelGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(Generator.prompts.project_name);
                 }
 
-                if (!this.project_host) {
+                if (!this.options['project-host']) {
                     prompts.push({
                         type: 'input',
-                        name: 'project_host',
+                        name: 'project-host',
                         message: 'What is the host of the project?',
                         default: (answers) => {
-                            const projectName = (this.project_name || answers.project_name);
+                            const projectName = (this.options['project-name'] || answers['project-name']);
                             return projectName.match(/.[^.]+$/) ? projectName : `${projectName}.com`;
                         },
                     });
@@ -153,10 +153,10 @@ module.exports = class LaravelGenerator extends Generator {
                     if (!this.options['db-name'] || !this.options['db-name'].length) {
                         prompts.push({
                             type: 'input',
-                            name: 'db_name',
+                            name: 'db-name',
                             message: 'Database name:',
                             default: (answers) => {
-                                const dbName = this.project_name || answers.project_name;
+                                const dbName = this.options['project-name'] || answers['project-name'];
                                 return LaravelGenerator.safeDbString(dbName);
                             },
                         });
@@ -165,10 +165,10 @@ module.exports = class LaravelGenerator extends Generator {
                     if (!this.options['db-user'] || !this.options['db-user'].length) {
                         prompts.push({
                             type: 'input',
-                            name: 'db_user',
+                            name: 'db-user',
                             message: 'Database user:',
                             default: (answers) => {
-                                const userName = this.project_name || answers.project_name;
+                                const userName = this.options['project-name'] || answers['project-name'];
                                 return LaravelGenerator.safeDbString(userName);
                             },
                         });
@@ -177,7 +177,7 @@ module.exports = class LaravelGenerator extends Generator {
                     if (!this.options['db-password'] || !this.options['db-password'].length) {
                         prompts.push({
                             type: 'input',
-                            name: 'db_password',
+                            name: 'db-password',
                             message: 'Database password:',
                             default: 'leave empty for auto-generated',
                         });
@@ -190,19 +190,19 @@ module.exports = class LaravelGenerator extends Generator {
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
-                        if (answers.project_host) {
-                            this.project_host = answers.project_host;
+                        if (answers['project-host']) {
+                            this.options['project-host'] = answers['project-host'];
                         }
 
                         if (this.options.db) {
-                            this.db_name = _.get(answers, 'db_name', this.options['db-name']);
-                            this.db_user = _.get(answers, 'db_user', this.options['db-user']);
-                            this.db_password = _.get(answers, 'db_password', this.options['db-password']) || '';
-                            if (!this.db_password.length || this.db_password === 'leave empty for auto-generated') {
-                                this.db_password = LaravelGenerator.getPassword();
+                            this.options['db-name'] = _.get(answers, 'db-name', this.options['db-name']);
+                            this.options['db-user'] = _.get(answers, 'db-user', this.options['db-user']);
+                            this.options['db-password'] = _.get(answers, 'db-password', this.options['db-password']) || '';
+                            if (!this.options['db-password'].length || this.options['db-password'] === 'leave empty for auto-generated') {
+                                this.options['db-password'] = LaravelGenerator.getPassword();
                             }
                         }
                     });
@@ -224,77 +224,69 @@ module.exports = class LaravelGenerator extends Generator {
         const imagesPath = _.get(this.options, 'images-path');
         const skipInstall = _.get(this.options, 'skip-install', false);
         const urlLocal = _.template(_.get(this.options, 'local-url'))({
-            project_host: this.project_host,
-            project_name: this.project_name,
+            project_host: this.options['project-host'],
+            project_name: this.options['project-name'],
         }).replace(/^(http)?(s)?(:\/\/)?/, 'http$2://');
         const urlProxy = _.template(_.get(this.options, 'proxy-url', _.get(this.options, 'local-url')))({
-            project_host: this.project_host,
-            project_name: this.project_name,
+            project_host: this.options['project-host'],
+            project_name: this.options['project-name'],
         }).replace(/^(http)?(s)?(:\/\/)?/, 'http$2://');
 
         this.composeWith('folklore:js', {
-            arguments: [this.project_name],
-            options: {
-                'project-path': projectPath,
-                path: jsSrcPath,
-                'skip-install': skipInstall,
-                quiet: true,
-            },
+            'project-name': this.options['project-name'],
+            'project-path': projectPath,
+            path: jsSrcPath,
+            'skip-install': skipInstall,
+            quiet: true,
         });
 
         this.composeWith('folklore:scss', {
-            arguments: [this.project_name],
-            options: {
-                'project-path': projectPath,
-                path: scssSrcPath,
-                quiet: true,
-            },
+            'project-name': this.options['project-name'],
+            'project-path': projectPath,
+            path: scssSrcPath,
+            quiet: true,
         });
 
         this.composeWith('folklore:build', {
-            arguments: [this.project_name],
-            options: {
-                'project-path': projectPath,
-                path: buildPath,
-                'tmp-path': tmpPath,
-                'src-path': assetsPath,
-                'dest-path': publicPath,
-                'js-path': jsPath,
-                'scss-path': scssPath,
-                'css-path': cssPath,
-                'images-path': imagesPath,
-                'webpack-entry': {
-                    main: './index',
-                    config: './config',
-                    vendor: ['lodash'],
-                },
-                'browsersync-base-dir': [
-                    tmpPath,
-                    publicPath,
-                ],
-                'browsersync-host': urlLocal.replace(/^https?:\/\//, ''),
-                'browsersync-proxy': urlProxy,
-                'browsersync-files': [
-                    'config/**/*.php',
-                    'app/**/*.php',
-                    'resources/views/**/*.php',
-                    path.join(tmpPath, 'css/*.css'),
-                    path.join(publicPath, '*.html'),
-                    path.join(publicPath, '**/*.{jpg,png,ico,gif}'),
-                ],
-                'skip-install': skipInstall,
-                quiet: true,
+            'project-name': this.options['project-name'],
+            'project-path': projectPath,
+            path: buildPath,
+            'tmp-path': tmpPath,
+            'src-path': assetsPath,
+            'dest-path': publicPath,
+            'js-path': jsPath,
+            'scss-path': scssPath,
+            'css-path': cssPath,
+            'images-path': imagesPath,
+            'webpack-entries': {
+                main: './index',
+                config: './config',
+                vendor: ['lodash'],
             },
+            'browsersync-base-dir': [
+                tmpPath,
+                publicPath,
+            ],
+            'browsersync-host': urlLocal.replace(/^https?:\/\//, ''),
+            'browsersync-proxy': urlProxy,
+            'browsersync-files': [
+                'config/**/*.php',
+                'app/**/*.php',
+                'resources/views/**/*.php',
+                path.join(tmpPath, 'css/*.css'),
+                path.join(publicPath, '*.html'),
+                path.join(publicPath, '**/*.{jpg,png,ico,gif}'),
+            ],
+            'skip-install': skipInstall,
+            quiet: true,
         });
 
         if (this.options.db) {
             this.composeWith('folklore:db', {
-                arguments: [this.db_name],
-                options: {
-                    user: this.db_user,
-                    password: this.db_password,
-                    quiet: true,
-                },
+                'db-name': this.options['db-name'],
+                user: this.options['db-user'],
+                password: this.options['db-password'],
+                quiet: true,
             });
         }
     }
@@ -335,6 +327,7 @@ module.exports = class LaravelGenerator extends Generator {
                     'routes/web.php',
                     'public/css/app.css',
                     'public/js/app.js',
+                    'app/Providers/AppServiceProvider.php',
                     'resources/assets/sass',
                     'resources/assets/js',
                     'resources/assets/js/app.js',
@@ -362,6 +355,7 @@ module.exports = class LaravelGenerator extends Generator {
                     require: {
                         'folklore/image': '^0.3',
                         'folklore/locale': '^2.1',
+                        'folklore/laravel-hypernova': '^0.1',
                         'barryvdh/laravel-debugbar': '^2.3',
                     },
                 });
@@ -369,20 +363,20 @@ module.exports = class LaravelGenerator extends Generator {
 
             env() {
                 const url = _.template(_.get(this.options, 'local-url'))({
-                    project_host: this.project_host,
-                    project_name: this.project_name,
+                    project_host: this.options['project-host'],
+                    project_name: this.options['project-name'],
                 }).replace(/^(http)?(s)?(:\/\/)?/, 'http$2://');
 
                 const urlLocal = _.template(_.get(this.options, 'local-url'))({
-                    project_host: this.project_host,
-                    project_name: this.project_name,
+                    project_host: this.options['project-host'],
+                    project_name: this.options['project-name'],
                 }).replace(/^(http)?(s)?(:\/\/)?/, 'http$2://');
 
                 const templateData = {
-                    project_name: this.project_name,
-                    db_name: this.db_name,
-                    db_user: this.db_user,
-                    db_password: this.db_password,
+                    project_name: this.options['project-name'],
+                    db_name: this.options['db-name'],
+                    db_user: this.options['db-user'],
+                    db_password: this.options['db-password'],
                     url: urlLocal,
                 };
 
@@ -433,7 +427,7 @@ module.exports = class LaravelGenerator extends Generator {
                         this.fs.copy(source, destination);
                     } else {
                         this.fs.copyTpl(source, destination, {
-                            project_name: this.project_name,
+                            project_name: this.options['project-name'],
                         });
                     }
                 });

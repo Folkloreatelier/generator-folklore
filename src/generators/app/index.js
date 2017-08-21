@@ -7,7 +7,7 @@ module.exports = class AppGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.argument('project_name', {
+        this.argument('project-name', {
             type: String,
             required: false,
         });
@@ -33,11 +33,11 @@ module.exports = class AppGenerator extends Generator {
             prompts() {
                 const prompts = [];
 
-                if (!this.project_name) {
+                if (!this.options['project-name']) {
                     prompts.push(Generator.prompts.project_name);
                 }
 
-                if (!this.type) {
+                if (!this.options.type) {
                     prompts.push({
                         type: 'list',
                         name: 'type',
@@ -74,11 +74,11 @@ module.exports = class AppGenerator extends Generator {
                 return this.prompt(prompts)
                     .then((answers) => {
                         if (answers.type) {
-                            this.type = answers.type;
+                            this.options.type = answers.type;
                         }
 
-                        if (answers.project_name) {
-                            this.project_name = answers.project_name;
+                        if (answers['project-name']) {
+                            this.options['project-name'] = answers['project-name'];
                         }
                     });
             },
@@ -86,17 +86,9 @@ module.exports = class AppGenerator extends Generator {
     }
 
     configuring() {
-        const composeWith = `folklore:${this.type}`;
-        const args = [];
-        const opts = this.options;
-
-        if (this.project_name && this.project_name.length) {
-            args.push(this.project_name);
-        }
-
+        const composeWith = `folklore:${this.options.type}`;
         this.composeWith(composeWith, {
-            arguments: args,
-            options: opts,
+            ...this.options,
         });
     }
 

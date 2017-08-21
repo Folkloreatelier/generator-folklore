@@ -5,16 +5,15 @@ module.exports = {
      */
     browsersync: {
         server: {
-            baseDir: <%- JSON.stringify(browserSyncBaseDir).replace(/\"/gi, '\'') %>,
+            baseDir: <%- JSON.stringify(browserSyncBaseDir, null, 4).replace(/\"/gi, '\'') %>,
             index: 'index.html',
-        },
+        },<% if(browserSyncProxy) { %>
 
-        <% if(browserSyncProxy) { %>
         host: '<%= browserSyncHost %>',
         proxy: '<%= browserSyncProxy %>',
         <% } %>
-
-        files: <%- JSON.stringify(browserSyncFiles).replace(/\"/gi, '\'') %>,
+        files: <%- JSON.stringify(browserSyncFiles, null, 4).replace(/\"/gi, '\'') %>,
+        ghostMode: false,
     },
 
     /**
@@ -49,8 +48,23 @@ module.exports = {
      * PostCSS
      */
     postcss: {
-        autoprefixer: {
-            browsers: '> 5%',
+        map: {
+            inline: false,
+        },
+        plugins: {
+            autoprefixer: {},
+            cssnano: {
+                preset: 'default',
+                zindex: false,
+            },
+        },
+        env: {
+            dev: {
+                plugins: {
+                    autoprefixer: false,
+                    cssnano: false,
+                },
+            },
         },
     },
 
@@ -76,7 +90,7 @@ module.exports = {
 
         tests: [],
 
-        excludeTests: [],
+        excludeTests: ['hidden'],
 
         crawl: true,
 

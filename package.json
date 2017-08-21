@@ -12,7 +12,8 @@
     "compile": "babel -d lib/ src/",
     "build": "npm run clean:lib && npm run compile && npm run copy:templates",
     "prepublish": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "npm run build && git add . && git commit -am 'Build' && git checkout master && git merge develop && npm version patch && git push origin master --tags && git checkout develop && git merge master && git push origin develop"
   },
   "files": [
     "generators/app",

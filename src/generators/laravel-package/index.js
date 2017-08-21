@@ -127,7 +127,7 @@ module.exports = class ComposerPackageGenerator extends Generator {
             testCase() {
                 const { baseClassName } = this.templateData;
                 const srcPath = this.templatePath('TestCase.php');
-                const destPath = this.destinationPath(`tests/${baseClassName}TestCase.php`);
+                const destPath = this.destinationPath(`tests/${baseClassName}Test.php`);
                 this.fs.copyTpl(srcPath, destPath, this.templateData);
             },
 

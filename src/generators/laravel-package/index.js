@@ -91,11 +91,12 @@ module.exports = class ComposerPackageGenerator extends Generator {
     }
 
     configuring() {
-        const baseName = this.options['package-name'].split('/')[1];
+        const namespaceParts = this.options['package-namespace'].split('\\');
+        const baseName = namespaceParts[1];
         this.templateData = {
             packageName: this.options['package-name'],
             namespace: this.options['package-namespace'],
-            namespacePath: this.options['package-namespace'].split('\\').join('/'),
+            namespacePath: namespaceParts.join('/'),
             baseClassName: pascalCase(baseName),
             basePath: this.options['package-name'],
             baseName,
@@ -126,7 +127,7 @@ module.exports = class ComposerPackageGenerator extends Generator {
             testCase() {
                 const { baseClassName } = this.templateData;
                 const srcPath = this.templatePath('TestCase.php');
-                const destPath = this.destinationPath(`tests/${baseClassName}TesCase.php`);
+                const destPath = this.destinationPath(`tests/${baseClassName}TestCase.php`);
                 this.fs.copyTpl(srcPath, destPath, this.templateData);
             },
 

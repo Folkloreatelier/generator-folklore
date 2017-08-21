@@ -55,7 +55,7 @@ module.exports = class ComposerPackageGenerator extends Generator {
                         message: 'Name of the package:',
                         default: () => {
                             const parts = process.cwd().split(path.sep);
-                            return parts[parts.length - 1];
+                            return `folklore/${parts[parts.length - 1]}`;
                         },
                     });
                 }

@@ -13,7 +13,7 @@
     <testsuites>
         <testsuite name="<%= namespace %> Test Suite">
             <directory>./tests/</directory>
-            <exclude>./tests/<%= baseClassName %>TestCase.php</exclude>
+            <exclude>./tests/TestCase.php</exclude>
         </testsuite>
     </testsuites>
     <filter>

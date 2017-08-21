@@ -686,6 +686,7 @@ module.exports = class AppGenerator extends Generator {
                     'babel-plugin-transform-es2015-spread@latest',
                     'babel-plugin-transform-object-rest-spread@latest',
                     'babel-plugin-transform-class-properties@latest',
+                    'babel-plugin-transform-runtime@latest',
                     'babel-preset-env@latest',
                     'babel-preset-react@latest',
                     'brfs@latest',

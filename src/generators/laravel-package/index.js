@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import chalk from 'chalk';
+import path from 'path';
 import { pascalCase } from 'change-case';
 import Generator from '../../lib/generator';
 
@@ -52,6 +53,10 @@ module.exports = class ComposerPackageGenerator extends Generator {
                         type: 'input',
                         name: 'package-name',
                         message: 'Name of the package:',
+                        default: () => {
+                            const parts = process.cwd().split(path.sep);
+                            return parts[parts.length - 1];
+                        },
                     });
                 }
 

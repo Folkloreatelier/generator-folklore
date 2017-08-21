@@ -113,6 +113,10 @@ module.exports = class NpmPackageGenerator extends Generator {
                         type: 'input',
                         name: 'package-name',
                         message: 'Name of the package:',
+                        default: () => {
+                            const parts = process.cwd().split(path.sep);
+                            return parts[parts.length - 1];
+                        },
                     });
                 }
 

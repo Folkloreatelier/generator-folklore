@@ -95,27 +95,6 @@ module.exports = class LaravelGenerator extends Generator {
             desc: 'Path for the images',
             defaults: 'img',
         });
-
-        this.option('db', {
-            type: Boolean,
-            desc: 'Create a database',
-            defaults: false,
-        });
-
-        this.option('db-name', {
-            type: String,
-            desc: 'Database name',
-        });
-
-        this.option('db-user', {
-            type: String,
-            desc: 'Database user',
-        });
-
-        this.option('db-password', {
-            type: String,
-            desc: 'Database password',
-        });
     }
 
     get prompting() {
@@ -149,41 +128,6 @@ module.exports = class LaravelGenerator extends Generator {
                     });
                 }
 
-                if (this.options.db) {
-                    if (!this.options['db-name'] || !this.options['db-name'].length) {
-                        prompts.push({
-                            type: 'input',
-                            name: 'db-name',
-                            message: 'Database name:',
-                            default: (answers) => {
-                                const dbName = this.options['project-name'] || answers['project-name'];
-                                return LaravelGenerator.safeDbString(dbName);
-                            },
-                        });
-                    }
-
-                    if (!this.options['db-user'] || !this.options['db-user'].length) {
-                        prompts.push({
-                            type: 'input',
-                            name: 'db-user',
-                            message: 'Database user:',
-                            default: (answers) => {
-                                const userName = this.options['project-name'] || answers['project-name'];
-                                return LaravelGenerator.safeDbString(userName);
-                            },
-                        });
-                    }
-
-                    if (!this.options['db-password'] || !this.options['db-password'].length) {
-                        prompts.push({
-                            type: 'input',
-                            name: 'db-password',
-                            message: 'Database password:',
-                            default: 'leave empty for auto-generated',
-                        });
-                    }
-                }
-
                 if (!prompts.length) {
                     return null;
                 }
@@ -195,15 +139,6 @@ module.exports = class LaravelGenerator extends Generator {
                         }
                         if (answers['project-host']) {
                             this.options['project-host'] = answers['project-host'];
-                        }
-
-                        if (this.options.db) {
-                            this.options['db-name'] = _.get(answers, 'db-name', this.options['db-name']);
-                            this.options['db-user'] = _.get(answers, 'db-user', this.options['db-user']);
-                            this.options['db-password'] = _.get(answers, 'db-password', this.options['db-password']) || '';
-                            if (!this.options['db-password'].length || this.options['db-password'] === 'leave empty for auto-generated') {
-                                this.options['db-password'] = LaravelGenerator.getPassword();
-                            }
                         }
                     });
             },
@@ -273,6 +208,8 @@ module.exports = class LaravelGenerator extends Generator {
             'browsersync-files': [
                 'config/**/*.php',
                 'app/**/*.php',
+                'routes/*.php',
+                'resources/lang/**/*.php',
                 'resources/views/**/*.php',
                 path.join(tmpPath, 'css/*.css'),
                 path.join(publicPath, '*.html'),
@@ -281,15 +218,6 @@ module.exports = class LaravelGenerator extends Generator {
             'skip-install': skipInstall,
             quiet: true,
         });
-
-        if (this.options.db) {
-            this.composeWith('folklore:db', {
-                'db-name': this.options['db-name'],
-                user: this.options['db-user'],
-                password: this.options['db-password'],
-                quiet: true,
-            });
-        }
     }
 
     get writing() {
@@ -375,9 +303,6 @@ module.exports = class LaravelGenerator extends Generator {
 
                 const templateData = {
                     project_name: this.options['project-name'],
-                    db_name: this.options['db-name'],
-                    db_user: this.options['db-user'],
-                    db_password: this.options['db-password'],
                     url: urlLocal,
                 };
 

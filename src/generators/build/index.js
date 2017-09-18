@@ -450,8 +450,11 @@ module.exports = class AppGenerator extends Generator {
                 let devEntries = getWebpackEntries(
                     _.get(this.options, 'webpack-dev-entry', null),
                     _.get(this.options, 'webpack-dev-entries', null),
-                ) || _.clone(entries);
+                );
                 if (this.options['webpack-hot-reload']) {
+                    if (typeof devEntries === 'undefined' || devEntries === null) {
+                        devEntries = _.clone(entries);
+                    }
                     const hotReloadEntries = [
                         'react-hot-loader/patch',
                         'webpack/hot/dev-server',

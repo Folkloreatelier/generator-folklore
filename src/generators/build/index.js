@@ -463,11 +463,11 @@ module.exports = class AppGenerator extends Generator {
                 const jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
                 const devContext = _.get(this.options, 'webpack-dev-context', null);
                 const publicPath = _.get(this.options, 'webpack-public-path', null) || '/';
-                let entries = getWebpackEntries(
+                const entries = getWebpackEntries(
                     _.get(this.options, 'webpack-entry', null),
                     _.get(this.options, 'webpack-entries', []),
                 );
-                let distEntries = getWebpackEntries(
+                const distEntries = getWebpackEntries(
                     _.get(this.options, 'webpack-dist-entry', null),
                     _.get(this.options, 'webpack-dist-entries', null),
                 );
@@ -496,10 +496,6 @@ module.exports = class AppGenerator extends Generator {
                             ...hotReloadEntries,
                             ...(!_.isArray(devEntries) ? [devEntries] : devEntries),
                         ];
-                    }
-                    if (distEntries === null) {
-                        distEntries = entries;
-                        entries = null;
                     }
                 }
 

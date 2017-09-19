@@ -46,9 +46,11 @@ module.exports = env => (
                 env: 'dev',
                 inject: false,
             }),<% } %>
+            new webpack.SourceMapDevToolPlugin({
+                filename: '[file].map',
+                exclude: [/vendor\//],
+            }),
         ],
-
-        cache: false,
 
     })
 );

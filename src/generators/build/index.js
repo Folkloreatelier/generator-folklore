@@ -30,6 +30,30 @@ const getWebpackEntries = (webpackEntry, webpackEntries) => {
     return entries;
 };
 
+const tab = number => ' '.repeat(4 * number);
+const formatWebpackEntries = (entries) => {
+    if (entries === null) {
+        return null;
+    }
+    const lines = [];
+    if (_.isArray(entries)) {
+        lines.push('entry: [');
+        entries.forEach((entry) => {
+            lines.push(`${tab(3)}'${entry}',`);
+        });
+        lines.push(`${tab(2)}],`);
+    } else if (_.isObject(entries)) {
+        lines.push('entry: {');
+        Object.keys(entries).forEach((key) => {
+            lines.push(`${tab(3)}${key}: ${JSON.stringify(entries[key]).replace(/"/gi, "'").replace(/','/gi, "', '")},`);
+        });
+        lines.push(`${tab(2)}},`);
+    } else {
+        lines.push(`entry: ${JSON.stringify(entries, null, 4).replace(/"/gi, "'")},`);
+    }
+    return lines.join('\n');
+};
+
 module.exports = class AppGenerator extends Generator {
 
     // The name `constructor` is important here
@@ -439,13 +463,13 @@ module.exports = class AppGenerator extends Generator {
                 const jsDestPath = _.get(this.options, 'js-dest-path', null) || path.join(destPath, jsPath);
                 const devContext = _.get(this.options, 'webpack-dev-context', null);
                 const publicPath = _.get(this.options, 'webpack-public-path', null) || '/';
-                const entries = getWebpackEntries(
+                let entries = getWebpackEntries(
                     _.get(this.options, 'webpack-entry', null),
                     _.get(this.options, 'webpack-entries', []),
                 );
-                const distEntries = getWebpackEntries(
+                let distEntries = getWebpackEntries(
                     _.get(this.options, 'webpack-dist-entry', null),
-                    _.get(this.options, 'webpack-dist-entries', []),
+                    _.get(this.options, 'webpack-dist-entries', null),
                 );
                 let devEntries = getWebpackEntries(
                     _.get(this.options, 'webpack-dev-entry', null),
@@ -473,9 +497,14 @@ module.exports = class AppGenerator extends Generator {
                             ...(!_.isArray(devEntries) ? [devEntries] : devEntries),
                         ];
                     }
+                    if (distEntries === null) {
+                        distEntries = entries;
+                        entries = null;
+                    }
                 }
 
                 const templateData = {
+                    _,
                     options: this.options,
                     srcPath: jsSrcPath,
                     devContext,
@@ -483,8 +512,11 @@ module.exports = class AppGenerator extends Generator {
                     destPath: jsDestPath,
                     publicPath,
                     entries,
+                    entriesFormatted: formatWebpackEntries(entries),
                     distEntries,
+                    distEntriesFormatted: formatWebpackEntries(distEntries),
                     devEntries,
+                    devEntriesFormatted: formatWebpackEntries(devEntries),
                 };
 
                 let configSrcPath;
@@ -679,7 +711,7 @@ module.exports = class AppGenerator extends Generator {
                     return;
                 }
 
-                this.yarnInstall([
+                this.npmInstall([
                     'autoprefixer@latest',
                     'babel-core@latest',
                     'babel-loader@latest',
@@ -724,23 +756,23 @@ module.exports = class AppGenerator extends Generator {
                     'webpack-dev-middleware@latest',
                     'webpack-merge@latest',
                 ], {
-                    dev: true,
+                    saveDev: true,
                 });
 
                 if (this.options['webpack-html']) {
-                    this.yarnInstall([
+                    this.npmInstall([
                         'autoprefixer@latest',
                     ], {
-                        dev: true,
+                        saveDev: true,
                     });
                 }
 
                 if (this.options['webpack-hot-reload']) {
-                    this.yarnInstall([
+                    this.npmInstall([
                         'webpack-hot-middleware@latest',
                         'react-hot-loader@^3.0.0-beta.7',
                     ], {
-                        dev: true,
+                        saveDev: true,
                     });
                 }
             },

@@ -244,7 +244,7 @@ module.exports = class NpmPackageGenerator extends Generator {
     get install() {
         return {
             npm() {
-                this.yarnInstall([
+                this.npmInstall([
                     'babel-eslint@latest',
                     'eslint@latest',
                     'eslint-config-airbnb@latest',
@@ -253,7 +253,7 @@ module.exports = class NpmPackageGenerator extends Generator {
                     'eslint-plugin-react@latest',
                     'jest@latest',
                 ], {
-                    dev: true,
+                    saveDev: true,
                 });
             },
         };

@@ -2,8 +2,9 @@
 const webpackMerge = require('webpack-merge');
 const webpack = require('webpack');
 const path = require('path');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-<% if (options['webpack-html']) { %>const HtmlWebpackPlugin = require('html-webpack-plugin');<% } %>
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');<%
+if (options['webpack-html']) { %>
+const HtmlWebpackPlugin = require('html-webpack-plugin');<% } %>
 const webpackConfig = require('./webpack.config.base');
 /* eslint-enable import/no-extraneous-dependencies */
 
@@ -11,9 +12,7 @@ const outputPath = path.join(process.env.PWD, '<%= destPath %>');
 
 module.exports = env => (
     webpackMerge(webpackConfig(env), {
-
-        <% if (distEntries !== null) { %>entry: <%- JSON.stringify(distEntries, null, 4).replace(/\"/gi, "'") %>,
-        <% } %>
+        <%- distEntriesFormatted !== null ? distEntriesFormatted : '' %>
 
         output: {
             path: outputPath,

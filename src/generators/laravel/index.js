@@ -95,6 +95,35 @@ module.exports = class LaravelGenerator extends Generator {
             desc: 'Path for the images',
             defaults: 'img',
         });
+
+        this.option('db-host', {
+            type: String,
+            desc: 'Database host',
+            defaults: 'localhost',
+        });
+
+        this.option('db-user', {
+            type: String,
+            desc: 'Database username',
+            defaults: 'homestead',
+        });
+
+        this.option('db-password', {
+            type: String,
+            desc: 'Database password',
+            defaults: 'secret',
+        });
+
+        this.option('db-name', {
+            type: String,
+            desc: 'Database name',
+        });
+
+        this.option('hot-reload', {
+            type: Boolean,
+            desc: 'Enable hot reload',
+            defaults: false,
+        });
     }
 
     get prompting() {
@@ -128,6 +157,18 @@ module.exports = class LaravelGenerator extends Generator {
                     });
                 }
 
+                if (!this.options['db-name']) {
+                    prompts.push({
+                        type: 'input',
+                        name: 'db-name',
+                        message: 'What is the name of the database?',
+                        default: (answers) => {
+                            const projectName = (this.options['project-name'] || answers['project-name']);
+                            return (projectName.match(/^([^.]+)/))[1];
+                        },
+                    });
+                }
+
                 if (!prompts.length) {
                     return null;
                 }
@@ -139,6 +180,9 @@ module.exports = class LaravelGenerator extends Generator {
                         }
                         if (answers['project-host']) {
                             this.options['project-host'] = answers['project-host'];
+                        }
+                        if (answers['db-name']) {
+                            this.options['db-name'] = answers['db-name'];
                         }
                     });
             },
@@ -199,6 +243,7 @@ module.exports = class LaravelGenerator extends Generator {
                 config: './config',
                 vendor: ['lodash'],
             },
+            'webpack-hot-reload': this.options['hot-reload'],
             'browsersync-base-dir': [
                 tmpPath,
                 publicPath,
@@ -303,6 +348,10 @@ module.exports = class LaravelGenerator extends Generator {
 
                 const templateData = {
                     project_name: this.options['project-name'],
+                    db_host: this.options['db-host'],
+                    db_username: this.options['db-username'],
+                    db_password: this.options['db-password'],
+                    db_name: this.options['db-name'],
                     url: urlLocal,
                 };
 

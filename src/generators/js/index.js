@@ -213,7 +213,7 @@ module.exports = class JsGenerator extends Generator {
                     return;
                 }
 
-                this.yarnInstall([
+                this.npmInstall([
                     'babel-plugin-add-module-exports@latest',
                     'babel-preset-airbnb@latest',
                     'domready@latest',
@@ -239,30 +239,34 @@ module.exports = class JsGenerator extends Generator {
                     'redux-devtools@latest',
                     'redux-devtools-log-monitor@latest',
                     'redux-devtools-dock-monitor@latest',
-                ]);
+                ], {
+                    save: true,
+                });
 
                 if (this.options['webpack-hot-reload']) {
-                    this.yarnInstall([
+                    this.npmInstall([
                         'react-hot-loader@^3.0.0-beta.7',
                     ], {
-                        dev: true,
+                        saveDev: true,
                     });
                 }
 
                 if (this.react_features.indexOf('relay') !== -1) {
-                    this.yarnInstall([
+                    this.npmInstall([
                         'react-relay@latest',
-                    ]);
+                    ], {
+                        save: true,
+                    });
 
-                    this.yarnInstall([
+                    this.npmInstall([
                         'babel-relay-plugin@latest',
                         'babel-plugin-transform-relay-hot@latest',
                     ], {
-                        dev: true,
+                        saveDev: true,
                     });
                 }
 
-                this.yarnInstall([
+                this.npmInstall([
                     'babel-eslint@latest',
                     'eslint@3.19.0',
                     'eslint-config-airbnb@15.0.2',
@@ -271,7 +275,7 @@ module.exports = class JsGenerator extends Generator {
                     'eslint-plugin-react@7.1.0',
                     'html-webpack-plugin@latest',
                 ], {
-                    dev: true,
+                    saveDev: true,
                 });
             },
         };

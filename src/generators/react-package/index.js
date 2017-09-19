@@ -182,13 +182,15 @@ module.exports = class ReactPackageGenerator extends Generator {
                     return;
                 }
 
-                this.yarnInstall([
+                this.npmInstall([
                     'react@latest',
                     'prop-types@latest',
                     'react-dom@latest',
-                ]);
+                ], {
+                    save: true,
+                });
 
-                this.yarnInstall([
+                this.npmInstall([
                     'domready@latest',
                     'jquery@latest',
                     'enzyme@latest',
@@ -198,7 +200,7 @@ module.exports = class ReactPackageGenerator extends Generator {
                     'extract-text-webpack-plugin@latest',
                     'html-webpack-plugin@latest',
                 ], {
-                    dev: true,
+                    saveDev: true,
                 });
             },
         };

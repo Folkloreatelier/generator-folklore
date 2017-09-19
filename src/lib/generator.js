@@ -10,6 +10,10 @@ class Generator extends BaseGenerator {
             type: 'input',
             name: 'project-name',
             message: 'What is the name of the project?',
+            default: () => {
+                const parts = process.cwd().split(path.sep);
+                return parts[parts.length - 1];
+            },
         },
     };
 

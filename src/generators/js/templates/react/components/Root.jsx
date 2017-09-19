@@ -10,6 +10,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 
 import configureStore from '../store/configureStore';
 import UrlGenerator from '../lib/UrlGenerator';
+import createRoutes from '../routes';
 
 const DevTools = __DEV__ ? require('./DevTools').default : null;
 
@@ -18,6 +19,7 @@ const propTypes = {
     urlGenerator: PropTypes.instanceOf(UrlGenerator),
     routerRoutes: PropTypes.object,
     renderProps: PropTypes.object,
+    routes: PropTypes.object,
 };
 
 const defaultProps = {
@@ -25,6 +27,7 @@ const defaultProps = {
     urlGenerator: null,
     renderProps: null,
     routerRoutes: null,
+    routes: null,
 };
 
 const childContextTypes = {
@@ -36,19 +39,34 @@ class Root extends Component {
     constructor(props) {
         super(props);
 
+        const urlGenerator = props.urlGenerator ?
+            props.urlGenerator : new UrlGenerator(props.routes || null);
+        const routes = props.routerRoutes ?
+            props.routerRoutes : createRoutes(urlGenerator);
+
         const routerHistory = typeof window === 'undefined' ?
             createMemoryHistory({
                 initialEntries: props.url !== null ? [props.url] : [],
             }) : browserHistory;
 
-        this.store = configureStore({
+        const store = configureStore({
 
-        }, props.urlGenerator);
+        }, urlGenerator);
 
-        this.history = syncHistoryWithStore(
+        const history = syncHistoryWithStore(
             routerHistory,
-            this.store,
+            store,
         );
+
+        this.state = {
+            routerHistory,
+            routes,
+            urlGenerator,
+            history,
+            store,
+            storeKey: `store-${(new Date()).getTime()}`,
+            routerKey: `router-${(new Date()).getTime()}`,
+        };
     }
 
     getChildContext() {
@@ -57,31 +75,75 @@ class Root extends Component {
         };
     }
 
+    componentWillReceiveProps(nextProps) {
+        const newState = {};
+        const routesChanged = (
+            JSON.stringify(nextProps.routes) !== JSON.stringify(this.props.routes)
+        );
+        const routerRoutesChanged = nextProps.routerRoutes !== this.props.routerRoutes;
+        const urlGeneratorChanged = nextProps.urlGenerator !== this.props.urlGenerator;
+        if (routesChanged) {
+            newState.urlGenerator = new UrlGenerator(nextProps.routes || null);
+            newState.routes = nextProps.routerRoutes ? nextProps.routerRoutes : createRoutes(
+                    newState.urlGenerator || this.state.urlGenerator,
+            );
+            newState.routerKey = `router-${(new Date()).getTime()}`;
+        } else {
+            if (urlGeneratorChanged) {
+                newState.urlGenerator = nextProps.urlGenerator;
+            }
+            if (urlGeneratorChanged || routerRoutesChanged) {
+                newState.routes = nextProps.routerRoutes ? nextProps.routerRoutes : createRoutes(
+                        newState.urlGenerator || this.state.urlGenerator,
+                );
+                newState.routerKey = `router-${(new Date()).getTime()}`;
+            }
+        }
+        if (typeof newState.urlGenerator !== 'undefined') {
+            newState.storeKey = `store-${(new Date()).getTime()}`;
+            newState.store = configureStore({
+
+            }, newState.urlGenerator);
+            newState.history = syncHistoryWithStore(
+                this.state.routerHistory,
+                this.state.store,
+            );
+        }
+    }
+
     render() {
-        const { routerRoutes, renderProps } = this.props;
+        const { renderProps } = this.props;
+        const {
+            routes,
+            history,
+            store,
+            routerKey,
+            storeKey,
+        } = this.state;
 
         const routerProps = typeof window === 'undefined' || renderProps !== null ? {
             ...renderProps,
         } : {
-            history: this.history,
-            routes: routerRoutes,
+            history,
+            routes,
         };
         const router = (
             <Router
+                key={routerKey}
                 {...routerProps}
             />
         );
 
-        const root = __DEV__ ? (
-            <Provider store={this.store}>
-                <div>
-                    { router }
-                    <DevTools />
-                </div>
-            </Provider>
-        ) : (
-            <Provider store={this.store}>
+        const rootChildren = __DEV__ ? (
+            <div>
                 { router }
+                <DevTools />
+            </div>
+        ) : router;
+
+        const root = (
+            <Provider store={store} key={storeKey}>
+                { rootChildren }
             </Provider>
         );
 

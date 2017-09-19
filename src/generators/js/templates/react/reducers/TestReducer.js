@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import {
     TEST_ACTION,
 } from '../actions/TestActions';
@@ -12,7 +11,10 @@ const TestReducer = (previousState, action) => {
 
     switch (action.type) {
     case TEST_ACTION:
-        return state.set('tested', true);
+        return {
+            ...state,
+            tested: true,
+        };
     default:
         return state;
     }

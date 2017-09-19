@@ -8,7 +8,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        return view('index');
+        return view('home');
     }
 
     public function redirect()

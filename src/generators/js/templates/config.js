@@ -1,3 +1,6 @@
+import get from 'lodash/get';
+import set from 'lodash/set';
+
 class Config {
 
     constructor(config) {
@@ -5,33 +8,17 @@ class Config {
     }
 
     get(str) {
-        if (typeof str === 'undefined') {
-            return this.config;
-        }
-        return str.split('.').reduce((o, x) => o[x], this.config);
+        return get(this.config, str);
     }
 
     set(str, val) {
-        const strArray = str.split('.');
-        let newConfig = Object.assign({}, this.config);
-        let currStr;
-        while (strArray.length > 1) {
-            currStr = strArray.shift();
-            if (!newConfig[currStr]) {
-                newConfig[currStr] = {};
-            }
-            newConfig = typeof this.config[currStr] === 'string' ? {
-                default: this.config[currStr],
-            } : Object.assign({}, this.config[currStr]);
-        }
-        newConfig[strArray.shift()] = val;
-        this.config = newConfig;
-        return newConfig;
+        return set(this.config, str, val);
     }
 }
 
 const config = new Config();
 
+// eslint-disable-next-line no-unused-vars
 const configFunc = (key, value) => {
     if (typeof value !== 'undefined') {
         return config.set(key, value);
@@ -40,6 +27,5 @@ const configFunc = (key, value) => {
     }
     return config.get(key);
 };
-configFunc.Config = Config;
 
-module.exports = configFunc;
+window.app_config = configFunc;

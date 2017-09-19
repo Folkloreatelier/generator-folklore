@@ -43,7 +43,7 @@ class Root extends Component {
 
         this.store = configureStore({
 
-        });
+        }, props.urlGenerator);
 
         this.history = syncHistoryWithStore(
             routerHistory,
@@ -85,13 +85,13 @@ class Root extends Component {
             </Provider>
         );
 
-        <% if (options['react-hot-reload']) { %>if (__DEV__) {
+        if (__DEV__) {
             if (typeof __REACT_HOT_LOADER__ !== 'undefined') {
                 // eslint-disable-next-line import/no-extraneous-dependencies, global-require
                 const AppContainer = require('react-hot-loader').AppContainer;
                 return React.createElement(AppContainer, {}, root);
             }
-        }<% } %>
+        }
 
         return root;
     }

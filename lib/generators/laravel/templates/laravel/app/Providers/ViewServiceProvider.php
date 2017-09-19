@@ -15,6 +15,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         $view = $this->app['view'];
         $view->composer('layouts.main', \App\Composers\Layouts\MainComposer::class);
+        $view->composer(['react'], \App\Composers\ReactComposer::class);
     }
 
     /**

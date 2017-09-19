@@ -63,9 +63,9 @@ domready(() => {
     FastClick.attach(document.body);
 
     const hypernovaElements = document.querySelectorAll('div[data-hypernova-key]');
-    renderHypernovaElements(hypernovaElements);
-
-    <% if (options['react-hot-reload']) { %>if (__DEV__) {
+    renderHypernovaElements(hypernovaElements);<%
+    if (options['react-hot-reload']) { %>
+    if (__DEV__) {
         // Hot reloading
         if (module.hot) {
             module.hot.accept([

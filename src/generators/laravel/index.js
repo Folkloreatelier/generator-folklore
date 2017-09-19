@@ -216,6 +216,7 @@ module.exports = class LaravelGenerator extends Generator {
             'project-path': projectPath,
             path: jsSrcPath,
             'skip-install': skipInstall,
+            'react-hot-reload': this.options['hot-reload'],
             quiet: true,
         });
 

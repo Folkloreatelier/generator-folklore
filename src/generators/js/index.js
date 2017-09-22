@@ -239,6 +239,8 @@ module.exports = class JsGenerator extends Generator {
                     'redux-devtools@latest',
                     'redux-devtools-log-monitor@latest',
                     'redux-devtools-dock-monitor@latest',
+                    'node-polyglot@latest',
+                    'classnames@latest',
                 ], {
                     save: true,
                 });

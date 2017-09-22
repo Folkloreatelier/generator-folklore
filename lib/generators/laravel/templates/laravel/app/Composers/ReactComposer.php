@@ -6,6 +6,7 @@ use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Contracts\View\Factory;
+use StdClass;
 
 class ReactComposer
 {
@@ -26,7 +27,7 @@ class ReactComposer
     {
         $path = '/'.ltrim($this->request->path(), '/');
         $locale = isset($view->locale) ? $view->locale : config('app.locale');
-        $routes = $this->getRoutes(isset($view->routes) ? $view->routes : null);
+        $routes = $this->getRoutes($locale, isset($view->routes) ? $view->routes : null);
         $translations = isset($view->translations) ? $view->translations : $this->getTranslations($locale);
 
         $view->props = [
@@ -43,17 +44,17 @@ class ReactComposer
         $translations[$locale] = [];
         $content = trans('content', [], $locale);
         if (is_string($content) || is_null($content)) {
-            return [];
+            return new StdClass();
         }
         $texts = array_dot($content);
         foreach ($texts as $key => $value) {
-            $translations[$locale][$key] = preg_replace('/\:([^\s]+)/', '%{$1}', $value);
+            $translations[$locale][$key] = preg_replace('/\:([^\sA-Z]+)/', '%{$1}', $value);
         }
 
         return $translations;
     }
 
-    protected function getRoutes($routeNames = null)
+    protected function getRoutes($locale, $routeNames = null)
     {
         $routes = [];
         $allRoutes = $this->router->getRoutes();
@@ -64,7 +65,7 @@ class ReactComposer
         foreach ($routeNames as $name) {
             $route = $allRoutes->getByName($name);
             $parameters = $route->parameterNames();
-            $key = $name;
+            $key = preg_replace('/\.'.$locale.'$/', '', $name);
             if (sizeof($parameters)) {
                 $params = [];
                 foreach ($parameters as $parameter) {

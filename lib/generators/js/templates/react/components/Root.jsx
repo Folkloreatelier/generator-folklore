@@ -7,9 +7,11 @@ import {
 } from 'react-router';
 import { Provider } from 'react-redux';
 import { syncHistoryWithStore } from 'react-router-redux';
+import isEmpty from 'lodash/isEmpty';
 
 import configureStore from '../store/configureStore';
 import UrlGenerator from '../lib/UrlGenerator';
+import Translations from '../lib/Translations';
 import createRoutes from '../routes';
 
 const DevTools = __DEV__ ? require('./DevTools').default : null;
@@ -20,6 +22,8 @@ const propTypes = {
     routerRoutes: PropTypes.object,
     renderProps: PropTypes.object,
     routes: PropTypes.object,
+    locale: PropTypes.string,
+    translations: PropTypes.object,
 };
 
 const defaultProps = {
@@ -28,11 +32,13 @@ const defaultProps = {
     renderProps: null,
     routerRoutes: null,
     routes: null,
+    locale: null,
+    translations: null,
 };
 
 const childContextTypes = {
-    urlGenerator: PropTypes.object,
-    socket: PropTypes.object,
+    urlGenerator: PropTypes.instanceOf(UrlGenerator),
+    translations: PropTypes.instanceOf(Translations),
 };
 
 class Root extends Component {
@@ -58,10 +64,13 @@ class Root extends Component {
             store,
         );
 
+        const translations = new Translations(props.translations, props.locale);
+
         this.state = {
+            urlGenerator,
+            translations,
             routerHistory,
             routes,
-            urlGenerator,
             history,
             store,
             storeKey: `store-${(new Date()).getTime()}`,
@@ -71,7 +80,8 @@ class Root extends Component {
 
     getChildContext() {
         return {
-            urlGenerator: this.props.urlGenerator,
+            urlGenerator: this.state.urlGenerator,
+            translations: this.state.translations,
         };
     }
 
@@ -82,6 +92,10 @@ class Root extends Component {
         );
         const routerRoutesChanged = nextProps.routerRoutes !== this.props.routerRoutes;
         const urlGeneratorChanged = nextProps.urlGenerator !== this.props.urlGenerator;
+        const translationsChanged = (
+            JSON.stringify(nextProps.translations) !== JSON.stringify(this.props.translations)
+        );
+        const localeChanged = nextProps.locale !== this.props.locale;
         if (routesChanged) {
             newState.urlGenerator = new UrlGenerator(nextProps.routes || null);
             newState.routes = nextProps.routerRoutes ? nextProps.routerRoutes : createRoutes(
@@ -99,6 +113,8 @@ class Root extends Component {
                 newState.routerKey = `router-${(new Date()).getTime()}`;
             }
         }
+
+        // Update store and history if urlGenerator has changed
         if (typeof newState.urlGenerator !== 'undefined') {
             newState.storeKey = `store-${(new Date()).getTime()}`;
             newState.store = configureStore({
@@ -108,6 +124,14 @@ class Root extends Component {
                 this.state.routerHistory,
                 this.state.store,
             );
+        }
+
+        if (translationsChanged || localeChanged) {
+            newState.translations = new Translations(nextProps.translations, nextProps.locale);
+        }
+
+        if (!isEmpty(newState)) {
+            this.setState(newState);
         }
     }
 

@@ -622,13 +622,6 @@ module.exports = class AppGenerator extends Generator {
                     scriptsBuild.push('npm run build:modernizr');
                 }
 
-                if (_.get(this.options, 'images')) {
-                    scripts['imagemin:dist'] = 'node -r babel-register ./build/imagemin.js';
-                    scripts.imagemin = 'npm run imagemin:dist';
-                    scripts['build:images'] = 'npm run imagemin:dist';
-                    scriptsBuild.push('npm run build:images');
-                }
-
                 if (_.get(this.options, 'scss')) {
                     const postcssConfigFile = path.join(buildPath, 'postcss.js');
                     const scssPath = _.get(this.options, 'scss-path', 'scss');
@@ -672,6 +665,13 @@ module.exports = class AppGenerator extends Generator {
                     scripts.scripts = 'npm run scripts:dist';
                     scripts['build:js'] = 'npm run lint && npm run scripts';
                     scriptsBuild.push('npm run build:js');
+                }
+
+                if (_.get(this.options, 'images')) {
+                    scripts['imagemin:dist'] = 'node -r babel-register ./build/imagemin.js';
+                    scripts.imagemin = 'npm run imagemin:dist';
+                    scripts['build:images'] = 'npm run imagemin:dist';
+                    scriptsBuild.push('npm run build:images');
                 }
 
                 scriptsBuild.push('npm run clean:tmp');
@@ -734,6 +734,7 @@ module.exports = class AppGenerator extends Generator {
                     'imagemin-cli@latest',
                     'imagemin-mozjpeg@latest',
                     'imagemin-pngquant@latest',
+                    'imagemin-svgo@latest',
                     'imports-loader@latest',
                     'json-loader@latest',
                     'node-sass@latest',
@@ -747,6 +748,8 @@ module.exports = class AppGenerator extends Generator {
                     'serve-static@latest',
                     'strip-ansi@latest',
                     'style-loader@latest',
+                    'file-loader@latest',
+                    'url-loader@latest',
                     'svg-react-loader@latest',
                     'webpack@latest',
                     'webpack-dev-middleware@latest',

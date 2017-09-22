@@ -2,6 +2,7 @@
 const imagemin = require('imagemin');
 const imageminMozjpeg = require('imagemin-mozjpeg');
 const imageminPngquant = require('imagemin-pngquant');
+const imageminSvgo = require('imagemin-svgo');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs');
@@ -21,6 +22,13 @@ function minifyImage(srcPath, output) {
             imageminMozjpeg(),
             imageminPngquant({
                 quality: '65-80',
+            }),
+            imageminSvgo({
+                plugins: [
+                    {
+                        removeViewBox: false,
+                    },
+                ],
             }),
         ],
     }).then((files) => {

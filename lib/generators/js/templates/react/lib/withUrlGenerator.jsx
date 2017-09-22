@@ -3,22 +3,27 @@ import PropTypes from 'prop-types';
 import invariant from 'invariant';
 import hoistStatics from 'hoist-non-react-statics';
 
+import UrlGenerator from './UrlGenerator';
+
 function getDisplayName(WrappedComponent) {
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
 const contextTypes = {
-    urlGenerator: PropTypes.object,
+    urlGenerator: PropTypes.instanceOf(UrlGenerator),
 };
 
-export default function withUrlGenerator(WrappedComponent, options) {
-    const withRef = options && options.withRef;
+export default function withUrlGenerator(WrappedComponent, opts) {
+    const options = {
+        withRef: false,
+        ...opts,
+    };
 
     class WithUrlGenerator extends Component {
 
         static getWrappedInstance() {
             invariant(
-                withRef,
+                options.withRef,
                 'To access the wrapped instance, you need to specify `{ withRef: true }` as the second argument of the withUrlGenerator() call.',
             );
             return this.wrappedInstance;
@@ -40,7 +45,7 @@ export default function withUrlGenerator(WrappedComponent, options) {
                 urlGenerator,
             };
 
-            if (withRef) {
+            if (options.withRef) {
                 props.ref = (c) => {
                     this.wrappedInstance = c;
                 };

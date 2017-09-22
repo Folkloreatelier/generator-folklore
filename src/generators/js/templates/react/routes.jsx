@@ -6,7 +6,7 @@ import Home from './components/pages/Home';
 
 // eslint-disable-next-line no-unused-vars
 export default urlGenerator => (
-    <Route path="*" component={App}>
-        <IndexRoute component={Home} />
+    <Route component={App}>
+        <Route path="*" component={Home} />
     </Route>
 );

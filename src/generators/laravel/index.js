@@ -102,7 +102,7 @@ module.exports = class LaravelGenerator extends Generator {
             defaults: 'localhost',
         });
 
-        this.option('db-user', {
+        this.option('db-username', {
             type: String,
             desc: 'Database username',
             defaults: 'homestead',
@@ -328,7 +328,7 @@ module.exports = class LaravelGenerator extends Generator {
                 const src = this.destinationPath('composer.json');
                 this.fs.extendJSON(src, {
                     require: {
-                        'folklore/image': '^0.3',
+                        'folklore/image': '^v1.x-dev',
                         'folklore/locale': '^2.1',
                         'folklore/laravel-hypernova': '^0.1',
                         'barryvdh/laravel-debugbar': '^2.3',
@@ -360,9 +360,14 @@ module.exports = class LaravelGenerator extends Generator {
                 const dest = this.destinationPath('.env');
                 this.fs.copyTpl(src, dest, templateData);
 
+                const srcExample = this.templatePath('env');
+                const destExample = this.destinationPath('.env.example');
+                this.fs.copyTpl(srcExample, destExample, templateData);
+
                 const srcProd = this.templatePath('env.prod');
                 const destProd = this.destinationPath('.env.prod');
                 templateData.url = url;
+                templateData.db_username = this.options['db-name'];
                 this.fs.copyTpl(srcProd, destProd, templateData);
             },
 

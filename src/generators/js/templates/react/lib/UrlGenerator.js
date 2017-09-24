@@ -8,7 +8,7 @@ class UrlGenerator {
     route(key, options) {
         const { withHost, ...params } = options || {};
         const route = this.routes[key] || key;
-        const url = reduce(params || {}, (str, v, k) => str.replace(`_-${k}-_`, v), route);
+        const url = reduce(params || {}, (str, v, k) => str.replace(`:${k}`, v), route);
 
         if (typeof withHost !== 'undefined' && withHost === true) {
             return url;

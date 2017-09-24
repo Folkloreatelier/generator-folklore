@@ -232,6 +232,8 @@ module.exports = class JsGenerator extends Generator {
                     'react-router@3.0',
                     'react-router-scroll@latest',
                     'react-router-redux@4.0',
+                    'recompose@latest',
+                    'react-helmet@latest',
                     'redux@latest',
                     'redux-thunk@latest',
                     'redux-logger@latest',

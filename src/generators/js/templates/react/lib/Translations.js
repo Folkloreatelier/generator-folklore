@@ -7,7 +7,7 @@ class Translations {
             ...polyglots,
             [key]: new Polyglot({
                 locale: key,
-                phrases: translations[key],
+                phrases: translations[key] || {},
             }),
         }), {});
     }
@@ -17,6 +17,9 @@ class Translations {
     }
 
     get(...args) {
+        if (typeof this.polyglots[this.locale] === 'undefined') {
+            return args[0];
+        }
         return this.polyglots[this.locale].t(...args);
     }
 }

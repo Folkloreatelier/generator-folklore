@@ -1,142 +1,73 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-    Router,
-    browserHistory,
-    createMemoryHistory,
-} from 'react-router';
-import { Provider } from 'react-redux';
-import { syncHistoryWithStore } from 'react-router-redux';
-import isEmpty from 'lodash/isEmpty';
+import { syncHistoryWithStore, routerMiddleware } from 'react-router-redux';
 import { compose } from 'recompose';
 
 import configureStore from '../store/configureStore';
-import UrlGenerator from '../lib/UrlGenerator';
+import createStoreContainer from '../lib/createStoreContainer';
+import createRouterContainer from '../lib/createRouterContainer';
 import createUrlGeneratorContainer from '../lib/createUrlGeneratorContainer';
 import createTranslationsContainer from '../lib/createTranslationsContainer';
+import withUrlGeneratorMiddleware from '../lib/withUrlGeneratorMiddleware';
 import createRoutes from '../routes';
 
 const DevTools = __DEV__ ? require('./DevTools').default : null;
 
 const propTypes = {
-    url: PropTypes.string,
-    urlGenerator: PropTypes.instanceOf(UrlGenerator),
-    renderProps: PropTypes.object,
-    routerRoutes: PropTypes.object,
+    store: PropTypes.object.isRequired,
+    router: PropTypes.node.isRequired,
+    history: PropTypes.object.isRequired,
 };
 
 const defaultProps = {
-    url: null,
-    urlGenerator: null,
-    renderProps: null,
-    routerRoutes: null,
+
 };
 
 class Root extends Component {
     constructor(props) {
         super(props);
 
-        const routes = props.routerRoutes ?
-            props.routerRoutes : createRoutes(props.urlGenerator);
-
-        const routerHistory = typeof window === 'undefined' ?
-            createMemoryHistory({
-                initialEntries: props.url !== null ? [props.url] : [],
-            }) : browserHistory;
-
-        const store = configureStore({
-
-        }, props.urlGenerator);
-
-        const history = syncHistoryWithStore(
-            routerHistory,
-            store,
-        );
-
         this.state = {
-            routerHistory,
-            routes,
-            history,
-            store,
-            storeKey: `store-${(new Date()).getTime()}`,
-            routerKey: `router-${(new Date()).getTime()}`,
+            history: props.history && props.store ? syncHistoryWithStore(
+                props.history,
+                props.store,
+            ) : null,
         };
     }
 
     componentWillReceiveProps(nextProps) {
-        const newState = {};
-        const routerRoutesChanged = nextProps.routerRoutes !== this.props.routerRoutes;
-        const urlGeneratorChanged = nextProps.urlGenerator !== this.props.urlGenerator;
-        if (routerRoutesChanged || urlGeneratorChanged) {
-            newState.routes = nextProps.routerRoutes || createRoutes(nextProps.urlGenerator);
-            newState.routerKey = `router-${(new Date()).getTime()}`;
-        }
-
-        // Update store and history if urlGenerator has changed
-        if (urlGeneratorChanged) {
-            newState.storeKey = `store-${(new Date()).getTime()}`;
-            newState.store = configureStore({
-
-            }, nextProps.urlGenerator);
-            newState.history = syncHistoryWithStore(
-                this.state.routerHistory,
-                this.state.store,
-            );
-        }
-
-        if (!isEmpty(newState)) {
-            this.setState(newState);
+        const historyChanged = nextProps.history !== this.props.history;
+        const storeChanged = nextProps.store !== this.props.store;
+        if (historyChanged || storeChanged) {
+            this.setState({
+                history: nextProps.history && nextProps.store ? syncHistoryWithStore(
+                    nextProps.history,
+                    nextProps.store,
+                ) : null,
+            });
         }
     }
 
     render() {
         const {
-            renderProps,
+            router,
         } = this.props;
 
         const {
-            routes,
             history,
-            store,
-            routerKey,
-            storeKey,
         } = this.state;
 
-        const routerProps = typeof window === 'undefined' || renderProps !== null ? {
-            ...renderProps,
-            routes,
-        } : {
+        const routerWithHistory = history !== null ? React.cloneElement(router, {
             history,
-            routes,
-        };
+        }) : router;
 
-        const router = (
-            <Router
-                key={routerKey}
-                {...routerProps}
-            />
-        );
-
-        const rootChildren = __DEV__ ? (
+        const root = __DEV__ ? (
             <div>
-                { router }
+                { routerWithHistory }
                 <DevTools />
             </div>
-        ) : router;
+        ) : routerWithHistory;
 
-        const root = (
-            <Provider store={store} key={storeKey}>
-                { rootChildren }
-            </Provider>
-        );
-<% if (options['react-hot-reload']) { %>
-        if (__DEV__) {
-            if (typeof __REACT_HOT_LOADER__ !== 'undefined') {
-                // eslint-disable-next-line import/no-extraneous-dependencies, global-require
-                const AppContainer = require('react-hot-loader').AppContainer;
-                return React.createElement(AppContainer, {}, root);
-            }
-        }<% } %>
         return root;
     }
 }
@@ -144,9 +75,26 @@ class Root extends Component {
 Root.propTypes = propTypes;
 Root.defaultProps = defaultProps;
 
-const enhance = compose(
-    createTranslationsContainer(),
-    createUrlGeneratorContainer(),
+// Creating routes
+const selectRoutes = props => (
+    props.routerRoutes ?
+        props.routerRoutes : createRoutes(props.urlGenerator)
 );
 
-export default enhance(Root);
+// Creating store from props
+const createStore = props => configureStore({
+    // map props to state
+}, [
+    routerMiddleware(props.history),
+    withUrlGeneratorMiddleware(props.urlGenerator),
+]);
+
+// Create rootEnhancer
+const rootEnhancer = compose(
+    createTranslationsContainer(),
+    createUrlGeneratorContainer(),
+    createRouterContainer(selectRoutes),
+    createStoreContainer(createStore),
+);
+
+export default rootEnhancer(Root);

@@ -13,8 +13,8 @@ const childContextTypes = {
 };
 
 export default function createTranslationsContainer(selectTranslations, selectLocale, opts) {
-    const translationsSelector = selectTranslations || (props => props.translations);
-    const localeSelector = selectLocale || (props => props.locale);
+    const translationsSelector = selectTranslations || (props => props.translations || null);
+    const localeSelector = selectLocale || (props => props.locale || null);
 
     const options = {
         withRef: false,
@@ -39,7 +39,8 @@ export default function createTranslationsContainer(selectTranslations, selectLo
                 const locale = localeSelector(props);
 
                 this.state = {
-                    translations: new Translations(translations, locale),
+                    translations: translations !== null && locale !== null ?
+                        new Translations(translations, locale) : null,
                 };
             }
 
@@ -60,7 +61,8 @@ export default function createTranslationsContainer(selectTranslations, selectLo
                 const localeChanged = nextLocale !== locale;
                 if (translationsChanged || localeChanged) {
                     this.setState({
-                        translations: new Translations(nextTranslations, nextLocale),
+                        translations: nextTranslations !== null && nextLocale !== null ?
+                            new Translations(nextTranslations, nextLocale) : null,
                     });
                 }
             }

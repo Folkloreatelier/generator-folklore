@@ -208,6 +208,13 @@ module.exports = class HTMLGenerator extends Generator {
                 });
             },
 
+            img() {
+                const srcPath = _.get(this.options, 'src-path');
+                const imgSrcPath = this.templatePath('folklore.png');
+                const imgDestPath = this.destinationPath(path.join(srcPath, 'img', 'folklore.png'));
+                this.fs.copy(imgSrcPath, imgDestPath);
+            },
+
             editorconfig() {
                 const projectPath = _.get(this.options, 'path');
                 const srcPath = this.templatePath('editorconfig');

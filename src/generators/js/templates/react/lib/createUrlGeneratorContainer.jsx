@@ -12,7 +12,7 @@ const childContextTypes = {
     urlGenerator: PropTypes.instanceOf(UrlGenerator),
 };
 
-export default function createUrlGeneratorContainer(selectRoutes, selectLocale, opts) {
+export default function createUrlGeneratorContainer(selectRoutes, opts) {
     const routesSelector = selectRoutes || (props => props.routes);
 
     const options = {

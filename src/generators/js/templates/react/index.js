@@ -31,7 +31,21 @@ domready(() => {
             console.warn(`Component ${componentName} not found.`);
             return;
         }
-        ReactDOM.render(React.createElement(Component, props), el);
+
+        <%
+        if (options['react-hot-reload']) { %>
+        let element = React.createElement(Component, props);
+
+        if (__DEV__) {
+            if (typeof __REACT_HOT_LOADER__ !== 'undefined') {
+                // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+                const AppContainer = require('react-hot-loader').AppContainer;
+                element = React.createElement(AppContainer, {}, element);
+            }
+        }<% } else { %>
+        const element = React.createElement(Component, props);<% } %>
+
+        ReactDOM.render(element, el);
     };
 
     const createRenderReact = (...args) => () => renderReact(...args);

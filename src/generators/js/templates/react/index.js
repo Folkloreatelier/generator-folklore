@@ -31,7 +31,6 @@ domready(() => {
             console.warn(`Component ${componentName} not found.`);
             return;
         }
-
         <%
         if (options['react-hot-reload']) { %>
         let element = React.createElement(Component, props);

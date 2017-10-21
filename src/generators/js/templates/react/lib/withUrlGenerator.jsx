@@ -13,55 +13,56 @@ const contextTypes = {
     urlGenerator: PropTypes.instanceOf(UrlGenerator),
 };
 
-export default function withUrlGenerator(WrappedComponent, opts) {
+export default function withUrlGenerator(opts) {
     const options = {
         withRef: false,
         ...opts,
     };
+    return (WrappedComponent) => {
+        class WithUrlGenerator extends Component {
 
-    class WithUrlGenerator extends Component {
+            static getWrappedInstance() {
+                invariant(
+                    options.withRef,
+                    'To access the wrapped instance, you need to specify `{ withRef: true }` as the second argument of the withUrlGenerator() call.',
+                );
+                return this.wrappedInstance;
+            }
 
-        static getWrappedInstance() {
-            invariant(
-                options.withRef,
-                'To access the wrapped instance, you need to specify `{ withRef: true }` as the second argument of the withUrlGenerator() call.',
-            );
-            return this.wrappedInstance;
-        }
+            render() {
+                const {
+                    urlGenerator,
+                } = this.context;
 
-        render() {
-            const {
-                urlGenerator,
-            } = this.context;
+                if (urlGenerator === null) {
+                    return (
+                        <WrappedComponent {...this.props} />
+                    );
+                }
 
-            if (urlGenerator === null) {
+                const props = {
+                    ...this.props,
+                    urlGenerator,
+                };
+
+                if (options.withRef) {
+                    props.ref = (c) => {
+                        this.wrappedInstance = c;
+                    };
+                }
+
                 return (
-                    <WrappedComponent {...this.props} />
+                    <WrappedComponent {...props} />
                 );
             }
-
-            const props = {
-                ...this.props,
-                urlGenerator,
-            };
-
-            if (options.withRef) {
-                props.ref = (c) => {
-                    this.wrappedInstance = c;
-                };
-            }
-
-            return (
-                <WrappedComponent {...props} />
-            );
         }
-    }
 
-    WithUrlGenerator.contextTypes = contextTypes;
-    WithUrlGenerator.displayName = `withUrlGenerator(${getDisplayName(WrappedComponent)})`;
-    WithUrlGenerator.WrappedComponent = WrappedComponent;
+        WithUrlGenerator.contextTypes = contextTypes;
+        WithUrlGenerator.displayName = `withUrlGenerator(${getDisplayName(WrappedComponent)})`;
+        WithUrlGenerator.WrappedComponent = WrappedComponent;
 
-    const WithUrlGeneratorComponent = hoistStatics(WithUrlGenerator, WrappedComponent);
+        const WithUrlGeneratorComponent = hoistStatics(WithUrlGenerator, WrappedComponent);
 
-    return WithUrlGeneratorComponent;
+        return WithUrlGeneratorComponent;
+    };
 }

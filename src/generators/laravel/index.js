@@ -328,7 +328,7 @@ module.exports = class LaravelGenerator extends Generator {
                 const src = this.destinationPath('composer.json');
                 this.fs.extendJSON(src, {
                     require: {
-                        'folklore/image': '^v1.x-dev',
+                        'folklore/image': 'v1.x-dev',
                         'folklore/locale': '^2.1',
                         'folklore/laravel-hypernova': '^0.1',
                         'barryvdh/laravel-debugbar': '^2.3',

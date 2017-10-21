@@ -1,21 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import '../styles/main.global.scss';
+import Container from './Container';
 
 const propTypes = {
-    children: PropTypes.node.isRequired,
+
 };
 
-const App = (props) => {
-    const { children } = props;
-    return (
-        <div>
-            { children }
-        </div>
-    );
+const defaultProps = {
+
 };
+
+const App = ({
+    ...otherProps
+}) => (
+    <Container
+        {...otherProps}
+        getStoreInitialState={() => ({
+
+        })}
+    />
+);
 
 App.propTypes = propTypes;
+App.defaultProps = defaultProps;
 
 export default App;

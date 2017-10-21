@@ -10,6 +10,7 @@ function getDisplayName(WrappedComponent) {
 
 const childContextTypes = {
     translations: PropTypes.instanceOf(Translations),
+    locale: PropTypes.string,
 };
 
 export default function createTranslationsContainer(selectTranslations, selectLocale, opts) {
@@ -23,7 +24,6 @@ export default function createTranslationsContainer(selectTranslations, selectLo
 
     return (WrappedComponent) => {
         class TranslationsContainer extends Component {
-
             static getWrappedInstance() {
                 invariant(
                     options.withRef,
@@ -45,8 +45,10 @@ export default function createTranslationsContainer(selectTranslations, selectLo
             }
 
             getChildContext() {
+                const locale = localeSelector(this.props);
                 return {
                     translations: this.state.translations,
+                    locale,
                 };
             }
 

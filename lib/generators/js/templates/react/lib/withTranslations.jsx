@@ -10,68 +10,71 @@ function getDisplayName(WrappedComponent) {
 
 const contextTypes = {
     translations: PropTypes.instanceOf(Translations),
+    locale: PropTypes.string,
 };
 
-export default function withTranslations(WrappedComponent, opts) {
+export default function withTranslations(opts) {
     const options = {
         withRef: false,
         ...opts,
     };
+    return (WrappedComponent) => {
+        class WithTranslations extends Component {
+            static getWrappedInstance() {
+                invariant(
+                    options.withRef,
+                    'To access the wrapped instance, you need to specify `{ withRef: true }` as the second argument of the withTranslations() call.',
+                );
+                return this.wrappedInstance;
+            }
 
-    class WithTranslations extends Component {
+            constructor(props) {
+                super(props);
+                this.getTranslation = this.getTranslation.bind(this);
+            }
 
-        static getWrappedInstance() {
-            invariant(
-                options.withRef,
-                'To access the wrapped instance, you need to specify `{ withRef: true }` as the second argument of the withTranslations() call.',
-            );
-            return this.wrappedInstance;
-        }
+            getTranslation(...args) {
+                const { translations } = this.context;
+                return translations.get(...args);
+            }
 
-        constructor(props) {
-            super(props);
-            this.getTranslation = this.getTranslation.bind(this);
-        }
+            render() {
+                const {
+                    translations,
+                    locale,
+                } = this.context;
 
-        getTranslation(...args) {
-            const { translations } = this.context;
-            return translations.get(...args);
-        }
+                if (translations === null) {
+                    return (
+                        <WrappedComponent {...this.props} />
+                    );
+                }
 
-        render() {
-            const {
-                translations,
-            } = this.context;
+                const props = {
+                    ...this.props,
+                    translations,
+                    locale,
+                    t: this.getTranslation,
+                };
 
-            if (translations === null) {
+                if (options.withRef) {
+                    props.ref = (c) => {
+                        this.wrappedInstance = c;
+                    };
+                }
+
                 return (
-                    <WrappedComponent {...this.props} />
+                    <WrappedComponent {...props} />
                 );
             }
-
-            const props = {
-                ...this.props,
-                translations,
-                t: this.getTranslation,
-            };
-
-            if (options.withRef) {
-                props.ref = (c) => {
-                    this.wrappedInstance = c;
-                };
-            }
-
-            return (
-                <WrappedComponent {...props} />
-            );
         }
-    }
 
-    WithTranslations.contextTypes = contextTypes;
-    WithTranslations.displayName = `withTranslations(${getDisplayName(WrappedComponent)})`;
-    WithTranslations.WrappedComponent = WrappedComponent;
+        WithTranslations.contextTypes = contextTypes;
+        WithTranslations.displayName = `withTranslations(${getDisplayName(WrappedComponent)})`;
+        WithTranslations.WrappedComponent = WrappedComponent;
 
-    const WithTranslationsComponent = hoistStatics(WithTranslations, WrappedComponent);
+        const WithTranslationsComponent = hoistStatics(WithTranslations, WrappedComponent);
 
-    return WithTranslationsComponent;
+        return WithTranslationsComponent;
+    };
 }

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Route, IndexRoute } from 'react-router';
 
-import App from './components/App';
+import MainLayout from './components/layouts/Main';
 import Home from './components/pages/Home';
 
 // eslint-disable-next-line no-unused-vars
 export default urlGenerator => (
-    <Route component={App}>
+    <Route component={MainLayout}>
         <Route path="*" component={Home} />
     </Route>
 );

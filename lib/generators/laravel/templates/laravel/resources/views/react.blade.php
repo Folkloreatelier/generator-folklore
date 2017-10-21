@@ -3,5 +3,5 @@
 @section('title', 'Accueil')
 
 @section('content')
-    @hypernova('Root', $props)
+    @hypernova('App', $props)
 @endsection

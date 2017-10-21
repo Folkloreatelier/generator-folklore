@@ -17,13 +17,17 @@ const propTypes = {
     store: PropTypes.object.isRequired,
     router: PropTypes.node.isRequired,
     history: PropTypes.object.isRequired,
+
+    /* eslint-disable react/no-unused-prop-types */
+    getStoreInitialState: PropTypes.func,
+    /* eslint-enable react/no-unused-prop-types */
 };
 
 const defaultProps = {
-
+    getStoreInitialState: () => {},
 };
 
-class Root extends Component {
+class Container extends Component {
     constructor(props) {
         super(props);
 
@@ -49,13 +53,8 @@ class Root extends Component {
     }
 
     render() {
-        const {
-            router,
-        } = this.props;
-
-        const {
-            history,
-        } = this.state;
+        const { router } = this.props;
+        const { history } = this.state;
 
         const routerWithHistory = history !== null ? React.cloneElement(router, {
             history,
@@ -72,8 +71,8 @@ class Root extends Component {
     }
 }
 
-Root.propTypes = propTypes;
-Root.defaultProps = defaultProps;
+Container.propTypes = propTypes;
+Container.defaultProps = defaultProps;
 
 // Creating routes
 const selectRoutes = props => (
@@ -82,19 +81,20 @@ const selectRoutes = props => (
 );
 
 // Creating store from props
-const createStore = props => configureStore({
-    // map props to state
-}, [
-    routerMiddleware(props.history),
-    withUrlGeneratorMiddleware(props.urlGenerator),
-]);
+const createStore = ({ getStoreInitialState, ...props }) => configureStore(
+    getStoreInitialState(props),
+    [
+        routerMiddleware(props.history),
+        withUrlGeneratorMiddleware(props.urlGenerator),
+    ],
+);
 
 // Create rootEnhancer
-const rootEnhancer = compose(
+const containerEnhancer = compose(
     createTranslationsContainer(),
     createUrlGeneratorContainer(),
     createRouterContainer(selectRoutes),
     createStoreContainer(createStore),
 );
 
-export default rootEnhancer(Root);
+export default containerEnhancer(Container);

@@ -1,6 +1,6 @@
 <?php
 
-class <%= baseClassName %>TestCase extends TestCase
+class <%= baseClassName %>Test extends TestCase
 {
     public function setUp()
     {

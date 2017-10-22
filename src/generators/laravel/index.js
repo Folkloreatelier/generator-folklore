@@ -329,7 +329,7 @@ module.exports = class LaravelGenerator extends Generator {
                 this.fs.extendJSON(src, {
                     require: {
                         'folklore/image': 'v1.x-dev',
-                        'folklore/locale': '^2.1',
+                        'folklore/laravel-locale': '^2.2',
                         'folklore/laravel-hypernova': '^0.1',
                         'barryvdh/laravel-debugbar': '^2.3',
                     },

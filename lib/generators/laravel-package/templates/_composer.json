@@ -34,10 +34,12 @@
         "php-mock/php-mock-phpunit": "^1.1|^2.0"
     },
     "autoload": {
+        "psr-0": {}
+    },
+    "autoload-dev": {
         "classmap": [
             "tests/"
-        ],
-        "psr-0": {}
+        ]
     },
     "minimum-stability": "stable"
 }

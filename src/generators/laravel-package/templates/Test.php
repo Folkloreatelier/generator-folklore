@@ -11,9 +11,8 @@ class <%= baseClassName %>Test extends TestCase
      * Test the constructor
      *
      * @test
-     * @covers ::__construct
      */
-    public function testConstruct()
+    public function testSomething()
     {
         $this->assertEquals(true, true);
     }

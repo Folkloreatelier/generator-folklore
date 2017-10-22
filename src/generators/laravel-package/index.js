@@ -111,7 +111,7 @@ module.exports = class ComposerPackageGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, this.templateData);
             },
 
-            tests() {
+            testsDirectory() {
                 const srcPath = this.templatePath('tests');
                 const destPath = this.destinationPath('tests');
                 this.fs.copyTpl(srcPath, destPath, this.templateData);
@@ -124,11 +124,18 @@ module.exports = class ComposerPackageGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, this.templateData);
             },
 
-            testCase() {
-                const { baseClassName } = this.templateData;
-                const srcPath = this.templatePath('TestCase.php');
-                const destPath = this.destinationPath(`tests/${baseClassName}Test.php`);
-                this.fs.copyTpl(srcPath, destPath, this.templateData);
+            tests() {
+                const featureSrcPath = this.templatePath('Test.php');
+                const featureDestPath = this.destinationPath('tests/Feature/FeatureTest.php');
+                this.fs.copyTpl(featureSrcPath, featureDestPath, {
+                    baseClassName: 'Feature',
+                });
+
+                const unitSrcPath = this.templatePath('Test.php');
+                const unitDestPath = this.destinationPath('tests/Unit/UnitTest.php');
+                this.fs.copyTpl(unitSrcPath, unitDestPath, {
+                    baseClassName: 'Unit',
+                });
             },
 
             gitignore() {

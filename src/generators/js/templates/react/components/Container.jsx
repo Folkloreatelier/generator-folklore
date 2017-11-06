@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { syncHistoryWithStore, routerMiddleware } from 'react-router-redux';
-import { compose } from 'recompose';
 
 import configureStore from '../store/configureStore';
 import createStoreContainer from '../lib/createStoreContainer';
@@ -89,12 +88,8 @@ const createStore = ({ getStoreInitialState, ...props }) => configureStore(
     ],
 );
 
-// Create rootEnhancer
-const containerEnhancer = compose(
-    createTranslationsContainer(),
-    createUrlGeneratorContainer(),
-    createRouterContainer(selectRoutes),
-    createStoreContainer(createStore),
-);
-
-export default containerEnhancer(Container);
+const WithStoreContainer = createStoreContainer(createStore)(Container);
+const WithRouterContainer = createRouterContainer(selectRoutes)(WithStoreContainer);
+const UrlGeneratorContainer = createUrlGeneratorContainer()(WithRouterContainer);
+const WithTranslationsContainer = createTranslationsContainer()(UrlGeneratorContainer);
+export default WithTranslationsContainer;

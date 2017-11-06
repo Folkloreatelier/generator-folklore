@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import invariant from 'invariant';
 import hoistStatics from 'hoist-non-react-statics';
+import isEqual from 'lodash/isEqual';
 
 function getDisplayName(WrappedComponent) {
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
 export default function createStoreContainer(createStore, storeHasChanged, opts) {
-    const storeChanged = storeHasChanged || ((props, nextProps) => props !== nextProps);
+    const storeChanged = storeHasChanged || ((props, nextProps) => isEqual(props, nextProps));
     const options = {
         withRef: false,
         ...opts,

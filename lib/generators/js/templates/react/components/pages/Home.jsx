@@ -32,7 +32,7 @@ const HomePage = () => (
                 }
             `}</style>
         </Helmet>
-        <div className="folklore"></div>
+        <div className="folklore" />
     </div>
 );
 

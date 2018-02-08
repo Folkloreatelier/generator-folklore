@@ -50,7 +50,7 @@ domready(() => {
     const createRenderReact = (...args) => () => renderReact(...args);
 
     const renderHypernovaElements = (elements) => {
-        elements.forEach((el) => {
+        Array.prototype.slice.call(elements).forEach((el) => {
             const componentName = el.dataset ? el.dataset.hypernovaKey : el.getAttribute('data-hypernova-key');
             const nodes = loadHypernova(componentName);
             nodes.forEach(({ node, data }) => {

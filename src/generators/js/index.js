@@ -93,17 +93,6 @@ module.exports = class JsGenerator extends Generator {
                     message: 'Which React features?',
                     choices: [
                         {
-                            name: 'Router',
-                            value: 'router',
-                            checked: true,
-                        },
-                        {
-                            name: 'Redux',
-                            value: 'redux',
-                            checked: true,
-                            short: 'Redux',
-                        },
-                        {
                             name: 'Relay',
                             value: 'relay',
                             checked: false,

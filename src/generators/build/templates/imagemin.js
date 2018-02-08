@@ -20,16 +20,8 @@ function minifyImage(srcPath, output) {
     imagemin([srcPath], output, {
         plugins: [
             imageminMozjpeg(),
-            imageminPngquant({
-                quality: '65-80',
-            }),
-            imageminSvgo({
-                plugins: [
-                    {
-                        removeViewBox: false,
-                    },
-                ],
-            }),
+            imageminPngquant(imageminConfig.pngquant),
+            imageminSvgo(imageminConfig.svgo),
         ],
     }).then((files) => {
         let saved;

@@ -234,7 +234,7 @@ module.exports = class LaravelGenerator extends Generator {
             'tmp-path': tmpPath,
             'src-path': assetsPath,
             'dest-path': publicPath,
-            'webpack-public-path': `/${jsPath}`,
+            'webpack-public-path': `/${jsPath.replace(/\/$/, '')}/`,
             'js-path': jsPath,
             'scss-path': scssPath,
             'css-path': cssPath,

@@ -2,57 +2,8 @@ import _ from 'lodash';
 import path from 'path';
 import chalk from 'chalk';
 import Generator from '../../lib/generator';
-
-const getWebpackEntries = (webpackEntry, webpackEntries) => {
-    if (webpackEntry === null && webpackEntries === null) {
-        return null;
-    }
-    const entry = webpackEntry;
-    let entries = {};
-    if (entry !== null) {
-        entries = {
-            main: entry,
-        };
-    } else {
-        entries = webpackEntries;
-    }
-    if (entries && !_.isObject(entries)) {
-        const newEntries = {};
-        if (!_.isArray(entries)) {
-            entries = entries.length ? [entries] : [];
-        }
-        entries.forEach((it) => {
-            const entryParts = it.split(',');
-            newEntries[entryParts[0]] = entryParts.slice(1);
-        });
-        entries = newEntries;
-    }
-    return entries;
-};
-
-const tab = number => ' '.repeat(4 * number);
-const formatWebpackEntries = (entries) => {
-    if (entries === null) {
-        return null;
-    }
-    const lines = [];
-    if (_.isArray(entries)) {
-        lines.push('entry: [');
-        entries.forEach((entry) => {
-            lines.push(`${tab(3)}'${entry}',`);
-        });
-        lines.push(`${tab(2)}],`);
-    } else if (_.isObject(entries)) {
-        lines.push('entry: {');
-        Object.keys(entries).forEach((key) => {
-            lines.push(`${tab(3)}${key}: ${JSON.stringify(entries[key]).replace(/"/gi, "'").replace(/','/gi, "', '")},`);
-        });
-        lines.push(`${tab(2)}},`);
-    } else {
-        lines.push(`entry: ${JSON.stringify(entries, null, 4).replace(/"/gi, "'")},`);
-    }
-    return lines.join('\n');
-};
+import getWebpackEntries from './lib/getWebpackEntries';
+import formatWebpackEntries from './lib/formatWebpackEntries';
 
 module.exports = class AppGenerator extends Generator {
 
@@ -96,11 +47,6 @@ module.exports = class AppGenerator extends Generator {
         });
 
         this.option('watch', {
-            type: Boolean,
-            defaults: true,
-        });
-
-        this.option('release', {
             type: Boolean,
             defaults: true,
         });
@@ -435,19 +381,6 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
-            release() {
-                if (!_.get(this.options, 'release', false)) {
-                    return;
-                }
-
-                const templateData = {};
-
-                const buildPath = _.get(this.options, 'path');
-                const srcPath = this.templatePath('release.sh');
-                const destPath = this.destinationPath(path.join(buildPath, 'release.sh'));
-                this.fs.copyTpl(srcPath, destPath, templateData);
-            },
-
             webpack() {
                 if (!_.get(this.options, 'js', false)) {
                     return;
@@ -592,10 +525,6 @@ module.exports = class AppGenerator extends Generator {
                     scriptsBuildFiles.push('npm run copy');
                 }
 
-                if (_.get(this.options, 'release')) {
-                    scripts.release = path.join(buildPath, 'release.sh');
-                }
-
                 if (_.get(this.options, 'browsersync')) {
                     const browserSyncPath = path.join(buildPath, 'browsersync.js');
                     scripts.browsersync = `node -r babel-register ${browserSyncPath}`;
@@ -623,14 +552,14 @@ module.exports = class AppGenerator extends Generator {
                 }
 
                 if (_.get(this.options, 'scss')) {
-                    const postcssConfigFile = path.join(buildPath, 'postcss.js');
+                    const postcssConfigFile = path.join(buildPath, 'postcss.config.js');
                     const scssPath = _.get(this.options, 'scss-path', 'scss');
                     const cssPath = _.get(this.options, 'css-path', 'css');
                     const scssSrcPath = _.get(this.options, 'scss-src-path', null) || path.join(srcPath, scssPath);
                     const scssTmpPath = _.get(this.options, 'scss-tmp-path', null) || path.join(tmpPath, cssPath);
                     const scssDestPath = _.get(this.options, 'scss-dest-path', null) || path.join(destPath, cssPath);
 
-                    scripts['postcss:dist'] = `postcss -c ${postcssConfigFile} -u autoprefixer -u cssnano -d ${scssDestPath} ${path.join(scssTmpPath, '/**/*.css')}`;
+                    scripts['postcss:dist'] = `postcss -c ${postcssConfigFile} -d ${scssDestPath} ${path.join(scssTmpPath, '/**/*.css')}`;
                     scripts.postcss = 'npm run postcss:dist';
                     scripts['sass:dist'] = `node-sass --source-map .tmp/css --include-path ./node_modules -r ${scssSrcPath} --output ${scssTmpPath}`;
                     scripts['sass:watch'] = `node-sass --source-map .tmp/css --include-path ./node_modules -r --watch ${scssSrcPath} --output ${scssTmpPath}`;

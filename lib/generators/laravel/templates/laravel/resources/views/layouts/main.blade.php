@@ -29,7 +29,7 @@
 
 	@section('head:scripts')
 		<!-- Head Javascript -->
-		<script src="https://cdn.polyfill.io/v2/polyfill.min.js" type="text/javascript"></script>
+		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Array.prototype.find,Map,Set,Array.prototype.findIndex" type="text/javascript"></script>
 		<script src="{{ asset('js/modernizr.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/manifest.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/config.js') }}" type="text/javascript"></script>

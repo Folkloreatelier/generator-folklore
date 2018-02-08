@@ -381,6 +381,13 @@ module.exports = class AppGenerator extends Generator {
                 this.fs.copyTpl(srcPath, destPath, templateData);
             },
 
+            lib() {
+                const buildPath = _.get(this.options, 'path');
+                const srcPath = this.templatePath('lib');
+                const destPath = this.destinationPath(path.join(buildPath, 'lib'));
+                this.fs.copy(srcPath, destPath);
+            },
+
             webpack() {
                 if (!_.get(this.options, 'js', false)) {
                     return;

@@ -30,6 +30,12 @@ module.exports = class LaravelGenerator extends Generator {
             required: false,
         });
 
+        this.option('laravel_branch', {
+            type: String,
+            desc: 'Laravel repository branch',
+            defaults: '5.5',
+        });
+
         this.option('url', {
             type: String,
             desc: 'Project url',
@@ -271,7 +277,7 @@ module.exports = class LaravelGenerator extends Generator {
             laravel() {
                 const done = this.async();
 
-                remote('laravel', 'laravel', (err, cachePath) => {
+                remote('laravel', 'laravel', this.options.laravel_branch, (err, cachePath) => {
                     const destinationPath = this.destinationPath();
                     const files = glob.sync('**', {
                         dot: true,

@@ -24,11 +24,6 @@ module.exports = class JsGenerator extends Generator {
             defaults: './',
         });
 
-        this.option('relay-graphql-path', {
-            type: String,
-            defaults: './graphql',
-        });
-
         this.option('react-hot-reload', {
             type: Boolean,
             defaults: false,
@@ -87,24 +82,6 @@ module.exports = class JsGenerator extends Generator {
                     });
                 }
 
-                prompts.push({
-                    type: 'checkbox',
-                    name: 'react_features',
-                    message: 'Which React features?',
-                    choices: [
-                        {
-                            name: 'Relay',
-                            value: 'relay',
-                            checked: false,
-                            short: 'Relay',
-                        },
-                    ],
-                    when: (answers) => {
-                        const type = this.options.type || answers.type;
-                        return type === 'react';
-                    },
-                });
-
                 if (!prompts.length) {
                     return null;
                 }
@@ -133,22 +110,6 @@ module.exports = class JsGenerator extends Generator {
                 const jsPath = _.get(this.options, 'path');
                 const srcPath = this.templatePath(this.options.type);
                 const destPath = this.destinationPath(jsPath);
-                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
-
-                if (this.react_features.indexOf('relay') !== -1) {
-                    const relaySrcPath = this.templatePath('relay');
-                    const relayDestPath = this.destinationPath(jsPath);
-                    /* this.directory */this.fs.copyTpl(relaySrcPath, relayDestPath, this);
-                }
-            },
-
-            graphqlRelay() {
-                if (!this.react_features || this.react_features.indexOf('relay') === -1) {
-                    return;
-                }
-                const graphqlPath = _.get(this.options, 'relay-graphql-path');
-                const srcPath = this.templatePath('graphql');
-                const destPath = this.destinationPath(graphqlPath);
                 /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
             },
 
@@ -203,69 +164,40 @@ module.exports = class JsGenerator extends Generator {
                 }
 
                 this.npmInstall([
-                    'babel-plugin-add-module-exports@latest',
-                    'babel-preset-airbnb@latest',
                     'domready@latest',
                     'fastclick@latest',
-                    'hoist-non-react-statics@latest',
                     'hypernova@latest',
-                    'immutable@latest',
-                    'invariant@latest',
                     'keymirror@latest',
                     'lodash@latest',
                     'react@latest',
                     'prop-types@latest',
                     'react-dom@latest',
                     'react-redux@latest',
-                    'history@3.0',
-                    'react-router@3.0',
-                    'react-router-scroll@latest',
-                    'react-router-redux@4.0',
-                    'recompose@latest',
+                    'history@^4.7.0',
+                    'react-router@^4.2.0',
+                    'react-router-redux@^5.0.0-alpha.9',
                     'react-helmet@latest',
-                    'redux@latest',
-                    'redux-thunk@latest',
-                    'redux-logger@latest',
-                    'redux-promise@latest',
-                    'redux-devtools@latest',
-                    'redux-devtools-log-monitor@latest',
-                    'redux-devtools-dock-monitor@latest',
                     'node-polyglot@latest',
                     'classnames@latest',
+                    '@folklore/react-app@latest',
                 ], {
                     save: true,
                 });
 
                 if (this.options['webpack-hot-reload']) {
                     this.npmInstall([
-                        'react-hot-loader@^3.0.0-beta.7',
-                    ], {
-                        saveDev: true,
-                    });
-                }
-
-                if (this.react_features.indexOf('relay') !== -1) {
-                    this.npmInstall([
-                        'react-relay@latest',
-                    ], {
-                        save: true,
-                    });
-
-                    this.npmInstall([
-                        'babel-relay-plugin@latest',
-                        'babel-plugin-transform-relay-hot@latest',
+                        'react-hot-loader@^4.0.0-beta.21',
                     ], {
                         saveDev: true,
                     });
                 }
 
                 this.npmInstall([
+                    'babel-plugin-add-module-exports@latest',
+                    'babel-preset-airbnb@latest',
                     'babel-eslint@latest',
-                    'eslint@3.19.0',
-                    'eslint-config-airbnb@15.0.2',
-                    'eslint-plugin-import@2.6.1',
-                    'eslint-plugin-jsx-a11y@5.1.1',
-                    'eslint-plugin-react@7.1.0',
+                    'eslint@4.16.0',
+                    'eslint-config-airbnb@latest',
                     'html-webpack-plugin@latest',
                 ], {
                     saveDev: true,

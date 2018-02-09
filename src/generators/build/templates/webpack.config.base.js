@@ -18,6 +18,7 @@ module.exports = (env) => {
     const extractPlugin = new ExtractTextPlugin({
         filename: CSS_FILENAME,
         allChunks: true,
+        disable: env === 'dev',
     });
 
     const cssLoaders = [

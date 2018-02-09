@@ -1,28 +1,53 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Route } from 'react-router';
+import { createAppContainer } from '@folklore/react-app';
 
-import Container from './Container';
+import reducers from '../reducers/index';
+import MainLayout from './layouts/Main';
+import HomePage from './pages/Home';
+<%
+if (options['react-hot-reload']) { %>
+// eslint-disable-next-line
+const hot = __DEV__ ? require('react-hot-loader').hot : null;<% } %>
 
 const propTypes = {
-
+    locale: PropTypes.string,
+    messages: PropTypes.objectOf(PropTypes.string),
 };
 
 const defaultProps = {
-
+    locale: 'fr',
+    messages: {},
 };
 
-const App = ({
-    ...otherProps
-}) => (
-    <Container
-        {...otherProps}
-        getStoreInitialState={() => ({
-
-        })}
-    />
+const App = () => (
+    <MainLayout>
+        <Route path="*" component={HomePage} />
+    </MainLayout>
 );
 
 App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
-export default App;
+// Create container
+
+const getStoreReducers = () => reducers;
+
+// Get store initial state from props
+const getStoreInitialState = () => ({
+    // map props to state
+});
+<% if (options['react-hot-reload']) { %>
+const AppHot = __DEV__ ? hot(module)(App) : App;
+const AppContainer = createAppContainer({
+    getStoreReducers,
+    getStoreInitialState,
+})(AppHot);
+<% } else { %>
+const AppContainer = createAppContainer({
+    getStoreReducers,
+    getStoreInitialState,
+})(App);
+<% } %>
+export default AppContainer;

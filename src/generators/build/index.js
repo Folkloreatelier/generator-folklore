@@ -420,7 +420,6 @@ module.exports = class AppGenerator extends Generator {
                         devEntries = _.clone(entries);
                     }
                     const hotReloadEntries = [
-                        'react-hot-loader/patch',
                         'webpack/hot/dev-server',
                         'webpack-hot-middleware/client?reload=true',
                     ];
@@ -705,7 +704,7 @@ module.exports = class AppGenerator extends Generator {
                 if (this.options['webpack-hot-reload']) {
                     this.npmInstall([
                         'webpack-hot-middleware@latest',
-                        'react-hot-loader@^3.0.0-beta.7',
+                        'react-hot-loader@^4.0.0-beta.21',
                     ], {
                         saveDev: true,
                     });

@@ -173,6 +173,7 @@ module.exports = class JsGenerator extends Generator {
                     'prop-types@latest',
                     'react-dom@latest',
                     'react-redux@latest',
+                    'react-intl@latest',
                     'history@^4.7.0',
                     'react-router@^4.2.0',
                     'react-router-redux@^5.0.0-alpha.9',

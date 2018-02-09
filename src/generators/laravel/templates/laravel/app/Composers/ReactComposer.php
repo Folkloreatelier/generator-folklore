@@ -14,6 +14,11 @@ class ReactComposer
         'home',
     ];
 
+    protected $translations = [
+        'meta',
+        'content',
+    ];
+
     protected $request = null;
     protected $router = null;
 
@@ -34,7 +39,7 @@ class ReactComposer
             'url' => $path,
             'routes' => $routes,
             'locale' => $locale,
-            'translations' => $translations,
+            'messages' => $translations,
         ];
     }
 
@@ -42,15 +47,21 @@ class ReactComposer
     {
         $translations = [];
         $translations[$locale] = [];
-        $content = trans('content', [], $locale);
-        if (is_string($content) || is_null($content)) {
-            return new StdClass();
+        foreach ($this->translations as $translation) {
+            $texts = trans($translation, [], $locale);
+            if (is_null($texts)) {
+                continue;
+            }
+            $texts = is_string($texts) ? [$texts] : array_dot($texts);
+            foreach ($texts as $key => $value) {
+                $key = sizeof($texts) === 1 && $key === 0 ? $translation : ($translation.'.'.$key);
+                $translations[$locale][$key] = preg_replace(
+                    '/\:([a-z][a-z0-9\_\-]+)/',
+                    '%{$1}',
+                    $value
+                );
+            }
         }
-        $texts = array_dot($content);
-        foreach ($texts as $key => $value) {
-            $translations[$locale][$key] = preg_replace('/\:([^\sA-Z]+)/', '%{$1}', $value);
-        }
-
         return $translations;
     }
 

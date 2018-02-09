@@ -13,7 +13,10 @@ const hot = __DEV__ ? require('react-hot-loader').hot : null;<% } %>
 
 const propTypes = {
     locale: PropTypes.string,
-    messages: PropTypes.objectOf(PropTypes.string),
+    messages: PropTypes.oneOfType([
+        PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
+        PropTypes.objectOf(PropTypes.string),
+    ]),
 };
 
 const defaultProps = {

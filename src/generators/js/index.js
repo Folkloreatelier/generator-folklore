@@ -198,6 +198,9 @@ module.exports = class JsGenerator extends Generator {
                     'babel-eslint@latest',
                     'eslint@4.16.0',
                     'eslint-config-airbnb@latest',
+                    'eslint-plugin-import',
+                    'eslint-plugin-jsx-a11y',
+                    'eslint-plugin-react',
                     'html-webpack-plugin@latest',
                 ], {
                     saveDev: true,

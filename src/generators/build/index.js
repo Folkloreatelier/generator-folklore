@@ -16,11 +16,6 @@ module.exports = class AppGenerator extends Generator {
             required: false,
         });
 
-        this.option('project-path', {
-            type: String,
-            defaults: './',
-        });
-
         this.option('path', {
             type: String,
             defaults: './build/',
@@ -129,7 +124,7 @@ module.exports = class AppGenerator extends Generator {
             defaults: true,
         });
 
-        this.option('webpack-hot-reload', {
+        this.option('hot-reload', {
             type: Boolean,
             defaults: false,
         });
@@ -415,7 +410,7 @@ module.exports = class AppGenerator extends Generator {
                     _.get(this.options, 'webpack-dev-entry', null),
                     _.get(this.options, 'webpack-dev-entries', null),
                 );
-                if (this.options['webpack-hot-reload']) {
+                if (this.options['hot-reload']) {
                     if (typeof devEntries === 'undefined' || devEntries === null) {
                         devEntries = _.clone(entries);
                     }
@@ -483,7 +478,6 @@ module.exports = class AppGenerator extends Generator {
             },
 
             packageJSONScripts() {
-                const projectPath = _.get(this.options, 'project-path');
                 const buildPath = _.get(this.options, 'path');
                 const tmpPath = _.get(this.options, 'tmp-path');
                 const srcPath = _.get(this.options, 'src-path');
@@ -594,7 +588,7 @@ module.exports = class AppGenerator extends Generator {
                     scripts['lint:dist'] = `eslint ${path.join(jsSrcPath, '/**.js')}`;
                     scripts.lint = 'npm run lint:dist';
                     scripts.jscs = `jscs ${path.join(jsSrcPath, '/**.js')}`;
-                    scripts['webpack:dist'] = `node -r babel-register ./node_modules/webpack/bin/webpack --env=dist  --config ${webpackConfigFile} --progress --colors`;
+                    scripts['webpack:dist'] = `node -r babel-register ./node_modules/.bin/webpack --env=dist  --config ${webpackConfigFile} --progress --colors`;
                     scripts.webpack = 'npm run webpack:dist';
                     scripts['scripts:dist'] = 'npm run webpack:dist';
                     scripts.scripts = 'npm run scripts:dist';
@@ -627,7 +621,7 @@ module.exports = class AppGenerator extends Generator {
                     scripts['build:files'] = scriptsBuildFiles.join(' && ');
                 }
 
-                const packagePath = this.destinationPath(path.join(projectPath, 'package.json'));
+                const packagePath = this.destinationPath('package.json');
                 this.fs.extendJSON(packagePath, {
                     scripts,
                 });
@@ -644,17 +638,8 @@ module.exports = class AppGenerator extends Generator {
 
                 this.npmInstall([
                     'autoprefixer@latest',
-                    'babel-core@latest',
                     'babel-loader@latest',
                     'babel-register@latest',
-                    'babel-plugin-dynamic-import-node@latest',
-                    'babel-plugin-syntax-dynamic-import@latest',
-                    'babel-plugin-transform-es2015-spread@latest',
-                    'babel-plugin-transform-object-rest-spread@latest',
-                    'babel-plugin-transform-class-properties@latest',
-                    'babel-plugin-transform-runtime@latest',
-                    'babel-preset-env@latest',
-                    'babel-preset-react@latest',
                     'brfs@latest',
                     'browser-sync@latest',
                     'bs-fullscreen-message@latest',
@@ -701,7 +686,7 @@ module.exports = class AppGenerator extends Generator {
                     });
                 }
 
-                if (this.options['webpack-hot-reload']) {
+                if (this.options['hot-reload']) {
                     this.npmInstall([
                         'webpack-hot-middleware@latest',
                         'react-hot-loader@^4.0.0-beta.21',

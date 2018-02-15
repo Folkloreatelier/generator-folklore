@@ -1,19 +1,7 @@
-import path from 'path';
 import chalk from 'chalk';
 import Generator from '../../lib/generator';
 
 module.exports = class EslintGenerator extends Generator {
-
-    constructor(...args) {
-        super(...args);
-
-        this.option('project-path', {
-            type: String,
-            required: false,
-            defaults: './',
-        });
-    }
-
     get prompting() {
         return {
             welcome() {
@@ -31,15 +19,13 @@ module.exports = class EslintGenerator extends Generator {
     get writing() {
         return {
             eslintrc() {
-                const projectPath = path.join(this.destinationPath(), this.options['project-path']);
                 const srcPath = this.templatePath('eslintrc');
-                const destPath = path.join(projectPath, '.eslintrc');
+                const destPath = this.destinationPath('.eslintrc');
                 this.fs.copy(srcPath, destPath);
             },
             eslintignore() {
-                const projectPath = path.join(this.destinationPath(), this.options['project-path']);
                 const srcPath = this.templatePath('eslintignore');
-                const destPath = path.join(projectPath, '.eslintignore');
+                const destPath = this.destinationPath('.eslintignore');
                 this.fs.copy(srcPath, destPath);
             },
         };

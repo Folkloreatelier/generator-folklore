@@ -14,27 +14,12 @@ module.exports = class JsGenerator extends Generator {
             required: false,
         });
 
-        this.argument('type', {
-            type: String,
-            required: false,
-        });
-
-        this.option('project-path', {
-            type: String,
-            defaults: './',
-        });
-
-        this.option('react-hot-reload', {
+        this.option('hot-reload', {
             type: Boolean,
             defaults: false,
         });
 
         this.option('babel-compile', {
-            type: Boolean,
-            defaults: false,
-        });
-
-        this.option('babel-exclude-runtime', {
             type: Boolean,
             defaults: false,
         });
@@ -68,34 +53,12 @@ module.exports = class JsGenerator extends Generator {
                     prompts.push(Generator.prompts.project_name);
                 }
 
-                if (!this.options.type) {
-                    prompts.push({
-                        type: 'list',
-                        name: 'type',
-                        message: 'What type of javascript project?',
-                        choices: [
-                            {
-                                name: 'React',
-                                value: 'react',
-                            },
-                        ],
-                    });
-                }
-
                 if (!prompts.length) {
                     return null;
                 }
 
                 return this.prompt(prompts)
                     .then((answers) => {
-                        if (answers.type) {
-                            this.options.type = answers.type;
-                        }
-
-                        if (answers.react_features) {
-                            this.react_features = answers.react_features;
-                        }
-
                         if (answers['project-name']) {
                             this.options['project-name'] = answers['project-name'];
                         }
@@ -105,10 +68,15 @@ module.exports = class JsGenerator extends Generator {
     }
 
     configuring() {
-        const projectPath = path.join(this.destinationPath(), this.options['project-path']);
         const skipInstall = this.options['skip-install'];
+        this.composeWith('folklore:babel', {
+            'hot-reload': this.options['hot-reload'],
+            compile: this.options['babel-compile'],
+            'skip-install': skipInstall,
+            quiet: true,
+        });
+
         this.composeWith('folklore:eslint', {
-            'project-path': projectPath,
             'skip-install': skipInstall,
             quiet: true,
         });
@@ -118,9 +86,9 @@ module.exports = class JsGenerator extends Generator {
         return {
             directory() {
                 const jsPath = _.get(this.options, 'path');
-                const srcPath = this.templatePath(this.options.type);
+                const srcPath = this.templatePath('src');
                 const destPath = this.destinationPath(jsPath);
-                /* this.directory */this.fs.copyTpl(srcPath, destPath, this);
+                this.fs.copyTpl(srcPath, destPath, this);
             },
 
             config() {
@@ -130,25 +98,9 @@ module.exports = class JsGenerator extends Generator {
                 this.fs.copy(srcPath, destPath);
             },
 
-            babelrc() {
-                const projectPath = _.get(this.options, 'project-path');
-                const reactHotReloading = _.get(this.options, 'react-hot-reload');
-                const babelCompile = _.get(this.options, 'babel-compile');
-                const babelExcludeRuntime = _.get(this.options, 'babel-exclude-runtime');
-                const srcPath = this.templatePath('babelrc');
-                const destPath = this.destinationPath(path.join(projectPath, '.babelrc'));
-                this.fs.copyTpl(srcPath, destPath, {
-                    react_features: this.react_features,
-                    hotReloading: reactHotReloading,
-                    compile: babelCompile,
-                    excludeRuntime: babelExcludeRuntime,
-                });
-            },
-
             packageJSON() {
-                const projectPath = _.get(this.options, 'project-path');
                 const srcPath = this.templatePath('_package.json');
-                const destPath = this.destinationPath(path.join(projectPath, 'package.json'));
+                const destPath = this.destinationPath('package.json');
 
                 const packageJSON = this.fs.readJSON(srcPath);
                 packageJSON.name = this.options['project-name'];
@@ -188,7 +140,7 @@ module.exports = class JsGenerator extends Generator {
                     save: true,
                 });
 
-                if (this.options['webpack-hot-reload']) {
+                if (this.options['hot-reload']) {
                     this.npmInstall([
                         'react-hot-loader@^4.0.0-beta.21',
                     ], {
@@ -197,7 +149,6 @@ module.exports = class JsGenerator extends Generator {
                 }
 
                 this.npmInstall([
-                    'babel-plugin-add-module-exports@latest',
                     'html-webpack-plugin@latest',
                 ], {
                     saveDev: true,

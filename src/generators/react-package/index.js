@@ -122,6 +122,7 @@ module.exports = class ReactPackageGenerator extends Generator {
             'tmp-path': tmpPath,
             'build-path': buildPath,
             'skip-install': skipInstall,
+            'hot-reload': true,
             'webpack-html': true,
             'webpack-dev-context': 'examples',
             'webpack-dist-entries': {
@@ -130,7 +131,6 @@ module.exports = class ReactPackageGenerator extends Generator {
             'webpack-dev-entries': {
                 main: './js/index',
             },
-            'webpack-hot-reload': true,
             'browsersync-base-dir': [
                 tmpPath,
                 examplesPath,

@@ -8,12 +8,6 @@ module.exports = class DocsGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.option('project-path', {
-            type: String,
-            required: false,
-            defaults: './',
-        });
-
         this.option('docs-path', {
             type: String,
             required: false,
@@ -79,9 +73,8 @@ module.exports = class DocsGenerator extends Generator {
     get writing() {
         return {
             bookJSON() {
-                const projectPath = path.join(this.destinationPath(), this.options['project-path']);
                 const srcPath = this.templatePath('book.json');
-                const destPath = path.join(projectPath, 'book.json');
+                const destPath = this.destinationPath('book.json');
                 this.fs.copy(srcPath, destPath);
             },
 
@@ -89,9 +82,8 @@ module.exports = class DocsGenerator extends Generator {
                 if (this.options.language !== 'js') {
                     return;
                 }
-                const projectPath = path.join(this.destinationPath(), this.options['project-path']);
                 const srcPath = this.templatePath('jsdoc.json');
-                const destPath = path.join(projectPath, 'jsdoc.json');
+                const destPath = this.destinationPath('jsdoc.json');
                 this.fs.copy(srcPath, destPath);
             },
 
@@ -99,38 +91,33 @@ module.exports = class DocsGenerator extends Generator {
                 if (this.options.language !== 'php') {
                     return;
                 }
-                const projectPath = path.join(this.destinationPath(), this.options['project-path']);
                 const srcPath = this.templatePath('phpdoc.xml');
-                const destPath = path.join(projectPath, 'phpdoc.xml');
+                const destPath = this.destinationPath('phpdoc.xml');
                 this.fs.copy(srcPath, destPath);
             },
 
             docs() {
                 const srcPath = this.templatePath('docs');
-                const destPath = path.join(
-                    this.destinationPath(),
-                    this.options['project-path'],
-                    this.options['docs-path'],
-                );
+                const destPath = this.destinationPath(this.options['docs-path']);
                 this.fs.copy(srcPath, destPath);
             },
 
             generateApiDoc() {
                 const srcPath = this.templatePath(`generate_api_doc.${this.options.language}`);
-                const destPath = path.join(
-                    this.destinationPath(),
-                    this.options['project-path'],
+                const destPath = this.destinationPath(path.join(
                     this.options['docs-path'],
                     'scripts/generate_api_doc',
-                );
+                ));
                 this.fs.copy(srcPath, destPath);
             },
 
             packageJSON() {
-                const generateApiPath = path.join(
-                    this.options['project-path'],
-                    this.options['docs-path'],
-                    './scripts/generate_api_doc',
+                const generateApiPath = path.relative(
+                    this.destinationPath(),
+                    this.destinationPath(path.join(
+                        this.options['docs-path'],
+                        './scripts/generate_api_doc',
+                    )),
                 );
                 const scripts = {
                     'docs:prepare': 'gitbook install',
@@ -139,9 +126,8 @@ module.exports = class DocsGenerator extends Generator {
                     'build:docs': 'npm run docs:prepare && npm run docs:api',
                 };
 
-                const projectPath = _.get(this.options, 'project-path');
                 const srcPath = this.templatePath('_package.json');
-                const destPath = this.destinationPath(path.join(projectPath, 'package.json'));
+                const destPath = this.destinationPath('package.json');
 
                 const packageJSON = this.fs.readJSON(srcPath);
                 packageJSON.scripts = {

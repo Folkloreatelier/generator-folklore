@@ -1,6 +1,7 @@
 {
     "name": "",
     "version": "0.1.0",
+    "private": true,
     "author": {
         "name": "Folklore",
         "email": "info@atelierfolklore.ca"

@@ -10,12 +10,13 @@ const outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
 const publicPath = '<%= publicPath %>';
 
 module.exports = (env) => {
-    const CSS_FILENAME = isFunction(config.cssFilename) ? config.cssFilename(env) : config.cssFilename;
-    const CSS_NAME = isFunction(config.cssLocalIdent) ? config.cssLocalIdent(env) : config.cssLocalIdent;
-    const IMAGE_FILENAME = isFunction(config.imageFilename) ? config.imageFilename(env) : config.imageFilename;
-    const FONT_FILENAME = isFunction(config.fontFilename) ? config.fontFilename(env) : config.fontFilename;
-    const IMAGE_PUBLIC_PATH = isFunction(config.imagePublicPath) ? config.imagePublicPath(env) : config.imagePublicPath;
-    const FONT_PUBLIC_PATH = isFunction(config.fontPublicPath) ? config.fontPublicPath(env) : config.fontPublicPath;
+    const getConfigValue = val => (isFunction(val) ? val(env) : val);
+    const CSS_FILENAME = getConfigValue(config.cssFilename);
+    const CSS_NAME = getConfigValue(config.cssLocalIdent);
+    const IMAGE_FILENAME = getConfigValue(config.imageFilename);
+    const FONT_FILENAME = getConfigValue(config.fontFilename);
+    const IMAGE_PUBLIC_PATH = getConfigValue(config.imagePublicPath);
+    const FONT_PUBLIC_PATH = getConfigValue(config.fontPublicPath);
 
     const extractPlugin = new ExtractTextPlugin({
         filename: CSS_FILENAME,

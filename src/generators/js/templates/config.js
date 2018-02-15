@@ -2,7 +2,6 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 
 class Config {
-
     constructor(config) {
         this.config = config || {};
     }
@@ -28,4 +27,7 @@ const configFunc = (key, value) => {
     return config.get(key);
 };
 
-window.app_config = configFunc;
+const root = global || window || null;
+if (root !== null) {
+    root.app_config = configFunc;
+}

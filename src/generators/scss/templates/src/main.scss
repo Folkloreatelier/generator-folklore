@@ -2,18 +2,12 @@
  * Commons
  */
 @import 'commons/variables';
+@import 'commons/placeholders';
 @import 'commons/mixins';
 @import 'commons/fonts';
 @import 'commons/medias_queries';
 @import 'commons/reset';
 @import 'commons/general';
-
-/**
- * Layout
- */
-@import 'layout/header';
-@import 'layout/content';
-@import 'layout/footer';
 
 body {
     background: $color-background;

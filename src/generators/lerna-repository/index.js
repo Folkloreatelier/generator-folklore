@@ -56,17 +56,14 @@ module.exports = class LernaPackageGenerator extends Generator {
     }
 
     configuring() {
-        const projectPath = this.destinationPath();
         const skipInstall = _.get(this.options, 'skip-install', false);
 
         this.composeWith('folklore:eslint', {
-            'project-path': projectPath,
             'skip-install': skipInstall,
             quiet: true,
         });
 
         this.composeWith('folklore:editorconfig', {
-            'project-path': projectPath,
             quiet: true,
         });
     }

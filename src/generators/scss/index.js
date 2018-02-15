@@ -12,11 +12,6 @@ module.exports = class ScssGenerator extends Generator {
             required: false,
         });
 
-        this.option('project-path', {
-            type: String,
-            defaults: './',
-        });
-
         this.option('path', {
             type: String,
             defaults: 'src/scss',

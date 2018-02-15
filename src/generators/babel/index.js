@@ -7,12 +7,6 @@ module.exports = class BabelGenerator extends Generator {
     constructor(...args) {
         super(...args);
 
-        this.option('project-path', {
-            type: String,
-            required: false,
-            defaults: './',
-        });
-
         this.option('build-path', {
             type: String,
             required: false,
@@ -61,27 +55,21 @@ module.exports = class BabelGenerator extends Generator {
     get writing() {
         return {
             babelrc() {
-                const presetPath = path.join(
-                    this.options['project-path'],
+                const presetPath = this.destinationPath(path.join(
                     this.options['build-path'],
                     'babel-preset.js',
-                );
-                const projectPath = path.join(this.destinationPath(), this.options['project-path']);
+                ));
+                const projectPath = this.destinationPath();
                 const srcPath = this.templatePath('babelrc');
-                const destPath = path.join(projectPath, '.babelrc');
+                const destPath = this.destinationPath('.babelrc');
                 this.fs.copyTpl(srcPath, destPath, {
-                    presetPath,
+                    presetPath: `./${path.relative(projectPath, presetPath)}`,
                 });
             },
 
             preset() {
-                const buildPath = path.join(
-                    this.destinationPath(),
-                    this.options['project-path'],
-                    this.options['build-path'],
-                );
                 const srcPath = this.templatePath('babel-preset.js');
-                const destPath = path.join(buildPath, 'babel-preset.js');
+                const destPath = this.destinationPath(path.join(this.options['build-path'], 'babel-preset.js'));
                 this.fs.copyTpl(srcPath, destPath, {
                     hotReload: this.options['hot-reload'],
                     transformRuntime: this.options['transform-runtime'],
@@ -91,31 +79,24 @@ module.exports = class BabelGenerator extends Generator {
             },
 
             lib() {
-                const buildPath = path.join(
-                    this.destinationPath(),
-                    this.options['project-path'],
-                    this.options['build-path'],
-                );
                 const srcPath = this.templatePath('lib');
-                const destPath = path.join(buildPath, 'lib');
+                const destPath = this.destinationPath(path.join(this.options['build-path'], 'lib'));
                 this.fs.copyTpl(srcPath, destPath, {
 
                 });
             },
 
             getLocalIdent() {
-                const destPath = path.join(
-                    this.destinationPath(),
-                    this.options['project-path'],
+                const destPath = this.destinationPath(path.join(
                     this.options['build-path'],
                     'lib/getLocalIdent.js',
-                );
-                if (this.fs.exists(this.destinationPath(destPath))) {
+                ));
+                if (this.fs.exists(destPath)) {
                     return;
                 }
                 const srcPath = path.join(
                     this.templatePath(),
-                    '../../build/templates/lib/getLocalIdent',
+                    '../../build/templates/lib/getLocalIdent.js',
                 );
                 this.fs.copy(srcPath, destPath);
             },
@@ -132,14 +113,13 @@ module.exports = class BabelGenerator extends Generator {
                 this.npmInstall([
                     'babel-cli@latest',
                     'babel-core@latest',
-                    'babel-loader@latest',
                     'babel-register@latest',
                     'babel-plugin-dynamic-import-node@latest',
                     'babel-plugin-syntax-dynamic-import@latest',
                     'babel-plugin-transform-es2015-spread@latest',
                     'babel-plugin-transform-object-rest-spread@latest',
                     'babel-plugin-transform-class-properties@latest',
-                    'babel-css-modules-transform@latest',
+                    'babel-plugin-css-modules-transform@latest',
                     'babel-preset-env@latest',
                     'babel-preset-react@latest',
                 ], {

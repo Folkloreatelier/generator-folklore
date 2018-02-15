@@ -21,7 +21,7 @@ module.exports = env => (
         devtool: 'source-map',
 
         plugins: [
-            <% if (options['webpack-hot-reload']) { %>new webpack.HotModuleReplacementPlugin(),<% } %>
+            <% if (options['hot-reload']) { %>new webpack.HotModuleReplacementPlugin(),<% } %>
             new webpack.NamedModulesPlugin(),
             new webpack.DefinePlugin({
                 'process.env': {

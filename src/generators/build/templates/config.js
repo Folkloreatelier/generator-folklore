@@ -5,7 +5,9 @@ module.exports = {
      */
     browsersync: {
         server: {
-            baseDir: <%- JSON.stringify(browserSyncBaseDir, null, 4).replace(/\"/gi, '\'') %>,
+            baseDir: [
+<% browserSyncBaseDir.forEach((dir) => { %>                '<%=dir%>',
+<% }) %>            ],
             index: 'index.html',
         },<% if(browserSyncProxy) { %>
 
@@ -13,7 +15,9 @@ module.exports = {
         proxy: '<%= browserSyncProxy %>',
         https: false,
         <% } %>
-        files: <%- JSON.stringify(browserSyncFiles, null, 4).replace(/\"/gi, '\'') %>,
+        files: [
+<% browserSyncFiles.forEach((file) => { %>            '<%=file%>',
+<% }) %>        ],
         ghostMode: false,
     },
 
@@ -28,7 +32,7 @@ module.exports = {
         imagePublicPath: '/',
 
         fontFilename: env => (env === 'dev' ? 'fonts/[name]-[hash:6].[ext]' : 'fonts/[name].[ext]'),
-        fontPublicPath: '/'
+        fontPublicPath: '/',
     },
 
     /**

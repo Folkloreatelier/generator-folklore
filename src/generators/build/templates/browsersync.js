@@ -2,7 +2,7 @@
 const BrowserSync = require('browser-sync');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');<%
-if(options['webpack-hot-reload']) { %>
+if(options['hot-reload']) { %>
 const webpackHotMiddleware = require('webpack-hot-middleware');<% } %>
 const proxyMiddleware = require('proxy-middleware');
 const servestaticMiddleware = require('serve-static');
@@ -34,12 +34,14 @@ bundler.plugin('done', (stats) => {
             body: stripAnsi(stats.toString()),
             timeout: 100000,
         });
-    }<%
-    if(options['webpack-hot-reload']) { %>
-    return null;
-    <% } else { %>
-    return browserSync.reload();
-    <% } %>
+    }
+    return <%
+        if(options['hot-reload']) {
+            %>null<%
+        } else {
+            %>browserSync.reload()<%
+        }
+    %>;
 });
 
 /**
@@ -66,7 +68,7 @@ const webpackMiddlewareOptions = _.merge({
  * Webpack middleware
  */
 const webpackMiddleware = webpackDevMiddleware(bundler, webpackMiddlewareOptions);
-browserSyncOptions.middleware.push(webpackMiddleware);<% if(options['webpack-hot-reload']) { %>
+browserSyncOptions.middleware.push(webpackMiddleware);<% if(options['hot-reload']) { %>
 browserSyncOptions.middleware.push(webpackHotMiddleware(bundler));
 <% } %>
 
@@ -112,10 +114,10 @@ if (browserSyncOptions.proxy) {
     /**
      * Proxy middleware
      */
-     const proxyMiddlewareOptions = url.parse(`${proxyHost.protocol}//${proxyHost.host}`);
-     proxyMiddlewareOptions.preserveHost = true;
-     proxyMiddlewareOptions.via = 'browserSync';
-     proxyMiddlewareOptions.rejectUnauthorized = false;
+    const proxyMiddlewareOptions = url.parse(`${proxyHost.protocol}//${proxyHost.host}`);
+    proxyMiddlewareOptions.preserveHost = true;
+    proxyMiddlewareOptions.via = 'browserSync';
+    proxyMiddlewareOptions.rejectUnauthorized = false;
     browserSyncOptions.middleware.push(proxyMiddleware(proxyMiddlewareOptions));
 }
 

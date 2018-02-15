@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title><%= title %></title>
 
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Array.prototype.find,Map,Set,Array.prototype.findIndex"></script>
     <%% for(var i = 0, fl = htmlWebpackPlugin.files.css.length; i < fl; i += 1) { %>
     <link rel="stylesheet" type="text/css" href="<%%= htmlWebpackPlugin.files.css[i] %>" />
     <%% } %>
@@ -13,7 +13,12 @@
 <body>
 
     <div data-hypernova-key="App" data-hypernova-id="1"></div>
-    <script type="application/json" data-hypernova-key="App" data-hypernova-id="1"><!--{"url": "/"}--></script>
+    <script type="application/json" data-hypernova-key="App" data-hypernova-id="1"><!--{
+        "locale": "fr",
+        "messages": {
+            "meta.title": "Titre"
+        }
+    }--></script>
 
     <%% for(i = 0, fl = htmlWebpackPlugin.files.js.length; i < fl; i += 1) { %>
     <script type="text/javascript" src="<%%= htmlWebpackPlugin.files.js[i] %>"></script>

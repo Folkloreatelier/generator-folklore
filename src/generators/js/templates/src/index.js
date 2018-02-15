@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import domready from 'domready';
 import { load as loadHypernova } from 'hypernova';
-<% if (!options['react-hot-reload']) { %>import HypernovaComponents from './hypernova';
+<% if (!options['hot-reload']) { %>import HypernovaComponents from './hypernova';
 <% } %>
 
 const FastClick = require('fastclick');
-<% if (options['react-hot-reload']) { %>let HypernovaComponents = require('./hypernova').default;
+<% if (options['hot-reload']) { %>let HypernovaComponents = require('./hypernova').default;
 <% } %>
 domready(() => {
     const findComponent = name => HypernovaComponents[name] || null;
@@ -38,7 +38,7 @@ domready(() => {
 
     const hypernovaElements = document.querySelectorAll('div[data-hypernova-key]');
     renderHypernovaElements(hypernovaElements);<%
-    if (options['react-hot-reload']) { %>
+    if (options['hot-reload']) { %>
     if (__DEV__) {
         // Hot reloading
         if (module.hot) {

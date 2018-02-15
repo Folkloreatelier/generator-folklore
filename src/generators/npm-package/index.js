@@ -43,6 +43,12 @@ module.exports = class NpmPackageGenerator extends Generator {
             defaults: './build',
         });
 
+        this.option('hot-reload', {
+            type: Boolean,
+            desc: 'Add hot reloading',
+            defaults: false,
+        });
+
         this.option('browsersync-base-dir', {
             type: String,
             desc: 'BrowserSync base directories',
@@ -72,12 +78,6 @@ module.exports = class NpmPackageGenerator extends Generator {
         this.option('webpack-dist-entries', {
             type: Object,
             desc: 'Specify dist entries',
-        });
-
-        this.option('webpack-hot-reload', {
-            type: Boolean,
-            desc: 'Add hot reloading',
-            defaults: false,
         });
 
         this.option('webpack-config-base', {
@@ -135,16 +135,15 @@ module.exports = class NpmPackageGenerator extends Generator {
     }
 
     configuring() {
-        const projectPath = this.destinationPath();
         const srcPath = _.get(this.options, 'src-path');
         const destPath = _.get(this.options, 'dest-path');
         const tmpPath = _.get(this.options, 'tmp-path');
         const buildPath = _.get(this.options, 'build-path');
         const skipInstall = _.get(this.options, 'skip-install', false);
+        const hotReload = _.get(this.options, 'hot-reload', false);
         const webpackConfigBase = _.get(this.options, 'webpack-config-base', false);
         const webpackConfigDev = _.get(this.options, 'webpack-config-dev', false);
         const webpackHtml = _.get(this.options, 'webpack-html', false);
-        const webpackHotReload = _.get(this.options, 'webpack-hot-reload', false);
         const webpackDevContext = _.get(this.options, 'webpack-dev-context', null);
         const webpackDevEntries = _.get(this.options, 'webpack-dev-entries', null);
         const webpackDistEntries = _.get(this.options, 'webpack-dist-entries', null);
@@ -161,7 +160,6 @@ module.exports = class NpmPackageGenerator extends Generator {
 
         this.composeWith('folklore:build', {
             'project-name': this.options['package-name'],
-            'project-path': projectPath,
             path: buildPath,
             'tmp-path': tmpPath,
             'src-path': srcPath,
@@ -176,7 +174,7 @@ module.exports = class NpmPackageGenerator extends Generator {
             'webpack-config-base': webpackConfigBase,
             'webpack-config-dev': webpackConfigDev,
             'webpack-html': webpackHtml,
-            'webpack-hot-reload': webpackHotReload,
+            'hot-reload': hotReload,
             'webpack-dev-context': webpackDevContext,
             'webpack-entries': webpackEntries,
             'webpack-dist-entries': webpackDistEntries,
@@ -187,14 +185,20 @@ module.exports = class NpmPackageGenerator extends Generator {
             quiet: true,
         });
 
+        this.composeWith('folklore:babel', {
+            'skip-install': skipInstall,
+            'hot-reload': hotReload,
+            compile: true,
+            'transform-runtime': true,
+            quiet: true,
+        });
+
         this.composeWith('folklore:eslint', {
-            'project-path': projectPath,
             'skip-install': skipInstall,
             quiet: true,
         });
 
         this.composeWith('folklore:editorconfig', {
-            'project-path': projectPath,
             quiet: true,
         });
     }
@@ -213,12 +217,6 @@ module.exports = class NpmPackageGenerator extends Generator {
             gitignore() {
                 const srcPath = this.templatePath('gitignore');
                 const destPath = this.destinationPath('.gitignore');
-                this.fs.copy(srcPath, destPath);
-            },
-
-            babelrc() {
-                const srcPath = this.templatePath('babelrc');
-                const destPath = this.destinationPath('.babelrc');
                 this.fs.copy(srcPath, destPath);
             },
 
@@ -243,6 +241,16 @@ module.exports = class NpmPackageGenerator extends Generator {
     get install() {
         return {
             npm() {
+                if (this.options['skip-install']) {
+                    return;
+                }
+
+                this.npmInstall([
+                    'babel-runtime@latest',
+                ], {
+                    save: true,
+                });
+
                 this.npmInstall([
                     'jest@latest',
                 ], {

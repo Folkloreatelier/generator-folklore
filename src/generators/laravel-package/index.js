@@ -91,7 +91,6 @@ module.exports = class ComposerPackageGenerator extends Generator {
     }
 
     configuring() {
-        const projectPath = this.destinationPath();
         const namespaceParts = this.options['package-namespace'].split('\\');
         const baseName = namespaceParts[1];
         this.templateData = {
@@ -104,7 +103,6 @@ module.exports = class ComposerPackageGenerator extends Generator {
         };
 
         this.composeWith('folklore:editorconfig', {
-            'project-path': projectPath,
             quiet: true,
         });
     }

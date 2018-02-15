@@ -196,7 +196,6 @@ module.exports = class LaravelGenerator extends Generator {
     }
 
     configuring() {
-        const projectPath = this.destinationPath();
         const assetsPath = _.get(this.options, 'assets-path', '').replace(/\/$/, '');
         const tmpPath = _.get(this.options, 'tmp-path', '').replace(/\/$/, '');
         const publicPath = _.get(this.options, 'public-path');
@@ -219,28 +218,24 @@ module.exports = class LaravelGenerator extends Generator {
 
         this.composeWith('folklore:js', {
             'project-name': this.options['project-name'],
-            'project-path': projectPath,
             path: jsSrcPath,
             'skip-install': skipInstall,
-            'react-hot-reload': this.options['hot-reload'],
+            'hot-reload': this.options['hot-reload'],
             quiet: true,
         });
 
         this.composeWith('folklore:editorconfig', {
-            'project-path': projectPath,
             quiet: true,
         });
 
         this.composeWith('folklore:scss', {
             'project-name': this.options['project-name'],
-            'project-path': projectPath,
             path: scssSrcPath,
             quiet: true,
         });
 
         this.composeWith('folklore:build', {
             'project-name': this.options['project-name'],
-            'project-path': projectPath,
             path: buildPath,
             'tmp-path': tmpPath,
             'src-path': assetsPath,
@@ -255,7 +250,7 @@ module.exports = class LaravelGenerator extends Generator {
                 config: './config',
                 vendor: ['lodash'],
             },
-            'webpack-hot-reload': this.options['hot-reload'],
+            'hot-reload': this.options['hot-reload'],
             'browsersync-base-dir': [
                 tmpPath,
                 publicPath,

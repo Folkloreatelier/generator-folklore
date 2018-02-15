@@ -130,21 +130,18 @@ module.exports = class HTMLGenerator extends Generator {
 
         this.composeWith('folklore:js', {
             'project-name': projectName,
-            'project-path': projectPath,
-            'react-hot-reload': true,
+            'hot-reload': true,
             path: jsSrcPath,
             'skip-install': skipInstall,
             quiet: true,
         });
 
         this.composeWith('folklore:editorconfig', {
-            'project-path': projectPath,
             quiet: true,
         });
 
         this.composeWith('folklore:scss', {
             'project-name': projectName,
-            'project-path': projectPath,
             path: scssSrcPath,
             'skip-install': skipInstall,
             quiet: true,
@@ -153,7 +150,6 @@ module.exports = class HTMLGenerator extends Generator {
         if (this.options.server) {
             this.composeWith('folklore:server', {
                 'project-name': projectName,
-                'project-path': projectPath,
                 path: _.get(this.options, 'server-path') || `${projectPath}/server`,
                 'skip-install': skipInstall,
                 quiet: true,
@@ -162,7 +158,6 @@ module.exports = class HTMLGenerator extends Generator {
 
         this.composeWith('folklore:build', {
             'project-name': projectName,
-            'project-path': projectPath,
             path: buildPath,
             'tmp-path': tmpPath,
             'src-path': srcPath,
@@ -174,6 +169,7 @@ module.exports = class HTMLGenerator extends Generator {
             copy: true,
             'copy-path': path.join(srcPath, '*.{html,ico,txt,png}'),
             'clean-dest': true,
+            'hot-reload': true,
             'webpack-entries': {
                 main: './index',
                 config: './config',
@@ -181,7 +177,6 @@ module.exports = class HTMLGenerator extends Generator {
                     'lodash',
                 ],
             },
-            'webpack-hot-reload': true,
             'webpack-html': true,
             'browsersync-base-dir': [
                 tmpPath,

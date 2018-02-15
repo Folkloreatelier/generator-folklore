@@ -7,7 +7,7 @@ import reducers from '../reducers/index';
 import MainLayout from './layouts/Main';
 import HomePage from './pages/Home';
 <%
-if (options['react-hot-reload']) { %>
+if (options['hot-reload']) { %>
 // eslint-disable-next-line
 const hot = __DEV__ ? require('react-hot-loader').hot : null;<% } %>
 
@@ -41,7 +41,7 @@ const getStoreReducers = () => reducers;
 const getStoreInitialState = () => ({
     // map props to state
 });
-<% if (options['react-hot-reload']) { %>
+<% if (options['hot-reload']) { %>
 const AppHot = __DEV__ ? hot(module)(App) : App;
 const AppContainer = createAppContainer({
     getStoreReducers,

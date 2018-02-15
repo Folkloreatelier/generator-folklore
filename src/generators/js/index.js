@@ -104,6 +104,16 @@ module.exports = class JsGenerator extends Generator {
         };
     }
 
+    configuring() {
+        const projectPath = path.join(this.destinationPath(), this.options['project-path']);
+        const skipInstall = this.options['skip-install'];
+        this.composeWith('folklore:eslint', {
+            'project-path': projectPath,
+            'skip-install': skipInstall,
+            quiet: true,
+        });
+    }
+
     get writing() {
         return {
             directory() {
@@ -117,13 +127,6 @@ module.exports = class JsGenerator extends Generator {
                 const jsPath = _.get(this.options, 'path');
                 const srcPath = this.templatePath('config.js');
                 const destPath = this.destinationPath(path.join(jsPath, 'config.js'));
-                this.fs.copy(srcPath, destPath);
-            },
-
-            eslintrc() {
-                const projectPath = _.get(this.options, 'project-path');
-                const srcPath = this.templatePath('eslintrc');
-                const destPath = this.destinationPath(path.join(projectPath, '.eslintrc'));
                 this.fs.copy(srcPath, destPath);
             },
 
@@ -195,13 +198,6 @@ module.exports = class JsGenerator extends Generator {
 
                 this.npmInstall([
                     'babel-plugin-add-module-exports@latest',
-                    'babel-preset-airbnb@latest',
-                    'babel-eslint@latest',
-                    'eslint@4.16.0',
-                    'eslint-config-airbnb@latest',
-                    'eslint-plugin-import',
-                    'eslint-plugin-jsx-a11y',
-                    'eslint-plugin-react',
                     'html-webpack-plugin@latest',
                 ], {
                     saveDev: true,

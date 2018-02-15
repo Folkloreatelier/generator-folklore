@@ -91,6 +91,7 @@ module.exports = class ComposerPackageGenerator extends Generator {
     }
 
     configuring() {
+        const projectPath = this.destinationPath();
         const namespaceParts = this.options['package-namespace'].split('\\');
         const baseName = namespaceParts[1];
         this.templateData = {
@@ -101,6 +102,11 @@ module.exports = class ComposerPackageGenerator extends Generator {
             basePath: this.options['package-name'],
             baseName,
         };
+
+        this.composeWith('folklore:editorconfig', {
+            'project-path': projectPath,
+            quiet: true,
+        });
     }
 
     get writing() {
@@ -186,12 +192,6 @@ module.exports = class ComposerPackageGenerator extends Generator {
                 const currentJson = this.fs.exists(destPath) ?
                     this.fs.readJSON(destPath) : {};
                 this.fs.writeJSON(destPath, _.merge(newJson, currentJson));
-            },
-
-            editorconfig() {
-                const srcPath = this.templatePath('editorconfig');
-                const destPath = this.destinationPath('.editorconfig');
-                this.fs.copy(srcPath, destPath);
             },
         };
     }

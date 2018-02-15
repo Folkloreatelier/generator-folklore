@@ -1,13 +1,11 @@
 const path = require('path');
+const LOCAL_IDENT_NAME = require('../config').webpack.cssLocalIdent;
 
-const getLocalIdent = (context, localIdentName, localeName) => {
-    const filePath = context.resourcePath;
+module.exports = (localIdentName, localName, filePath) => {
     const directories = path.dirname(filePath).split('/');
     const dir = directories[directories.length - 1];
     const basename = path.basename(filePath, '.scss');
     const name = dir !== 'styles' ? `${dir}-${basename}` : basename;
-    return localIdentName.replace(/\[\s*name\s*\]/gi, name)
-        .replace(/\[\s*local\s*\]/gi, localeName);
+    return (localIdentName || LOCAL_IDENT_NAME).replace(/\[\s*name\s*\]/gi, name)
+        .replace(/\[\s*local\s*\]/gi, localName);
 };
-
-module.exports = getLocalIdent;

@@ -137,6 +137,11 @@ module.exports = class HTMLGenerator extends Generator {
             quiet: true,
         });
 
+        this.composeWith('folklore:editorconfig', {
+            'project-path': projectPath,
+            quiet: true,
+        });
+
         this.composeWith('folklore:scss', {
             'project-name': projectName,
             'project-path': projectPath,
@@ -213,13 +218,6 @@ module.exports = class HTMLGenerator extends Generator {
                 const imgSrcPath = this.templatePath('folklore.png');
                 const imgDestPath = this.destinationPath(path.join(srcPath, 'img', 'folklore.png'));
                 this.fs.copy(imgSrcPath, imgDestPath);
-            },
-
-            editorconfig() {
-                const projectPath = _.get(this.options, 'path');
-                const srcPath = this.templatePath('editorconfig');
-                const destPath = this.destinationPath(path.join(projectPath, '.editorconfig'));
-                this.fs.copy(srcPath, destPath);
             },
 
             gitignore() {

@@ -56,12 +56,44 @@ module.exports = class AppGenerator extends Generator {
                                 value: 'js',
                             },
                             {
+                                name: 'SCSS',
+                                value: 'scss',
+                            },
+                            {
                                 name: 'NPM Package',
                                 value: 'npm-package',
                             },
                             {
                                 name: 'React Package',
                                 value: 'react-package',
+                            },
+                            {
+                                name: 'Laravel Package',
+                                value: 'laravel-package',
+                            },
+                            {
+                                name: 'Lerna repository',
+                                value: 'lerna-repository',
+                            },
+                            {
+                                name: 'Build tools',
+                                value: 'build',
+                            },
+                            {
+                                name: 'Babel',
+                                value: 'babel',
+                            },
+                            {
+                                name: 'Eslint',
+                                value: 'eslint',
+                            },
+                            {
+                                name: 'Editorconfig',
+                                value: 'editorconfig',
+                            },
+                            {
+                                name: 'Documentation',
+                                value: 'docs',
                             },
                         ],
                     });

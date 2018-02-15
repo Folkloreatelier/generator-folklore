@@ -226,6 +226,11 @@ module.exports = class LaravelGenerator extends Generator {
             quiet: true,
         });
 
+        this.composeWith('folklore:editorconfig', {
+            'project-path': projectPath,
+            quiet: true,
+        });
+
         this.composeWith('folklore:scss', {
             'project-name': this.options['project-name'],
             'project-path': projectPath,
@@ -380,12 +385,6 @@ module.exports = class LaravelGenerator extends Generator {
             phpcs() {
                 const srcPath = this.templatePath('phpcs.xml');
                 const destPath = this.destinationPath('phpcs.xml');
-                this.fs.copy(srcPath, destPath);
-            },
-
-            editorconfig() {
-                const srcPath = this.templatePath('editorconfig');
-                const destPath = this.destinationPath('.editorconfig');
                 this.fs.copy(srcPath, destPath);
             },
 

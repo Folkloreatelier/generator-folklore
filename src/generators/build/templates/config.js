@@ -18,6 +18,20 @@ module.exports = {
     },
 
     /**
+     * Webpack
+     */
+    webpack: {
+        cssFilename: env => (env === 'dev' ? '[name]-[contenthash].css' : '[name].css'),
+        cssLocalIdent: '[name]-[local]',
+
+        imageFilename: env => (env === 'dev' ? 'img/[name]-[hash:6].[ext]' : 'img/[name].[ext]'),
+        imagePublicPath: '/',
+
+        fontFilename: env => (env === 'dev' ? 'fonts/[name]-[hash:6].[ext]' : 'fonts/[name].[ext]'),
+        fontPublicPath: '/'
+    },
+
+    /**
      * Webpack middleware
      */
     webpackMiddleware: {
@@ -38,6 +52,9 @@ module.exports = {
         },
     },<% } %>
 
+    /**
+     * Imagemin
+     */
     imagemin: {
         files: [
             '<%= imagesSrcPath %>',

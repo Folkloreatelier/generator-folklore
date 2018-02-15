@@ -186,6 +186,17 @@ module.exports = class NpmPackageGenerator extends Generator {
             'skip-install': skipInstall,
             quiet: true,
         });
+
+        this.composeWith('folklore:eslint', {
+            'project-path': projectPath,
+            'skip-install': skipInstall,
+            quiet: true,
+        });
+
+        this.composeWith('folklore:editorconfig', {
+            'project-path': projectPath,
+            quiet: true,
+        });
     }
 
     get writing() {
@@ -202,12 +213,6 @@ module.exports = class NpmPackageGenerator extends Generator {
             gitignore() {
                 const srcPath = this.templatePath('gitignore');
                 const destPath = this.destinationPath('.gitignore');
-                this.fs.copy(srcPath, destPath);
-            },
-
-            eslintrc() {
-                const srcPath = this.templatePath('eslintrc');
-                const destPath = this.destinationPath('.eslintrc');
                 this.fs.copy(srcPath, destPath);
             },
 
@@ -232,12 +237,6 @@ module.exports = class NpmPackageGenerator extends Generator {
                     this.fs.readJSON(destPath) : {};
                 this.fs.writeJSON(destPath, _.merge(packageJSON, currentPackageJSON));
             },
-
-            editorconfig() {
-                const srcPath = this.templatePath('editorconfig');
-                const destPath = this.destinationPath('.editorconfig');
-                this.fs.copy(srcPath, destPath);
-            },
         };
     }
 
@@ -245,12 +244,6 @@ module.exports = class NpmPackageGenerator extends Generator {
         return {
             npm() {
                 this.npmInstall([
-                    'babel-eslint@latest',
-                    'eslint@latest',
-                    'eslint-config-airbnb@latest',
-                    'eslint-plugin-import@latest',
-                    'eslint-plugin-jsx-a11y@latest',
-                    'eslint-plugin-react@latest',
                     'jest@latest',
                 ], {
                     saveDev: true,

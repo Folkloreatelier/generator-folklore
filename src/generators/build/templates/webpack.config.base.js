@@ -1,19 +1,21 @@
 const webpack = require('webpack');
 const path = require('path');
+const isFunction = require('lodash/isFunction');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const getLocalIdent = require('./lib/getLocalIdent');
+const config = require('./config').webpack;
 
 const contextPath = path.join(process.env.PWD, '<%= srcPath %>');
 const outputPath = path.join(process.env.PWD, '<%= tmpPath %>');
 const publicPath = '<%= publicPath %>';
 
 module.exports = (env) => {
-    const CSS_FILENAME = env === 'dev' ? '[name]-[contenthash].css' : '[name].css';
-    const CSS_NAME = env === 'dev' ? '[name]_[local]' : '[name]_[local]';
-    const IMAGE_FILENAME = env === 'dev' ? 'img/[name]-[hash:6].[ext]' : 'img/[name].[ext]';
-    const FONT_FILENAME = env === 'dev' ? 'fonts/[name]-[hash:6].[ext]' : 'fonts/[name].[ext]';
-    const IMAGE_PUBLIC_PATH = env === 'dev' ? '/' : '/';
-    const FONT_PUBLIC_PATH = env === 'dev' ? '/' : '/';
+    const CSS_FILENAME = isFunction(config.cssFilename) ? config.cssFilename(env) : config.cssFilename;
+    const CSS_NAME = isFunction(config.cssLocalIdent) ? config.cssLocalIdent(env) : config.cssLocalIdent;
+    const IMAGE_FILENAME = isFunction(config.imageFilename) ? config.imageFilename(env) : config.imageFilename;
+    const FONT_FILENAME = isFunction(config.fontFilename) ? config.fontFilename(env) : config.fontFilename;
+    const IMAGE_PUBLIC_PATH = isFunction(config.imagePublicPath) ? config.imagePublicPath(env) : config.imagePublicPath;
+    const FONT_PUBLIC_PATH = isFunction(config.fontPublicPath) ? config.fontPublicPath(env) : config.fontPublicPath;
 
     const extractPlugin = new ExtractTextPlugin({
         filename: CSS_FILENAME,
@@ -33,7 +35,7 @@ module.exports = (env) => {
             options: {
                 sourceMap: true,
                 config: {
-                    path: path.join(process.env.PWD, './build/postcss.config.js'),
+                    path: path.join(__dirname, './postcss.config.js'),
                     ctx: {
                         env,
                     },
@@ -45,7 +47,7 @@ module.exports = (env) => {
             options: {
                 sourceMap: true,
                 includePaths: [
-                    './node_modules',
+                    path.join(process.env.PWD, './node_modules'),
                 ],
             },
         },
@@ -59,7 +61,9 @@ module.exports = (env) => {
             sourceMap: true,
             importLoaders: 1,
             localIdentName: CSS_NAME,
-            getLocalIdent,
+            getLocalIdent: (context, localIdentName, localName) => (
+                getLocalIdent(localIdentName, localName, context.resourcePath)
+            ),
         },
     };
 
@@ -102,7 +106,7 @@ module.exports = (env) => {
                     test: /\.jsx?$/,
                     loader: 'babel-loader',
                     exclude: [
-                        path.join(__dirname, '../node_modules'),
+                        path.join(process.env.PWD, './node_modules'),
                     ],
                     options: {
                         forceEnv: env,
@@ -113,7 +117,7 @@ module.exports = (env) => {
                     test: /react-draw\/src/,
                     loader: 'babel-loader',
                     include: [
-                        path.join(__dirname, '../node_modules/react-draw'),
+                        path.join(process.env.PWD, './node_modules/react-draw'),
                     ],
                     options: {
                         forceEnv: env,
@@ -124,22 +128,22 @@ module.exports = (env) => {
                     test: /\.json$/,
                     loader: 'json-loader',
                     exclude: [
-                        path.join(__dirname, '../node_modules'),
+                        path.join(process.env.PWD, './node_modules'),
                     ],
                 },
                 {
                     test: /\.html$/,
                     loader: 'html-loader',
                     exclude: [
-                        path.join(__dirname, '../node_modules'),
+                        path.join(process.env.PWD, './node_modules'),
                     ],
                 },
                 {
                     test: /\.svg$/,
                     exclude: [
-                        path.join(__dirname, '../node_modules'),
-                        path.join(__dirname, '../.tmp'),
-                        path.join(__dirname, '../src/img/icons'),
+                        path.join(process.env.PWD, './node_modules'),
+                        path.join(process.env.PWD, './.tmp'),
+                        path.join(process.env.PWD, './src/img/icons'),
                     ],
                     use: [
                         `babel-loader?forceEnv=${env}&cacheDirectory`,
